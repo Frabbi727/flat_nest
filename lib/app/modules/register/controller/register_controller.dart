@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
@@ -36,6 +37,7 @@ class RegisterController extends BaseController {
 
   // Step 3 — Avatar (path chosen on device)
   final avatarPath = RxnString();
+  final _picker = ImagePicker();
 
   void _tick() => formTick.value++;
 
@@ -154,11 +156,40 @@ class RegisterController extends BaseController {
     }
   }
 
-  // Step 3: Skip avatar → go to home
+  Future<void> pickImage(ImageSource source) async {
+    final xfile = await _picker.pickImage(source: source, imageQuality: 85);
+    if (xfile != null) avatarPath.value = xfile.path;
+  }
+
+  // Step 3: Skip avatar → go to home without uploading
   void skipAvatar() => _navigateToHome();
 
-  // Step 3: Finish registration
-  void finishRegistration() => _navigateToHome();
+  // Step 3: Upload avatar then go to home
+  void finishRegistration() async {
+    final path = avatarPath.value;
+    if (path == null) {
+      _navigateToHome();
+      return;
+    }
+
+    showLoading();
+    final result = await _authRepository.uploadAvatar(path);
+    hideLoading();
+
+    switch (result) {
+      case Success(data: final data?):
+        final avatarUrl = data['avatar_url'] as String?;
+        final user = _authService.currentUser;
+        if (user != null && avatarUrl != null) {
+          _authService.saveUser(user.copyWith(avatarUrl: avatarUrl));
+        }
+        _navigateToHome();
+      case Success():
+        _navigateToHome();
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
 
   void _navigateToHome() {
     final user = _authService.currentUser;

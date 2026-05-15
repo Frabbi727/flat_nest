@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
 
 import '../../../core/base/base_repository.dart';
@@ -51,6 +52,27 @@ class AuthRepository extends BaseRepository {
         data: {'role': role, 'date_of_birth': dateOfBirth},
       );
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<Map<String, dynamic>>> uploadAvatar(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await apiClient.patch(
+        path: ApiEndpoints.registerAvatar,
+        data: formData,
+      );
+      return Success(
+        data: response.data as Map<String, dynamic>,
+        statusCode: response.statusCode ?? 200,
+      );
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
     }

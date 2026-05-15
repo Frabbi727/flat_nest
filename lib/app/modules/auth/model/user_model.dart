@@ -28,6 +28,26 @@ class UserModel extends Equatable {
   bool get isOwner => role == 'owner';
   bool get isRenter => role == 'renter';
 
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? phone,
+    String? role,
+    String? avatarUrl,
+    bool? isComplete,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      role: role ?? this.role,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      isComplete: isComplete ?? this.isComplete,
+    );
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
