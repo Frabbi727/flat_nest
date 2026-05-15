@@ -17,7 +17,10 @@ class ErrorInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         final statusCode = err.response?.statusCode;
         final data = err.response?.data;
-        if (data is Map && data.containsKey('message')) {
+        
+        if (statusCode == 401) {
+          errorMessage = 'Session expired. Please login again.';
+        } else if (data is Map && data.containsKey('message')) {
           errorMessage = data['message'];
         } else {
           errorMessage = 'Error $statusCode: ${err.message}';

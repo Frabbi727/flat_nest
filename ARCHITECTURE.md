@@ -2,6 +2,14 @@
 
 This document explains the architecture, directory structure, and development flow of the FlatNest mobile application.
 
+## ⚙️ Code Generation
+We use `json_serializable` for data models. When you create or update a model in the `model/` folder, you MUST run the build runner:
+
+- **Single Build**: `flutter pub run build_runner build --delete-conflicting-outputs`
+- **Watch Mode**: `flutter pub run build_runner watch --delete-conflicting-outputs`
+
+---
+
 ## 🚀 Running Different Environments
 
 We use separate entry points for different environments (Dev, Staging, Prod). This automatically switches the API Base URL.
@@ -11,10 +19,30 @@ We use separate entry points for different environments (Dev, Staging, Prod). Th
 - **Staging**: `flutter run -t lib/main_staging.dart`
 - **Production**: `flutter run -t lib/main_prod.dart`
 
-### To Build (Release):
-- **Development**: `flutter build apk -t lib/main_dev.dart`
-- **Staging**: `flutter build apk -t lib/main_staging.dart`
-- **Production**: `flutter build apk -t lib/main_prod.dart`
+### To Build (Release Mode):
+For production, always use the `--release` flag and point to the production entry point:
+
+#### 🤖 Android:
+- **Build APK**: `flutter build apk --release -t lib/main_prod.dart`
+- **Build App Bundle (for Play Store)**: `flutter build appbundle --release -t lib/main_prod.dart`
+
+#### 🍎 iOS:
+- **Build IPA**: `flutter build ipa --release -t lib/main_prod.dart`
+
+> **Note**: If you want to build for Staging, simply replace `-t lib/main_prod.dart` with `-t lib/main_staging.dart`.
+
+---
+
+## 🏗 Core Architecture
+We use **Dio** with a specialized `ApiClient` that handles:
+- **Automatic Token Injection**: `AuthInterceptor` adds the Bearer token to all requests.
+- **Refresh Token Mechanism**: If a request fails with `401 Unauthorized`, the interceptor automatically:
+    1. Pauses the error.
+    2. Calls the refresh token endpoint.
+    3. Retries the original request with the new token.
+    4. Logouts the user if the refresh fails.
+- **Centralized Error Handling**: `ErrorInterceptor` converts raw exceptions into user-friendly messages.
+- **Multi-Environment**: Environment-specific Base URLs are managed via `ApiConfig`.
 
 ---
 

@@ -22,8 +22,10 @@ class ApiClient {
     );
 
     _dio.interceptors.addAll([
-      AuthInterceptor(),
+      // ErrorInterceptor is added first so it's called last in the onError chain
       ErrorInterceptor(),
+      // AuthInterceptor is added last so it's called first in the onError chain (to handle retries)
+      AuthInterceptor(),
       if (kDebugMode)
         LogInterceptor(
           requestHeader: true,
@@ -99,7 +101,7 @@ class ApiClient {
     Options? options,
     CancelToken? cancelToken,
   }) async {
-    return await _dio.post(
+    return await _dio.delete(
       path,
       data: data,
       queryParameters: queryParameters,

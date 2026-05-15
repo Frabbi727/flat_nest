@@ -37,7 +37,11 @@ class AuthController extends BaseController {
     try {
       showLoading();
       final user = await _authRepository.login(email, password);
-      await _authService.login('fake_token_for_${user.id}');
+      // In a real app, the repository should return both tokens
+      await _authService.login(
+        accessToken: 'fake_access_token_for_${user.id}',
+        refreshToken: 'fake_refresh_token_for_${user.id}',
+      );
       hideLoading();
       Get.offAllNamed(Routes.home);
     } catch (e) {
