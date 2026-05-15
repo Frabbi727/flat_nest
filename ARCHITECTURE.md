@@ -98,32 +98,36 @@ class UserModel extends Equatable { ... }
 ```
 
 ### 2. The Repository (`repository/`)
-Handle API calls using the `ApiClient`. Return clean models to the controller.
+Handle API calls using the `ApiClient`. Catch exceptions and return a `Resource<T>` wrapper.
 ```dart
 class AuthRepository extends BaseRepository {
-  Future<UserModel> login(String email, String password) async {
-    final response = await apiClient.post('/login', ...);
-    return UserModel.fromJson(response.data);
+  Future<Resource<UserModel>> login(String email, String password) async {
+    try {
+      final response = await apiClient.post('/login', ...);
+      return Success(UserModel.fromJson(response.data));
+    } catch (e) {
+      return Error(e.toString());
+    }
   }
 }
 ```
 
 ### 3. The Controller (`controller/`)
-Handle UI state (loading, errors) and call the repository. **No UI code here.**
+Handle UI state (loading, errors) and call the repository. Use exhaustive pattern matching on the `Resource`. **No UI code here.**
 ```dart
 class AuthController extends BaseController {
   final AuthRepository _repo;
-  final emailController = TextEditingController();
 
   void login() async {
     showLoading();
-    try {
-      final user = await _repo.login(emailController.text, ...);
-      // Handle success
-    } catch (e) {
-      showError(e.toString());
-    } finally {
-      hideLoading();
+    final result = await _repo.login(...);
+    hideLoading();
+
+    switch (result) {
+      case Success(data: final user):
+        // Handle success
+      case Error(message: final msg):
+        showError(msg);
     }
   }
 }
