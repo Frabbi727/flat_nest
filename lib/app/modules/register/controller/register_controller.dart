@@ -110,7 +110,7 @@ class RegisterController extends BaseController {
       name: name,
       email: email,
       password: password,
-      phone: '+880$phone',
+      phone: phone,
     );
     hideLoading();
 
@@ -199,6 +199,6 @@ class RegisterController extends BaseController {
         GetUtils.isEmail(email) &&
         password.length >= 8 &&
         password == confirm &&
-        phone.replaceAll(RegExp(r'\D'), '').length >= 9;
+        phone.replaceAll(RegExp(r'\D'), '').length == 11;
   }
 }

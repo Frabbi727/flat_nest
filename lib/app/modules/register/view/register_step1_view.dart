@@ -40,7 +40,7 @@ class RegisterStep1View extends GetView<RegisterController> {
         bool passOk = password.length >= 8;
         bool confirmOk = confirm.isNotEmpty && confirm == password;
         bool confirmMismatch = confirm.isNotEmpty && confirm != password;
-        bool phoneOk = phone.replaceAll(RegExp(r'\D'), '').length >= 9;
+        bool phoneOk = phone.replaceAll(RegExp(r'\D'), '').length == 11;
 
         FieldState stateFor(bool ok, String val) {
           if (val.isEmpty) return FieldState.idle;
@@ -182,12 +182,12 @@ class RegisterStep1View extends GetView<RegisterController> {
             FNField(
               t: t,
               label: 'Phone number',
-              placeholder: '1712 345 678',
+              placeholder: '01712 345 678',
               controller: controller.phoneController,
               keyboardType: TextInputType.phone,
               state: stateFor(phoneOk, phone),
-              fixedPrefix: '+880',
-              hint: "We'll verify this number.",
+              fixedPrefix: '+88',
+              hint: "Enter your 11-digit BD number (01XXXXXXXXX).",
             ),
             const SizedBox(height: 12),
 
