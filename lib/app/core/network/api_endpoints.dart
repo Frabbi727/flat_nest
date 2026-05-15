@@ -33,6 +33,7 @@ class ApiEndpoints {
   static const String notificationsReadAll = '/notifications/read-all';
 
   // ── Reference data ────────────────────────────────────────────────────────
+  static const String listingTypes = '/listing-types';
   static const String amenities = '/amenities';
   static const String geoDivisions = '/geo/divisions';
   static String geoDistricts(int divisionId) => '/geo/districts/$divisionId';

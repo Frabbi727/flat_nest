@@ -4,6 +4,11 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../route/app_routes.dart';
+import '../../listing/model/geo_model.dart';
+import '../../listing/model/listing_model.dart';
+import '../../listing/model/listing_type_model.dart';
+import '../model/create_listing_request.dart';
+import '../model/save_location_request.dart';
 import '../repository/create_listing_repository.dart';
 
 class CreateListingController extends BaseController {
@@ -24,15 +29,22 @@ class CreateListingController extends BaseController {
   final bedsController = TextEditingController(text: '2');
   final bathsController = TextEditingController(text: '2');
   final sizeController = TextEditingController();
-  final selectedType = 'Family'.obs;
+  final selectedType = ''.obs;
+  final selectedTypeId = RxnInt();
   final selectedAmenities = <int>[].obs;
+  final listingTypes = <ListingTypeModel>[].obs;
+  final amenities = <AmenityModel>[].obs;
+  final typesLoading = false.obs;
 
-  static const typeOptions = ['Family', 'Bachelor', 'Couple', 'Student', 'Sublet'];
+  void pickListingType(ListingTypeModel type) {
+    selectedType.value = type.name;
+    selectedTypeId.value = type.id;
+  }
 
   // Step 2 — Photos
   final photos = <File>[].obs;
 
-  // Step 3 — Location
+  // Step 3 — Location (display labels)
   final division = RxnString();
   final district = RxnString();
   final upazila = RxnString();
@@ -40,98 +52,66 @@ class CreateListingController extends BaseController {
   final roadAndHouse = TextEditingController();
   final activeDropdown = RxnString();
 
-  // Location hierarchy
-  static const _locations = {
-    'Dhaka': {
-      'Dhaka': {
-        'Gulshan': ['Gulshan 1', 'Gulshan 2', 'Niketan', 'Baridhara DOHS'],
-        'Banani': ['Banani DOHS', 'Banani Block A', 'Banani Block C'],
-        'Dhanmondi': ['Dhanmondi 27', 'Dhanmondi 32', 'Lalmatia'],
-        'Mirpur': ['Mirpur 1', 'Mirpur 10', 'Mirpur 11', 'Pallabi'],
-        'Mohammadpur': ['Mohammadpur', 'Adabor', 'Shyamoli'],
-        'Uttara': ['Sector 3', 'Sector 7', 'Sector 11', 'Sector 13'],
-      },
-      'Gazipur': {
-        'Gazipur Sadar': ['Joydebpur', 'Tongi', 'Konabari'],
-      },
-      'Narayanganj': {
-        'Narayanganj Sadar': ['Fatullah', 'Siddhirganj'],
-      },
-    },
-    'Chattogram': {
-      'Chattogram': {
-        'Panchlaish': ['Probortok', 'O.R. Nizam Road'],
-        'Khulshi': ['East Khulshi', 'West Khulshi', 'GEC'],
-      },
-    },
-    'Sylhet': {
-      'Sylhet': {
-        'Sylhet Sadar': ['Zindabazar', 'Amberkhana', 'Shahjalal Uposhohor'],
-      },
-    },
-    'Khulna': {
-      'Khulna': {
-        'Khulna Sadar': ['Sonadanga', 'Khalishpur'],
-      },
-    },
-    'Rajshahi': {
-      'Rajshahi': {
-        'Boalia': ['Shaheb Bazar', 'Uposhohor'],
-      },
-    },
-  };
+  // Geo API item lists
+  final divisionItems = <GeoItemModel>[].obs;
+  final districtItems = <GeoItemModel>[].obs;
+  final upazilaItems = <GeoItemModel>[].obs;
+  final unionItems = <GeoItemModel>[].obs;
 
-  List<String> get divisions => _locations.keys.toList();
+  // Per-level loading flags
+  final divisionsLoading = false.obs;
+  final districtsLoading = false.obs;
+  final upazilasLoading = false.obs;
+  final unionsLoading = false.obs;
 
-  List<String> get districts {
-    final div = division.value;
-    if (div == null) return [];
-    return (_locations[div] as Map<String, dynamic>?)?.keys.toList() ?? [];
-  }
+  // Selected geo IDs — sent to the location API
+  int? _divisionId;
+  int? _districtId;
+  int? _upazilaId;
+  int? _unionId;
 
-  List<String> get upazilas {
-    final div = division.value;
-    final dist = district.value;
-    if (div == null || dist == null) return [];
-    return ((_locations[div] as Map<String, dynamic>?)?[dist] as Map<String, dynamic>?)
-            ?.keys
-            .toList() ??
-        [];
-  }
-
-  List<String> get unions {
-    final div = division.value;
-    final dist = district.value;
-    final upa = upazila.value;
-    if (div == null || dist == null || upa == null) return [];
-    final list = ((_locations[div] as Map<String, dynamic>?)?[dist]
-            as Map<String, dynamic>?)?[upa];
-    return (list as List<dynamic>?)?.cast<String>() ?? [];
-  }
-
-  void pickDivision(String v) {
-    division.value = v;
+  void pickDivision(GeoItemModel item) {
+    _divisionId = item.id;
+    division.value = item.name;
+    _districtId = null;
     district.value = null;
+    _upazilaId = null;
     upazila.value = null;
+    _unionId = null;
     union.value = null;
-    activeDropdown.value = 'district';
+    districtItems.clear();
+    upazilaItems.clear();
+    unionItems.clear();
+    activeDropdown.value = null;
+    _fetchDistricts(item.id);
   }
 
-  void pickDistrict(String v) {
-    district.value = v;
+  void pickDistrict(GeoItemModel item) {
+    _districtId = item.id;
+    district.value = item.name;
+    _upazilaId = null;
     upazila.value = null;
+    _unionId = null;
     union.value = null;
-    activeDropdown.value = 'upazila';
+    upazilaItems.clear();
+    unionItems.clear();
+    activeDropdown.value = null;
+    _fetchUpazilas(item.id);
   }
 
-  void pickUpazila(String v) {
-    upazila.value = v;
+  void pickUpazila(GeoItemModel item) {
+    _upazilaId = item.id;
+    upazila.value = item.name;
+    _unionId = null;
     union.value = null;
-    activeDropdown.value = 'union';
+    unionItems.clear();
+    activeDropdown.value = null;
+    _fetchUnions(item.id);
   }
 
-  void pickUnion(String v) {
-    union.value = v;
+  void pickUnion(GeoItemModel item) {
+    _unionId = item.id;
+    union.value = item.name;
     activeDropdown.value = null;
   }
 
@@ -139,15 +119,45 @@ class CreateListingController extends BaseController {
     activeDropdown.value = activeDropdown.value == key ? null : key;
   }
 
+  Future<void> _fetchDistricts(int divisionId) async {
+    districtsLoading.value = true;
+    final result = await _repo.getDistricts(divisionId);
+    districtsLoading.value = false;
+    if (result case Success(data: final data?)) {
+      districtItems.assignAll(data);
+      activeDropdown.value = 'district';
+    }
+  }
+
+  Future<void> _fetchUpazilas(int districtId) async {
+    upazilasLoading.value = true;
+    final result = await _repo.getUpazilas(districtId);
+    upazilasLoading.value = false;
+    if (result case Success(data: final data?)) {
+      upazilaItems.assignAll(data);
+      activeDropdown.value = 'upazila';
+    }
+  }
+
+  Future<void> _fetchUnions(int upazilaId) async {
+    unionsLoading.value = true;
+    final result = await _repo.getUnions(upazilaId);
+    unionsLoading.value = false;
+    if (result case Success(data: final data?)) {
+      unionItems.assignAll(data);
+      activeDropdown.value = 'union';
+    }
+  }
+
   bool get step1Valid {
     final title = titleController.text.trim();
     final price = int.tryParse(priceController.text.replaceAll(',', '')) ?? 0;
     final beds = int.tryParse(bedsController.text) ?? 0;
     final baths = int.tryParse(bathsController.text) ?? 0;
-    return title.isNotEmpty && price > 0 && beds > 0 && baths > 0;
+    return title.isNotEmpty && price > 0 && beds > 0 && baths > 0 && selectedTypeId.value != null;
   }
 
-  bool get step3Valid => union.value != null;
+  bool get step3Valid => _unionId != null;
 
   void goBack() {
     if (currentStep.value == 0) {
@@ -184,9 +194,9 @@ class CreateListingController extends BaseController {
     final desc = descController.text.trim();
 
     showLoading();
-    final result = await _repo.createListing(
+    final result = await _repo.createListing(CreateListingRequest(
       title: titleController.text.trim(),
-      type: selectedType.value,
+      listingTypeId: selectedTypeId.value!,
       price: price,
       beds: beds,
       baths: baths,
@@ -194,7 +204,7 @@ class CreateListingController extends BaseController {
       size: size,
       description: desc.isEmpty ? null : desc,
       amenities: selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
-    );
+    ));
     hideLoading();
 
     switch (result) {
@@ -237,11 +247,18 @@ class CreateListingController extends BaseController {
     }
     if (_listingId == null) return;
 
+    final rh = roadAndHouse.text.trim();
     showLoading();
     final result = await _repo.saveLocation(
-      listingId: _listingId!,
-      area: union.value!,
-      roadAndHouse: roadAndHouse.text.trim().isEmpty ? null : roadAndHouse.text.trim(),
+      _listingId!,
+      SaveLocationRequest(
+        area: union.value!,
+        divisionId: _divisionId!,
+        districtId: _districtId!,
+        upazilaId: _upazilaId!,
+        unionId: _unionId!,
+        roadAndHouse: rh.isEmpty ? null : rh,
+      ),
     );
     hideLoading();
 
@@ -286,6 +303,45 @@ class CreateListingController extends BaseController {
       selectedAmenities.remove(id);
     } else {
       selectedAmenities.add(id);
+    }
+  }
+
+  @override
+  @override
+  void onInit() {
+    super.onInit();
+    _fetchListingTypes();
+  }
+
+  Future<void> _fetchListingTypes() async {
+    typesLoading.value = true;
+    divisionsLoading.value = true;
+
+    final results = await Future.wait([
+      _repo.getListingTypes(),
+      _repo.getAmenities(),
+      _repo.getDivisions(),
+    ]);
+
+    typesLoading.value = false;
+    divisionsLoading.value = false;
+
+    final typesResult = results[0] as Resource<List<ListingTypeModel>>;
+    final amenitiesResult = results[1] as Resource<List<AmenityModel>>;
+    final divisionsResult = results[2] as Resource<List<GeoItemModel>>;
+
+    if (typesResult case Success(data: final data?)) {
+      listingTypes.assignAll(data);
+      if (data.isNotEmpty) {
+        selectedType.value = data.first.name;
+        selectedTypeId.value = data.first.id;
+      }
+    }
+    if (amenitiesResult case Success(data: final data?)) {
+      amenities.assignAll(data);
+    }
+    if (divisionsResult case Success(data: final data?)) {
+      divisionItems.assignAll(data);
     }
   }
 

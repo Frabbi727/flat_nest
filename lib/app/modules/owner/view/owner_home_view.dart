@@ -159,7 +159,7 @@ class _DashboardTab extends GetView<OwnerController> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 1.6,
+                childAspectRatio: 1.35,
               ),
               delegate: SliverChildBuilderDelegate(
                 (_, i) => _KPICard(t: t, kpi: kpis[i]),

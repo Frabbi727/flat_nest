@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
+import '../../listing/model/geo_model.dart';
 import '../controller/create_listing_controller.dart';
 
 class CreateListingStep3View extends GetView<CreateListingController> {
@@ -16,51 +17,58 @@ class CreateListingStep3View extends GetView<CreateListingController> {
       child: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _CascadeSelect(
+              _GeoSelect(
                 t: t,
                 label: 'Division',
                 placeholder: 'Select division',
                 value: controller.division.value,
-                options: controller.divisions,
+                items: controller.divisionItems,
+                isLoading: controller.divisionsLoading.value,
                 isOpen: controller.activeDropdown.value == 'division',
                 onToggle: () => controller.toggleDropdown('division'),
                 onPick: controller.pickDivision,
               ),
-              _CascadeSelect(
+              _GeoSelect(
                 t: t,
                 label: 'District',
                 placeholder: controller.division.value != null
                     ? 'Select district'
                     : 'Select division first',
                 value: controller.district.value,
-                options: controller.districts,
-                isDisabled: controller.division.value == null,
+                items: controller.districtItems,
+                isLoading: controller.districtsLoading.value,
+                isDisabled: controller.division.value == null &&
+                    !controller.districtsLoading.value,
                 isOpen: controller.activeDropdown.value == 'district',
                 onToggle: () => controller.toggleDropdown('district'),
                 onPick: controller.pickDistrict,
               ),
-              _CascadeSelect(
+              _GeoSelect(
                 t: t,
                 label: 'Upazila / Thana',
                 placeholder: controller.district.value != null
                     ? 'Select upazila'
                     : 'Select district first',
                 value: controller.upazila.value,
-                options: controller.upazilas,
-                isDisabled: controller.district.value == null,
+                items: controller.upazilaItems,
+                isLoading: controller.upazilasLoading.value,
+                isDisabled: controller.district.value == null &&
+                    !controller.upazilasLoading.value,
                 isOpen: controller.activeDropdown.value == 'upazila',
                 onToggle: () => controller.toggleDropdown('upazila'),
                 onPick: controller.pickUpazila,
               ),
-              _CascadeSelect(
+              _GeoSelect(
                 t: t,
                 label: 'Union / Area',
                 placeholder: controller.upazila.value != null
                     ? 'Select union'
                     : 'Select upazila first',
                 value: controller.union.value,
-                options: controller.unions,
-                isDisabled: controller.upazila.value == null,
+                items: controller.unionItems,
+                isLoading: controller.unionsLoading.value,
+                isDisabled: controller.upazila.value == null &&
+                    !controller.unionsLoading.value,
                 isOpen: controller.activeDropdown.value == 'union',
                 onToggle: () => controller.toggleDropdown('union'),
                 onPick: controller.pickUnion,
@@ -78,16 +86,13 @@ class CreateListingStep3View extends GetView<CreateListingController> {
                   ),
                 ),
               ),
-              // Location preview card
               if (controller.union.value != null) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: t.primarySoft,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: t.primary.withValues(alpha:0.3),
-                    ),
+                    border: Border.all(color: t.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -136,23 +141,27 @@ class CreateListingStep3View extends GetView<CreateListingController> {
       );
 }
 
-class _CascadeSelect extends StatelessWidget {
+// ── Geo dropdown ─────────────────────────────────────────────────────────────
+
+class _GeoSelect extends StatelessWidget {
   final FlatNestTheme t;
   final String label;
   final String placeholder;
   final String? value;
-  final List<String> options;
+  final List<GeoItemModel> items;
+  final bool isLoading;
   final bool isDisabled;
   final bool isOpen;
   final VoidCallback onToggle;
-  final ValueChanged<String> onPick;
+  final ValueChanged<GeoItemModel> onPick;
 
-  const _CascadeSelect({
+  const _GeoSelect({
     required this.t,
     required this.label,
     required this.placeholder,
     required this.value,
-    required this.options,
+    required this.items,
+    required this.isLoading,
     required this.isOpen,
     required this.onToggle,
     required this.onPick,
@@ -179,7 +188,7 @@ class _CascadeSelect extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             GestureDetector(
-              onTap: isDisabled ? null : onToggle,
+              onTap: isDisabled || isLoading ? null : onToggle,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 height: 48,
@@ -194,7 +203,7 @@ class _CascadeSelect extends StatelessWidget {
                   boxShadow: isOpen
                       ? [
                           BoxShadow(
-                            color: t.primary.withValues(alpha:0.12),
+                            color: t.primary.withValues(alpha: 0.12),
                             blurRadius: 0,
                             spreadRadius: 4,
                           ),
@@ -208,25 +217,36 @@ class _CascadeSelect extends StatelessWidget {
                         value ?? placeholder,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: value != null ? t.ink : t.inkFaint,
-                          fontWeight: value != null ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight:
+                              value != null ? FontWeight.w600 : FontWeight.w500,
                           fontSize: 15,
                         ),
                       ),
                     ),
-                    AnimatedRotation(
-                      duration: const Duration(milliseconds: 200),
-                      turns: isOpen ? 0.5 : 0,
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: t.inkSoft,
-                        size: 20,
+                    if (isLoading)
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: t.primary,
+                        ),
+                      )
+                    else
+                      AnimatedRotation(
+                        duration: const Duration(milliseconds: 200),
+                        turns: isOpen ? 0.5 : 0,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: t.inkSoft,
+                          size: 20,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
             ),
-            if (isOpen)
+            if (isOpen && items.isNotEmpty)
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 margin: const EdgeInsets.only(top: 4),
@@ -236,7 +256,7 @@ class _CascadeSelect extends StatelessWidget {
                   border: Border.all(color: t.borderSoft),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha:0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -245,7 +265,8 @@ class _CascadeSelect extends StatelessWidget {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: t.bgAlt,
                         borderRadius: const BorderRadius.only(
@@ -257,7 +278,7 @@ class _CascadeSelect extends StatelessWidget {
                       child: Row(
                         children: [
                           Text(
-                            '${options.length} option${options.length == 1 ? '' : 's'}',
+                            '${items.length} option${items.length == 1 ? '' : 's'}',
                             style: AppTextStyles.caption.copyWith(
                               color: t.inkSoft,
                               fontWeight: FontWeight.w600,
@@ -272,14 +293,14 @@ class _CascadeSelect extends StatelessWidget {
                       child: ListView.separated(
                         shrinkWrap: true,
                         padding: EdgeInsets.zero,
-                        itemCount: options.length,
+                        itemCount: items.length,
                         separatorBuilder: (_, __) =>
                             Divider(height: 1, color: t.borderSoft),
                         itemBuilder: (context, i) {
-                          final opt = options[i];
-                          final selected = opt == value;
+                          final item = items[i];
+                          final selected = item.name == value;
                           return GestureDetector(
-                            onTap: () => onPick(opt),
+                            onTap: () => onPick(item),
                             child: Container(
                               color: selected ? t.primarySoft : t.surface,
                               padding: const EdgeInsets.symmetric(
@@ -290,9 +311,10 @@ class _CascadeSelect extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      opt,
+                                      item.name,
                                       style: AppTextStyles.bodyMedium.copyWith(
-                                        color: selected ? t.primaryInk : t.ink,
+                                        color:
+                                            selected ? t.primaryInk : t.ink,
                                         fontWeight: selected
                                             ? FontWeight.w600
                                             : FontWeight.w500,
@@ -319,6 +341,8 @@ class _CascadeSelect extends StatelessWidget {
     );
   }
 }
+
+// ── Form group ────────────────────────────────────────────────────────────────
 
 class _FormGroup extends StatelessWidget {
   final FlatNestTheme t;
