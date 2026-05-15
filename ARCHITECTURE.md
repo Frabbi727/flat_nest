@@ -2,6 +2,22 @@
 
 This document explains the architecture, directory structure, and development flow of the FlatNest mobile application.
 
+## 🚀 Running Different Environments
+
+We use separate entry points for different environments (Dev, Staging, Prod). This automatically switches the API Base URL.
+
+### To Run:
+- **Development**: `flutter run -t lib/main_dev.dart`
+- **Staging**: `flutter run -t lib/main_staging.dart`
+- **Production**: `flutter run -t lib/main_prod.dart`
+
+### To Build (Release):
+- **Development**: `flutter build apk -t lib/main_dev.dart`
+- **Staging**: `flutter build apk -t lib/main_staging.dart`
+- **Production**: `flutter build apk -t lib/main_prod.dart`
+
+---
+
 ## 🏗 Core Architecture
 We follow a **Modular MVVM + Repository Pattern** using **GetX** for state management and dependency injection.
 
