@@ -8,15 +8,24 @@ class SplashController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    _checkAuth();
+    _checkNavigation();
   }
 
-  void _checkAuth() async {
+  void _checkNavigation() async {
+    // Artificial delay for splash visual
     await Future.delayed(const Duration(seconds: 2));
-    if (_authService.isAuthenticated) {
-      Get.offAllNamed(Routes.home);
+
+    if (_authService.isFirstTime) {
+      // Show onboarding only once
+      Get.offAllNamed(Routes.onboarding);
     } else {
-      Get.offAllNamed(Routes.login);
+      if (_authService.isAuthenticated) {
+        // Remembered login
+        Get.offAllNamed(Routes.home);
+      } else {
+        // Must login
+        Get.offAllNamed(Routes.login);
+      }
     }
   }
 }

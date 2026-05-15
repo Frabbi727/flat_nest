@@ -46,6 +46,20 @@ We use **Dio** with a specialized `ApiClient` that handles:
 
 ---
 
+## 🔐 Session & Onboarding Flow
+The app handles the first-time user experience and persistent logins through the `SplashController` and `AuthService`.
+
+### Navigation Branching (Splash):
+1. **First Time Launch**: If `isFirstTime` is true in `CacheManager`, the user is routed to the **Onboarding** module.
+2. **Returning User (Logged In)**: If `isAuthenticated` is true, the user skips login and goes directly to **Home**.
+3. **Returning User (Logged Out)**: The user is routed to the **Login** screen.
+
+### Persistence:
+- **Tokens**: Stored securely using `flutter_secure_storage`.
+- **Flags**: `is_first_time` and `is_logged_in` flags are persisted to ensure the user doesn't see onboarding twice and stays logged in.
+
+---
+
 ## 🏗 Core Architecture
 We follow a **Modular MVVM + Repository Pattern** using **GetX** for state management and dependency injection.
 

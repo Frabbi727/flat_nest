@@ -4,6 +4,8 @@ import '../modules/auth/binding/auth_binding.dart';
 import '../modules/auth/view/login_view.dart';
 import '../modules/home/binding/home_binding.dart';
 import '../modules/home/view/home_view.dart';
+import '../modules/onboarding/binding/onboarding_binding.dart';
+import '../modules/onboarding/view/onboarding_view.dart';
 import '../modules/splash/binding/splash_binding.dart';
 import '../modules/splash/view/splash_view.dart';
 import 'app_routes.dart';
@@ -16,6 +18,11 @@ class AppPages {
       name: Routes.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
+    ),
+    GetPage(
+      name: Routes.onboarding,
+      page: () => const OnboardingView(),
+      binding: OnboardingBinding(),
     ),
     GetPage(
       name: Routes.login,

@@ -7,14 +7,17 @@ class AuthService extends GetxService {
   final CacheManager _cacheManager = CacheManager();
   final RxnString _accessToken = RxnString();
   final RxnString _refreshToken = RxnString();
+  final RxBool _isFirstTime = true.obs;
 
   String? get token => _accessToken.value;
   String? get refreshToken => _refreshToken.value;
   bool get isAuthenticated => _accessToken.value != null;
+  bool get isFirstTime => _isFirstTime.value;
 
   Future<AuthService> init() async {
     _accessToken.value = await _cacheManager.getAccessToken();
     _refreshToken.value = await _cacheManager.getRefreshToken();
+    _isFirstTime.value = await _cacheManager.isFirstTime();
     return this;
   }
 
@@ -30,15 +33,20 @@ class AuthService extends GetxService {
     _refreshToken.value = null;
   }
 
+  Future<void> completeOnboarding() async {
+    await _cacheManager.setNotFirstTime();
+    _isFirstTime.value = false;
+  }
+
   /// Mechanism to refresh token when expired
   Future<bool> refreshAuthToken() async {
     try {
       if (_refreshToken.value == null) return false;
 
-      // We use a clean Dio instance or the base ApiClient to avoid interceptor loops
+      // We use a clean Dio instance to avoid interceptor loops
       final dio = Dio(); 
       final response = await dio.post(
-        '${ApiConfig.baseUrl}/v1/auth/refresh', // Use centralized baseUrl
+        '${ApiConfig.baseUrl}/v1/auth/refresh',
         data: {'refresh_token': _refreshToken.value},
       );
 
@@ -51,7 +59,7 @@ class AuthService extends GetxService {
       }
     } catch (e) {
       Get.log('Token refresh failed: $e');
-      await logout(); // Logout on persistent failure
+      await logout(); 
     }
     return false;
   }
