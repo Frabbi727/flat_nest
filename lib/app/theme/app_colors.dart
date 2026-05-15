@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Colors
-  static const Color primary = Color(0xFF2196F3);
-  static const Color primaryDark = Color(0xFF1976D2);
-  static const Color primaryLight = Color(0xFFBBDEFB);
+  // Primary Colors — FlatNest teal
+  static const Color primary = Color(0xFF1A6B72);
+  static const Color primaryDark = Color(0xFF0E484D);
+  static const Color primaryLight = Color(0xFFE6F0F1);
+  static const Color primarySoft = Color(0xFFE6F0F1);
 
-  // Accent Colors
+  // Accent / Secondary
   static const Color accent = Color(0xFF00BCD4);
+  static const Color secondary = Color(0xFFFF6B6B);
+  static const Color secondarySoft = Color(0xFFFFE9E9);
 
   // Neutral Colors
   static const Color white = Colors.white;
@@ -21,9 +24,11 @@ class AppColors {
   static const Color warning = Color(0xFFFFC107);
   static const Color info = Color(0xFF2196F3);
 
-  // Background Colors
-  static const Color backgroundLight = Color(0xFFF5F5F5);
-  static const Color backgroundDark = Color(0xFF121212);
+  // Background Colors — FlatNest design tokens
+  static const Color backgroundLight = Color(0xFFF7F8FA);
+  static const Color backgroundAltLight = Color(0xFFEEF0F4);
+  static const Color backgroundDark = Color(0xFF0E1113);
+  static const Color backgroundAltDark = Color(0xFF16191C);
   
   // Text Colors
   static const Color textPrimary = Color(0xFF1C1C1E);

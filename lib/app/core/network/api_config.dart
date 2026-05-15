@@ -6,11 +6,11 @@ class ApiConfig {
   static String get baseUrl {
     switch (environment) {
       case ApiEnvironment.dev:
-        return 'https://dev-api.flatnest.com';
+        return 'http://192.168.0.108:8000/api/v1';
       case ApiEnvironment.staging:
-        return 'https://staging-api.flatnest.com';
+        return 'http://192.168.0.108:8000/api/v1';
       case ApiEnvironment.prod:
-        return 'https://api.flatnest.com';
+        return 'http://192.168.0.108:8000/api/v1';
     }
   }
 

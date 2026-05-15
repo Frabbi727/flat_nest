@@ -1,0 +1,179 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../core/base/base_controller.dart';
+import '../../../core/network/resource.dart';
+import '../../../core/service/auth_service.dart';
+import '../../../modules/auth/repository/auth_repository.dart';
+import '../../../route/app_routes.dart';
+
+class RegisterController extends BaseController {
+  final AuthRepository _authRepository;
+  final AuthService _authService = Get.find<AuthService>();
+
+  RegisterController({required AuthRepository authRepository})
+      : _authRepository = authRepository;
+
+  // Step tracking
+  final currentStep = 0.obs;
+
+  // Step 1 — Basic info
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final phoneController = TextEditingController();
+  final showPassword = false.obs;
+
+  // Step 2 — Role + DOB
+  final selectedRole = RxnString();
+  final dobDay = 14.obs;
+  final dobMonth = 6.obs;
+  final dobYear = 1998.obs;
+
+  // Step 3 — Avatar (path chosen on device)
+  final avatarPath = RxnString();
+
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null && args['step'] != null) {
+      currentStep.value = (args['step'] as int) - 1;
+    }
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    phoneController.dispose();
+    super.onClose();
+  }
+
+  void togglePassword() => showPassword.value = !showPassword.value;
+
+  void goBack() {
+    if (currentStep.value == 0) {
+      Get.back();
+    } else {
+      currentStep.value--;
+    }
+  }
+
+  // Step 1: Register basic info
+  void submitStep1() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final phone = phoneController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty) {
+      showError('Please fill all fields');
+      return;
+    }
+
+    // Validate email
+    if (!GetUtils.isEmail(email)) {
+      showError('Please enter a valid email address');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters');
+      return;
+    }
+
+    showLoading();
+    final result = await _authRepository.register(
+      name: name,
+      email: email,
+      password: password,
+      phone: '+880$phone',
+    );
+    hideLoading();
+
+    switch (result) {
+      case Success(data: final authResponse?):
+        await _authService.login(
+          accessToken: authResponse.accessToken,
+          refreshToken: authResponse.refreshToken,
+        );
+        _authService.saveUser(authResponse.user);
+        currentStep.value = 1;
+      case Success():
+        showError('Registration failed');
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
+
+  // Step 2: Save role + DOB
+  void submitStep2() async {
+    if (selectedRole.value == null) {
+      showError('Please select your role');
+      return;
+    }
+
+    final dob =
+        '${dobYear.value}-${dobMonth.value.toString().padLeft(2, '0')}-${dobDay.value.toString().padLeft(2, '0')}';
+
+    showLoading();
+    final result = await _authRepository.saveDetails(
+      role: selectedRole.value!,
+      dateOfBirth: dob,
+    );
+    hideLoading();
+
+    switch (result) {
+      case Success():
+        currentStep.value = 2;
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
+
+  // Step 3: Skip avatar → go to home
+  void skipAvatar() => _navigateToHome();
+
+  // Step 3: Finish registration
+  void finishRegistration() => _navigateToHome();
+
+  void _navigateToHome() {
+    final user = _authService.currentUser;
+    if (user?.isOwner == true) {
+      Get.offAllNamed(Routes.ownerHome);
+    } else {
+      Get.offAllNamed(Routes.renterHome);
+    }
+  }
+
+  String get dobLabel {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${dobDay.value.toString().padLeft(2, '0')} ${months[dobMonth.value - 1]} ${dobYear.value}';
+  }
+
+  int get age => DateTime.now().year - dobYear.value;
+
+  int get passwordStrength {
+    final p = passwordController.text;
+    int s = 0;
+    if (p.length >= 8) s++;
+    if (p.contains(RegExp(r'[A-Z]'))) s++;
+    if (p.contains(RegExp(r'[0-9]'))) s++;
+    if (p.contains(RegExp(r'[^A-Za-z0-9]'))) s++;
+    return s;
+  }
+
+  bool get step1Valid {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    final phone = phoneController.text.trim();
+    return name.split(' ').where((w) => w.isNotEmpty).length >= 2 &&
+        GetUtils.isEmail(email) &&
+        password.length >= 8 &&
+        phone.length >= 9;
+  }
+}

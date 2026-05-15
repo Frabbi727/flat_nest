@@ -5,6 +5,7 @@ import '../../../core/localization/translation_keys.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../route/app_routes.dart';
+import '../model/user_model.dart';
 import '../repository/auth_repository.dart';
 
 class AuthController extends BaseController {
@@ -15,7 +16,7 @@ class AuthController extends BaseController {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  
+
   final showPassword = false.obs;
 
   @override
@@ -26,6 +27,8 @@ class AuthController extends BaseController {
   }
 
   void togglePassword() => showPassword.value = !showPassword.value;
+
+  void goToRegister() => Get.toNamed(Routes.register);
 
   void login() async {
     final email = emailController.text.trim();
@@ -41,16 +44,29 @@ class AuthController extends BaseController {
     hideLoading();
 
     switch (result) {
-      case Success(data: final user?):
+      case Success(data: final authResponse?):
         await _authService.login(
-          accessToken: 'fake_access_token_for_${user.id}',
-          refreshToken: 'fake_refresh_token_for_${user.id}',
+          accessToken: authResponse.accessToken,
+          refreshToken: authResponse.refreshToken,
         );
-        Get.offAllNamed(Routes.home);
+        _authService.saveUser(authResponse.user);
+        _navigateAfterAuth(authResponse.user);
       case Success():
         showError(TranslationKeys.userDataNotFound.tr);
       case Error(message: final msg):
-        showError(msg.tr);
+        showError(msg);
+    }
+  }
+
+  void _navigateAfterAuth(UserModel user) {
+    if (!user.isComplete) {
+      Get.offAllNamed(Routes.register, arguments: {'step': 2});
+      return;
+    }
+    if (user.isOwner) {
+      Get.offAllNamed(Routes.ownerHome);
+    } else {
+      Get.offAllNamed(Routes.renterHome);
     }
   }
 }

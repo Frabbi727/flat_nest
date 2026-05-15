@@ -1,25 +1,63 @@
 import '../../../core/base/base_repository.dart';
-import '../../../core/localization/translation_keys.dart';
 import '../../../core/network/resource.dart';
 import '../model/user_model.dart';
 
 class AuthRepository extends BaseRepository {
   AuthRepository({required super.apiClient});
 
-  Future<Resource<UserModel>> login(String email, String password) async {
+  Future<Resource<AuthResponse>> login(String email, String password) async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // In real app:
-      // final response = await apiClient.post('/login', data: {'email': email, 'password': password});
-      // return Success(UserModel.fromJson(response.data['user']));
-      
-      if (email == 'test@example.com' && password == 'password') {
-        return const Success(data: UserModel(id: '1', email: 'test@example.com', name: 'Test User'), statusCode: 200);
-      } else {
-        return const Error(TranslationKeys.error, statusCode: 401);
-      }
+      final response = await apiClient.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
+      return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<AuthResponse>> register({
+    required String name,
+    required String email,
+    required String password,
+    required String phone,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/register',
+        data: {
+          'name': name,
+          'email': email,
+          'password': password,
+          'phone': phone,
+        },
+      );
+      return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 201);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<Map<String, dynamic>>> saveDetails({
+    required String role,
+    required String dateOfBirth,
+  }) async {
+    try {
+      final response = await apiClient.patch(
+        '/auth/register/details',
+        data: {'role': role, 'date_of_birth': dateOfBirth},
+      );
+      return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<Map<String, dynamic>>> logout() async {
+    try {
+      final response = await apiClient.post('/auth/logout');
+      return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
     }

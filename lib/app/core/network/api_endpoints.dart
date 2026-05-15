@@ -1,0 +1,41 @@
+class ApiEndpoints {
+  ApiEndpoints._();
+
+  // ── Auth ──────────────────x────────────────────────────────────────────────
+  static const String login = '/auth/login';
+  static const String register = '/auth/register';
+  static const String registerDetails = '/auth/register/details';
+  static const String registerAvatar = '/auth/register/avatar';
+  static const String refreshToken = '/auth/refresh';
+  static const String logout = '/auth/logout';
+
+  // ── Listings ──────────────────────────────────────────────────────────────
+  static const String listings = '/listings';
+  static String listing(String id) => '/listings/$id';
+  static String listingPhotos(String id) => '/listings/$id/photos';
+  static String listingLocation(String id) => '/listings/$id/location';
+  static String listingSubmit(String id) => '/listings/$id/submit';
+
+  // ── Owner ─────────────────────────────────────────────────────────────────
+  static const String ownerListings = '/owner/listings';
+
+  // ── Wishlist ──────────────────────────────────────────────────────────────
+  static const String wishlist = '/wishlist';
+  static String wishlistItem(String id) => '/wishlist/$id';
+
+  // ── Chat ──────────────────────────────────────────────────────────────────
+  static const String chats = '/chats';
+  static String chatMessages(String id) => '/chats/$id/messages';
+
+  // ── Notifications ─────────────────────────────────────────────────────────
+  static const String notifications = '/notifications';
+  static String notificationRead(String id) => '/notifications/$id/read';
+  static const String notificationsReadAll = '/notifications/read-all';
+
+  // ── Reference data ────────────────────────────────────────────────────────
+  static const String amenities = '/amenities';
+  static const String geoDivisions = '/geo/divisions';
+  static String geoDistricts(int divisionId) => '/geo/districts/$divisionId';
+  static String geoUpazilas(int districtId) => '/geo/upazilas/$districtId';
+  static String geoUnions(int upazilaId) => '/geo/unions/$upazilaId';
+}

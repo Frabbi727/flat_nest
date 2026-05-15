@@ -12,20 +12,19 @@ class SplashController extends GetxController {
   }
 
   void _checkNavigation() async {
-    // Artificial delay for splash visual
     await Future.delayed(const Duration(seconds: 2));
 
     if (_authService.isFirstTime) {
-      // Show onboarding only once
       Get.offAllNamed(Routes.onboarding);
-    } else {
-      if (_authService.isAuthenticated) {
-        // Remembered login
-        Get.offAllNamed(Routes.home);
+    } else if (_authService.isAuthenticated) {
+      final user = _authService.currentUser;
+      if (user?.isOwner == true) {
+        Get.offAllNamed(Routes.ownerHome);
       } else {
-        // Must login
-        Get.offAllNamed(Routes.login);
+        Get.offAllNamed(Routes.renterHome);
       }
+    } else {
+      Get.offAllNamed(Routes.login);
     }
   }
 }

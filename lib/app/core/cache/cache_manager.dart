@@ -7,6 +7,7 @@ class CacheManager {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _isLoggedInKey = 'is_logged_in';
   static const String _isFirstTimeKey = 'is_first_time';
+  static const String _userDataKey = 'user_data';
 
   Future<void> saveTokens({required String accessToken, required String refreshToken}) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
@@ -40,6 +41,14 @@ class CacheManager {
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
     await _storage.write(key: _isLoggedInKey, value: 'false');
+  }
+
+  Future<void> saveUserData(String jsonData) async {
+    await _storage.write(key: _userDataKey, value: jsonData);
+  }
+
+  Future<String?> getUserData() async {
+    return await _storage.read(key: _userDataKey);
   }
 
   Future<void> clearAll() async {

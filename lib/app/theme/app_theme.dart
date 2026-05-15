@@ -10,35 +10,19 @@ class AppTheme {
         colorSchemeSeed: AppColors.primary,
         scaffoldBackgroundColor: AppColors.backgroundLight,
         textTheme: _textTheme,
-        extensions: [
-          FlatNestTheme(
-            ink: AppColors.textPrimary,
-            inkMid: AppColors.textSecondary,
-            inkSoft: AppColors.textFaint,
-            surface: AppColors.surfaceLight,
-            borderSoft: AppColors.borderSoft,
-          ),
-        ],
+        extensions: [FlatNestTheme.light],
       );
 
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorSchemeSeed: AppColors.primary,
+        colorSchemeSeed: const Color(0xFF46A7AE),
         scaffoldBackgroundColor: AppColors.backgroundDark,
         textTheme: _textTheme.apply(
           bodyColor: AppColors.white,
           displayColor: AppColors.white,
         ),
-        extensions: [
-          FlatNestTheme(
-            ink: AppColors.white,
-            inkMid: Colors.white70,
-            inkSoft: Colors.white54,
-            surface: AppColors.surfaceDark,
-            borderSoft: AppColors.borderSoftDark,
-          ),
-        ],
+        extensions: [FlatNestTheme.dark],
       );
 
   static TextTheme get _textTheme => TextTheme(
