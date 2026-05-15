@@ -1,0 +1,31 @@
+name: falt_nest_mobile_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  get: ^4.6.6
+  dio: ^5.4.0
+  equatable: ^2.0.5
+  json_annotation: ^4.8.1
+  flutter_secure_storage: ^9.0.0
+  google_fonts: ^6.1.0
+  intl: ^0.18.1
+  connectivity_plus: ^5.0.2
+  logger: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 2.0.3
+  build_runner: 2.4.6
+  json_serializable: 6.7.1
+
+flutter:
+  uses-material-design: true
