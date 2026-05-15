@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../cache/cache_manager.dart';
 
 class LocalizationService extends GetxService {
   final Rx<Locale> _locale = const Locale('en', 'US').obs;
