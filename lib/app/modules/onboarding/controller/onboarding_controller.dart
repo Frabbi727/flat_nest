@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/localization/translation_keys.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../route/app_routes.dart';
 
@@ -9,20 +10,20 @@ class OnboardingController extends GetxController {
 
   final List<OnboardingPageModel> pages = [
     OnboardingPageModel(
-      title: 'Find your next flat',
-      description: 'Browse trusted listings from verified owners across Dhaka. No brokers, no hidden fees.',
+      title: TranslationKeys.onboarding1Title.tr,
+      description: TranslationKeys.onboarding1Desc.tr,
       icon: '🔍',
       color: 0xFFFFE0CC,
     ),
     OnboardingPageModel(
-      title: 'List your flat in minutes',
-      description: 'Upload photos, set your price, and reach thousands of renters looking for a home like yours.',
+      title: TranslationKeys.onboarding2Title.tr,
+      description: TranslationKeys.onboarding2Desc.tr,
       icon: '📸',
       color: 0xFFD4E7DA,
     ),
     OnboardingPageModel(
-      title: 'Chat & move in',
-      description: 'Message owners directly, schedule a visit, and finalize without leaving the app.',
+      title: TranslationKeys.onboarding3Title.tr,
+      description: TranslationKeys.onboarding3Desc.tr,
       icon: '💬',
       color: 0xFFD7DFFC,
     ),

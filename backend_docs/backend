@@ -1,0 +1,656 @@
+ FlatNest Mobile API — Implementation Guide
+
+ Why owner side first?
+
+ Yes — owner side first is the right call. Here's why:
+ - Renters browse listings → listings must exist first
+ - Auth is shared (both need it), so you build it once
+ - The 4-step listing wizard is the most complex flow — get it done while fresh
+ - After owner is done, renter side is mostly read-only and much simpler
+
+ ---
+ Implementation Order
+
+ Phase 1 → Auth (shared)
+ Phase 2 → Owner: complete registration + listing wizard + dashboard
+ Phase 3 → Renter: feed + detail + wishlist
+ Phase 4 → Chat (works for both sides)
+ Phase 5 → Notifications
+ Phase 6 → Reference data (geo + amenities — use on forms)
+
+ ---
+ Setup
+
+ Base URL
+
+ http://localhost:8000/api/v1
+
+ Headers (every request)
+
+ Content-Type: application/json
+ Accept: application/json
+
+ Auth header (protected routes only)
+
+ Authorization: Bearer {access_token}
+
+ Error format (all errors follow this shape)
+
+ { "message": "Human readable text", "code": "MACHINE_CODE" }
+
+ Common error codes
+
+ ┌───────────────────────┬──────┬──────────────────────────────────────────────┐
+ │         Code          │ HTTP │                   Meaning                    │
+ ├───────────────────────┼──────┼──────────────────────────────────────────────┤
+ │ INVALID_CREDENTIALS   │ 401  │ Wrong email/password                         │
+ ├───────────────────────┼──────┼──────────────────────────────────────────────┤
+ │ INVALID_REFRESH_TOKEN │ 401  │ Refresh token expired/invalid                │
+ ├───────────────────────┼──────┼──────────────────────────────────────────────┤
+ │ NOT_FOUND             │ 404  │ Resource doesn't exist                       │
+ ├───────────────────────┼──────┼──────────────────────────────────────────────┤
+ │ FORBIDDEN             │ 403  │ Not your resource                            │
+ ├───────────────────────┼──────┼──────────────────────────────────────────────┤
+ │ INCOMPLETE            │ 422  │ Listing missing area or photos before submit │
+ └───────────────────────┴──────┴──────────────────────────────────────────────┘
+
+ Validation errors (422)
+
+ {
+   "message": "The given data was invalid.",
+   "errors": {
+     "email": ["The email has already been taken."]
+   }
+ }
+
+ ---
+ Phase 1 — Auth (build this first, shared by both sides)
+
+ Step 1 of 3 — Register
+
+ POST /auth/register
+ Content-Type: application/json
+ Body:
+ {
+   "name": "string, required, max 100",
+   "email": "string, required, unique",
+   "password": "string, required, min 8",
+   "phone": "string, required, BD format 01XXXXXXXXX, unique"
+ }
+ Response 201:
+ {
+   "access_token": "string",
+   "refresh_token": "string",
+   "registration_step": 2,
+   "user": {
+     "id": "uuid",
+     "name": "string",
+     "email": "string",
+     "phone": "string",
+     "role": "renter",
+     "avatar_url": null,
+     "is_complete": false
+   }
+ }
+
+ ▎ Save access_token and refresh_token after this. User is logged in.
+
+ ---
+ Step 2 of 3 — Save role + date of birth
+
+ PATCH /auth/register/details
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body:
+ {
+   "role": "renter | owner",
+   "date_of_birth": "YYYY-MM-DD (must be 18+)"
+ }
+ Response 200:
+ { "message": "Details saved", "registration_step": 3 }
+
+ ▎ If user selects owner, they will later see the listing creation flow.
+
+ ---
+ Step 3 of 3 — Upload avatar
+
+ PATCH /auth/register/avatar
+ Authorization: Bearer {token}
+ Content-Type: multipart/form-data
+ Body:
+ avatar: file (jpg/jpeg/png, max 2MB)
+ Response 200:
+ { "message": "Registration complete", "avatar_url": "https://..." }
+
+ ▎ is_complete becomes true. Redirect to home screen.
+
+ ---
+ Login
+
+ POST /auth/login
+ Content-Type: application/json
+ Body:
+ {
+   "email": "string",
+   "password": "string"
+ }
+ Response 200:
+ {
+   "access_token": "string",
+   "refresh_token": "string",
+   "user": {
+     "id": "uuid",
+     "name": "string",
+     "email": "string",
+     "phone": "string",
+     "role": "renter | owner",
+     "avatar_url": "string | null",
+     "is_complete": true
+   }
+ }
+
+ ---
+ Refresh access token
+
+ Call this when you get a 401 on any protected request.
+ POST /auth/refresh
+ Content-Type: application/json
+ Body:
+ { "refresh_token": "string" }
+ Response 200:
+ { "access_token": "string" }
+
+ ---
+ Logout
+
+ POST /auth/logout
+ Authorization: Bearer {token}
+ Response 200:
+ { "message": "Logged out" }
+
+ ---
+ Phase 2 — Owner Side
+
+ ▎ All owner routes require Authorization: Bearer {token} AND the user's role must be owner.
+ ▎ A non-owner gets HTTP 403.
+
+ Owner dashboard — list my listings
+
+ GET /owner/listings
+ Authorization: Bearer {token}
+ Response 200:
+ {
+   "data": [
+     {
+       "id": "uuid",
+       "title": "string",
+       "area": "string | null",
+       "type": "Family | Bachelor | Student | Couple | Sublet",
+       "price": 25000,
+       "beds": 3,
+       "baths": 2,
+       "status": "draft | pending | active | rented | rejected",
+       "status_label": "Draft | Pending Review | Active | Rented | Rejected",
+       "views": 42,
+       "inquiries": 3,
+       "amenities": [{ "id": 1, "name": "wifi", "label": "WiFi" }],
+       "photos": [{ "id": "uuid", "url": "https://...", "position": 0 }],
+       "created_at": "ISO datetime"
+     }
+   ]
+ }
+
+ ---
+ Create listing — 4-step wizard
+
+ Step 1 — Details (JSON)
+
+ POST /listings
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body:
+ {
+   "title": "3BHK Family Flat – Dhanmondi",
+   "type": "Family",
+   "price": 35000,
+   "beds": 3,
+   "baths": 2,
+   "deposit": 70000,
+   "size": 1200,
+   "description": "Spacious flat with great view...",
+   "amenities": [1, 3, 5]
+ }
+ - type must be one of: Family, Bachelor, Student, Couple, Sublet
+ - amenities is an array of amenity IDs (get IDs from GET /amenities)
+ - deposit, size, description, amenities are optional
+
+ Response 201:
+ {
+   "id": "uuid",
+   "message": "Listing draft created. Upload photos to submit for review.",
+   "listing_step": 2
+ }
+
+ ▎ Save the id — you need it for steps 2, 3, and 4.
+
+ ---
+ Step 2 — Photos (multipart)
+
+ POST /listings/{id}/photos
+ Authorization: Bearer {token}
+ Content-Type: multipart/form-data
+ Body:
+ photos[]: file (jpg/jpeg/png, max 5MB each, at least 1 required)
+ photos[]: file
+ photos[]: file
+
+ ▎ Flutter: send as MultipartFile list under the key photos[]
+
+ Response 200:
+ { "listing_step": 3 }
+
+ ---
+ Step 3 — Location (JSON)
+
+ PATCH /listings/{id}/location
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body:
+ {
+   "area": "Dhanmondi",
+   "division_id": 3,
+   "district_id": 10,
+   "upazila_id": 50,
+   "union_id": 200,
+   "road_and_house": "House 12, Road 7, Dhanmondi",
+   "coord_x": 23.7461,
+   "coord_y": 90.3742
+ }
+ - area is required; all others are optional
+ - Get division_id → district_id → upazila_id → union_id by chaining the Geo APIs (Phase 6)
+
+ Response 200:
+ { "listing_step": 4 }
+
+ ---
+ Step 4 — Preview + Submit
+
+ Show the user a preview using GET /listings/{id} (public endpoint, no auth needed).
+
+ Then submit:
+ POST /listings/{id}/submit
+ Authorization: Bearer {token}
+ No body needed.
+
+ Response 200:
+ {
+   "message": "Listing submitted for review.",
+   "listing": { "...full listing object..." }
+ }
+
+ Response 422 — missing location:
+ { "message": "Location is required. Please complete Step 3 first.", "code": "INCOMPLETE" }
+ Response 422 — missing photos:
+ { "message": "At least one photo is required. Please complete Step 2 first.", "code": "INCOMPLETE" }
+
+ ---
+ Edit a listing
+
+ Partial update — only send the fields you want to change.
+ PATCH /listings/{id}
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body (all fields optional):
+ {
+   "title": "Updated title",
+   "price": 38000,
+   "amenities": [1, 2, 4]
+ }
+ Response 200: Full listing object (same shape as owner dashboard item)
+
+ ---
+ Delete a listing
+
+ DELETE /listings/{id}
+ Authorization: Bearer {token}
+ Response 200:
+ { "message": "Listing deleted" }
+
+ ---
+ Phase 3 — Renter Side
+
+ Browse listings feed
+
+ GET /listings
+ No auth needed.
+
+ Query params (all optional):
+
+ ┌───────────┬─────────────────────┬──────────────────┐
+ │   Param   │        Type         │     Example      │
+ ├───────────┼─────────────────────┼──────────────────┤
+ │ type      │ string              │ ?type=Family     │
+ ├───────────┼─────────────────────┼──────────────────┤
+ │ maxPrice  │ integer             │ ?maxPrice=30000  │
+ ├───────────┼─────────────────────┼──────────────────┤
+ │ amenities │ comma-separated IDs │ ?amenities=1,3,5 │
+ └───────────┴─────────────────────┴──────────────────┘
+
+ Example:
+ GET /listings?type=Family&maxPrice=30000&amenities=1,3
+
+ Response 200:
+ {
+   "data": [
+     {
+       "id": "uuid",
+       "title": "string",
+       "area": "string",
+       "road_and_house": "string | null",
+       "division_id": 3,
+       "district_id": 10,
+       "upazila_id": 50,
+       "union_id": 200,
+       "type": "Family",
+       "price": 35000,
+       "deposit": 70000,
+       "beds": 3,
+       "baths": 2,
+       "size": 1200,
+       "description": "string",
+       "status": "active",
+       "status_label": "Active",
+       "views": 42,
+       "coord_x": 23.7461,
+       "coord_y": 90.3742,
+       "amenities": [{ "id": 1, "name": "wifi", "label": "WiFi" }],
+       "owner": { "id": "uuid", "name": "string", "phone": "string" },
+       "photos": [{ "id": "uuid", "url": "https://...", "position": 0 }],
+       "created_at": "ISO datetime"
+     }
+   ]
+ }
+
+ ▎ Only active listings appear here. draft, pending, rejected are hidden.
+
+ ---
+ Listing detail
+
+ GET /listings/{id}
+ No auth needed. Increments view count.
+
+ Response 200: Same shape as feed item above (single object wrapped in data)
+
+ Response 404:
+ { "message": "Listing not found", "code": "NOT_FOUND" }
+
+ ---
+ Wishlist — get saved IDs
+
+ GET /wishlist
+ Authorization: Bearer {token}
+ Response 200:
+ { "saved_ids": ["uuid1", "uuid2"] }
+
+ ▎ Use this to show heart icons as filled/empty on the feed.
+
+ ---
+ Wishlist — save a listing
+
+ POST /wishlist/{listing_id}
+ Authorization: Bearer {token}
+ No body needed.
+
+ Response 200:
+ { "message": "Saved" }
+
+ ---
+ Wishlist — remove a listing
+
+ DELETE /wishlist/{listing_id}
+ Authorization: Bearer {token}
+ Response 200:
+ { "message": "Removed" }
+
+ ---
+ Phase 4 — Chat
+
+ List all conversations (inbox)
+
+ GET /chats
+ Authorization: Bearer {token}
+ Response 200:
+ {
+   "data": [
+     {
+       "id": "uuid",
+       "listing": { "id": "uuid", "title": "string", "area": "string" },
+       "other_user": { "id": "uuid", "name": "string", "avatar_url": "string | null" },
+       "last_message": {
+         "id": "uuid",
+         "sender_id": "uuid",
+         "text": "string",
+         "is_read": false,
+         "created_at": "ISO datetime"
+       },
+       "unread_count": 2,
+       "updated_at": "ISO datetime"
+     }
+   ]
+ }
+
+ ---
+ Start a new chat (renter initiates)
+
+ POST /chats
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body:
+ {
+   "listing_id": "uuid",
+   "initial_message": "Hi, is this flat still available?"
+ }
+ Response 201:
+ { "chat_id": "uuid" }
+
+ ▎ If a chat for this listing already exists between these users, the existing chat is returned.
+
+ ---
+ Load messages in a chat
+
+ GET /chats/{id}/messages
+ Authorization: Bearer {token}
+ Automatically marks all messages in this chat as read.
+
+ Response 200:
+ {
+   "chat": { "id": "uuid" },
+   "messages": [
+     {
+       "id": "uuid",
+       "chat_id": "uuid",
+       "sender_id": "uuid",
+       "sender": { "id": "uuid", "name": "string", "avatar_url": "string | null" },
+       "text": "string",
+       "is_read": true,
+       "created_at": "ISO datetime"
+     }
+   ]
+ }
+
+ ---
+ Send a message
+
+ POST /chats/{id}/messages
+ Authorization: Bearer {token}
+ Content-Type: application/json
+ Body:
+ { "text": "Yes it's available, come visit!" }
+ Response 201: Single message object (same shape as message in list above)
+
+ ▎ This fires a Pusher event on channel private-chat.{chat_id} with event message.sent.
+ ▎ The receiver also gets a notification (kind = message).
+
+ ---
+ Real-time (Pusher) — subscribe to a chat
+
+ Channel : private-chat.{chat_id}
+ Event   : message.sent
+ Payload : MessageResource (same shape as message above)
+
+ ---
+ Phase 5 — Notifications
+
+ Get notifications
+
+ GET /notifications
+ Authorization: Bearer {token}
+ Response 200:
+ {
+   "data": [
+     {
+       "id": "uuid",
+       "kind": "message | listing",
+       "title": "string",
+       "body": "string",
+       "time": "2 hours ago",
+       "is_unread": true,
+       "reference_id": "uuid"
+     }
+   ]
+ }
+
+ ▎ kind=message → reference_id is chat_id → open that chat
+ ▎ kind=listing → reference_id is listing_id → open that listing
+
+ ---
+ Mark one as read
+
+ PATCH /notifications/{id}/read
+ Authorization: Bearer {token}
+ Response 200: { "message": "Marked as read" }
+
+ Mark all as read
+
+ PATCH /notifications/read-all
+ Authorization: Bearer {token}
+ Response 200: { "message": "All marked as read" }
+
+ ---
+ Phase 6 — Reference Data (load once, cache locally)
+
+ All amenities (for listing form checkboxes)
+
+ GET /amenities
+ No auth needed.
+
+ Response 200:
+ [
+   { "id": 1,  "name": "wifi",      "label": "WiFi" },
+   { "id": 2,  "name": "ac",        "label": "Air Conditioning" },
+   { "id": 3,  "name": "parking",   "label": "Parking" },
+   { "id": 4,  "name": "lift",      "label": "Elevator / Lift" },
+   { "id": 5,  "name": "generator", "label": "Generator" },
+   { "id": 6,  "name": "gas",       "label": "Gas Line" },
+   { "id": 7,  "name": "water",     "label": "Water Supply" },
+   { "id": 8,  "name": "security",  "label": "Security Guard" },
+   { "id": 9,  "name": "cctv",      "label": "CCTV" },
+   { "id": 10, "name": "furnished", "label": "Furnished" },
+   { "id": 11, "name": "balcony",   "label": "Balcony" },
+   { "id": 12, "name": "rooftop",   "label": "Rooftop Access" },
+   { "id": 13, "name": "gym",       "label": "Gym" },
+   { "id": 14, "name": "swimming",  "label": "Swimming Pool" },
+   { "id": 15, "name": "intercom",  "label": "Intercom" }
+ ]
+
+ ---
+ Geo — chained dropdowns for location picker
+
+ 1. All divisions
+
+ GET /geo/divisions
+ [{ "id": 3, "name": "Dhaka", "bn_name": "ঢাকা" }]
+
+ 2. Districts by division
+
+ GET /geo/districts/{division_id}
+ [{ "id": 10, "division_id": 3, "name": "Dhaka", "bn_name": "ঢাকা" }]
+
+ 3. Upazilas by district
+
+ GET /geo/upazilas/{district_id}
+ [{ "id": 50, "district_id": 10, "name": "Dhanmondi", "bn_name": "ধানমন্ডি" }]
+
+ 4. Unions by upazila
+
+ GET /geo/unions/{upazila_id}
+ [{ "id": 200, "upazilla_id": 50, "name": "Union Name", "bn_name": "..." }]
+
+ ---
+ Amenity CRUD (for admin screen)
+
+ POST   /amenities          body: { "name": "pool", "label": "Swimming Pool" }
+ PATCH  /amenities/{id}     body: { "label": "Updated label" }
+ DELETE /amenities/{id}
+ All three require Authorization: Bearer {token}.
+
+ ---
+ Listing status — UI logic
+
+ draft    → only owner can see it (still filling the wizard)
+ pending  → submitted, awaiting admin approval
+ active   → live in public feed
+ rejected → admin rejected, owner is notified
+ rented   → owner marks it rented (future)
+
+ ---
+ Token management (important)
+
+ 1. Store access_token + refresh_token in secure storage (flutter_secure_storage)
+ 2. On every API call: if you get HTTP 401 → call POST /auth/refresh
+ 3. If refresh also fails (401) → clear tokens, send user to login screen
+
+     1. Store access_token + refresh_token in secure storage (flutter_secure_storage)
+     2. On every API call: if you get HTTP 401 → call POST /auth/refresh
+     3. If refresh also fails (401) → clear tokens, send user to login screen
+     4. On logout: call POST /auth/logout then clear both tokens from storage
+
+⏺ Here's the full API reference, organized in the exact order I'd recommend implementing on mobile:
+
+  Your recommended order — yes, owner side first:
+
+  ┌───────┬─────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────┐
+  │ Phase │                      What to build                      │                             Why                             │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 1     │ Auth                                                    │ Both sides need it — build once                             │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 2     │ Owner: registration + 4-step listing wizard + dashboard │ Most complex; needs to exist before renters can do anything │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 3     │ Renter: feed + detail + wishlist                        │ Mostly read-only, much simpler                              │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 4     │ Chat                                                    │ Works for both sides once listings exist                    │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 5     │ Notifications                                           │ Works for both sides                                        │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 6     │ Geo + Amenities                                         │ Reference data for forms — load once, cache                 │
+  └───────┴─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
+
+  A few things to note as you implement:
+
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 4     │ Chat                                                    │ Works for both sides once listings exist                    │
+  ├───────┼─────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+  │ 5     │ Notifications                                           │ Works for both sides                                        │
+  │ 6     │ Geo + Amenities                                         │ Reference data for forms — load once, cache                 │
+  └───────┴─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
+
+  A few things to note as you implement:
+
+  - After register (Step 1), the user is already logged in — save access_token + refresh_token immediately and skip the login screen
+  - For photos (listing Step 2), use multipart/form-data with key photos[] — each file is a separate field entry
+  - The listing_id you get from Step 1 of the wizard persists through all 4 steps — keep it in your wizard state
+  - Token refresh: wrap your HTTP client with an interceptor that catches 401 → calls /auth/refresh → retries the original request automatically
+  - The unread_count on the chat inbox drives your badge counters
+
+✻ Baked for 5m 3s
+

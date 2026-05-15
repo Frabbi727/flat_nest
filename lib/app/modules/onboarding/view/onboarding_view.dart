@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/localization/translation_keys.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
@@ -39,7 +40,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       child: TextButton(
                         onPressed: controller.skip,
                         child: Text(
-                          'Skip',
+                          TranslationKeys.skip.tr,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: fnTheme.ink,
                             fontWeight: FontWeight.w600,
@@ -101,7 +102,7 @@ class OnboardingView extends GetView<OnboardingController> {
                             elevation: 0,
                           ),
                           child: Text(
-                            currentPage == controller.pages.length - 1 ? 'Get started' : 'Next',
+                            currentPage == controller.pages.length - 1 ? TranslationKeys.getStarted.tr : TranslationKeys.next.tr,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
+import '../../../core/localization/translation_keys.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../route/app_routes.dart';
@@ -31,7 +32,7 @@ class AuthController extends BaseController {
     final password = passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      showError('Please fill all fields');
+      showError(TranslationKeys.pleaseFillAll.tr);
       return;
     }
 
@@ -47,9 +48,9 @@ class AuthController extends BaseController {
         );
         Get.offAllNamed(Routes.home);
       case Success():
-        showError('User data not found');
+        showError(TranslationKeys.userDataNotFound.tr);
       case Error(message: final msg):
-        showError(msg);
+        showError(msg.tr);
     }
   }
 }

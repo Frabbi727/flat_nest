@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/service/theme_service.dart';
+import '../../../core/service/localization_service.dart';
+import '../../../core/localization/translation_keys.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
@@ -18,6 +20,10 @@ class LoginView extends GetView<AuthController> {
         backgroundColor: AppColors.transparent,
         elevation: 0,
         actions: [
+          IconButton(
+            onPressed: () => Get.find<LocalizationService>().toggleLocale(),
+            icon: Icon(Icons.language, color: fnTheme.ink),
+          ),
           IconButton(
             onPressed: () => Get.find<ThemeService>().toggleTheme(),
             icon: Icon(Icons.brightness_4, color: fnTheme.ink),
@@ -74,13 +80,13 @@ class LoginView extends GetView<AuthController> {
     return Column(
       children: [
         Text(
-          'Welcome back',
+          TranslationKeys.welcomeBack.tr,
           style: AppTextStyles.h1.copyWith(color: theme.ink, fontSize: 28, letterSpacing: -0.5),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
         Text(
-          'Sign in to find or list your next flat.',
+          TranslationKeys.signInDesc.tr,
           style: AppTextStyles.bodyMedium.copyWith(color: theme.inkMid),
           textAlign: TextAlign.center,
         ),
@@ -93,7 +99,7 @@ class LoginView extends GetView<AuthController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Email',
+          TranslationKeys.email.tr,
           style: AppTextStyles.bodySmall.copyWith(color: theme.inkMid, fontWeight: FontWeight.w600, fontSize: 12),
         ),
         const SizedBox(height: 6),
@@ -112,14 +118,14 @@ class LoginView extends GetView<AuthController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Password',
+          TranslationKeys.password.tr,
           style: AppTextStyles.bodySmall.copyWith(color: theme.inkMid, fontWeight: FontWeight.w600, fontSize: 12),
         ),
         TextButton(
           onPressed: () {},
           style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Text(
-            'Forgot?',
+            TranslationKeys.forgotPassword.tr,
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 12),
           ),
         ),
@@ -136,7 +142,7 @@ class LoginView extends GetView<AuthController> {
             suffixIcon: TextButton(
               onPressed: controller.togglePassword,
               child: Text(
-                controller.showPassword.value ? 'Hide' : 'Show',
+                controller.showPassword.value ? TranslationKeys.hide.tr : TranslationKeys.show.tr,
                 style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 12),
               ),
             ),
@@ -157,7 +163,7 @@ class LoginView extends GetView<AuthController> {
               elevation: 0,
             ),
             child: Text(
-              'Sign in',
+              TranslationKeys.signIn.tr,
               style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600, color: AppColors.white),
             ),
           ));
@@ -172,7 +178,7 @@ class LoginView extends GetView<AuthController> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              'OR CONTINUE WITH',
+              TranslationKeys.orContinueWith.tr,
               style: AppTextStyles.caption.copyWith(color: theme.inkSoft, letterSpacing: 0.6, fontSize: 11),
             ),
           ),
@@ -214,14 +220,14 @@ class LoginView extends GetView<AuthController> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'New here? ',
+          TranslationKeys.newHere.tr,
           style: AppTextStyles.bodyMedium.copyWith(color: theme.inkMid, fontSize: 13),
         ),
         TextButton(
           onPressed: () {},
           style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Text(
-            'Create an account',
+            TranslationKeys.createAccount.tr,
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13),
           ),
         ),

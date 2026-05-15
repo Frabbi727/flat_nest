@@ -163,6 +163,25 @@ class LoginView extends GetView<AuthController> {
 
 ---
 
+## 🌍 Localization (Multi-Language)
+We support English (`en_US`) and Bangla (`bn_BD`) using a structured, type-safe approach.
+
+### Directory Structure:
+`lib/app/core/localization/`
+- `translation_keys.dart`: Contains static constants for all keys.
+- `en_us.dart`: English string map.
+- `bn_bd.dart`: Bangla string map.
+- `app_translations.dart`: Main GetX Translations class.
+
+### How to use:
+Always use `TranslationKeys` to access strings in your UI or Controllers.
+```dart
+Text(TranslationKeys.welcomeBack.tr)
+```
+This ensures you can easily navigate to the key definition and prevents typos.
+
+---
+
 ## 🎨 Theme & Styling
 - **Colors**: Use `AppColors` constants.
 - **Text Styles**: Use `AppTextStyles` or `Theme.of(context).textTheme`.
