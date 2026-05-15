@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 
-import '../modules/auth/binding/auth_binding.dart';
-import '../modules/auth/view/login_view.dart';
-import '../modules/home/binding/home_binding.dart';
-import '../modules/home/view/home_view.dart';
-import '../modules/splash/binding/splash_binding.dart';
-import '../modules/splash/view/splash_view.dart';
+import '../features/auth/binding/auth_binding.dart';
+import '../features/auth/view/login_view.dart';
+import '../features/home/binding/home_binding.dart';
+import '../features/home/view/home_view.dart';
+import '../features/splash/binding/splash_binding.dart';
+import '../features/splash/view/splash_view.dart';
 import 'app_routes.dart';
 
 class AppPages {

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/service/auth_service.dart';
@@ -10,18 +11,32 @@ class AuthController extends BaseController {
 
   AuthController({required AuthRepository authRepository}) : _authRepository = authRepository;
 
-  final email = ''.obs;
-  final password = ''.obs;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  
+  final showPassword = false.obs;
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.onClose();
+  }
+
+  void togglePassword() => showPassword.value = !showPassword.value;
 
   void login() async {
-    if (email.value.isEmpty || password.value.isEmpty) {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       showError('Please fill all fields');
       return;
     }
 
     try {
       showLoading();
-      final user = await _authRepository.login(email.value, password.value);
+      final user = await _authRepository.login(email, password);
       await _authService.login('fake_token_for_${user.id}');
       hideLoading();
       Get.offAllNamed(Routes.home);
