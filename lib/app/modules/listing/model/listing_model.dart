@@ -1,8 +1,35 @@
+import 'package:intl/intl.dart';
+import 'package:json_annotation/json_annotation.dart';
+import '../../../core/network/api_config.dart';
+
+part 'listing_model.g.dart';
+
+// ── Shared converters ─────────────────────────────────────────────────────────
+
+int _toInt(dynamic v) => (v as num?)?.toInt() ?? 0;
+int? _toNullableInt(dynamic v) => (v as num?)?.toInt();
+double? _toNullableDouble(dynamic v) => (v as num?)?.toDouble();
+String _createdAtFromJson(dynamic v) => v as String? ?? '';
+
+// readValue helpers — receive the whole map so we can read sibling keys
+dynamic _typeReadValue(Map json, String key) =>
+    json['type'] ?? (json['listing_type'] as Map?)?['name'] ?? '';
+
+dynamic _statusReadValue(Map json, String key) => json['status'] ?? 'draft';
+
+dynamic _statusLabelReadValue(Map json, String key) =>
+    json['status_label'] ?? json['status'] ?? 'Draft';
+
+// ── AmenityModel ──────────────────────────────────────────────────────────────
+
+@JsonSerializable()
 class AmenityModel {
   final int id;
   final String name;
   final String label;
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   const AmenityModel({
@@ -13,45 +40,49 @@ class AmenityModel {
     this.updatedAt,
   });
 
-  factory AmenityModel.fromJson(Map<String, dynamic> json) => AmenityModel(
-        id: (json['id'] as num).toInt(),
-        name: json['name'] as String,
-        label: json['label'] as String,
-        createdAt: json['created_at'] == null
-            ? null
-            : DateTime.parse(json['created_at'] as String),
-        updatedAt: json['updated_at'] == null
-            ? null
-            : DateTime.parse(json['updated_at'] as String),
-      );
+  factory AmenityModel.fromJson(Map<String, dynamic> json) =>
+      _$AmenityModelFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'label': label,
-        'created_at': createdAt?.toIso8601String(),
-        'updated_at': updatedAt?.toIso8601String(),
-      };
+  Map<String, dynamic> toJson() => _$AmenityModelToJson(this);
 }
 
+// ── ListingPhotoModel ─────────────────────────────────────────────────────────
+
+@JsonSerializable()
 class ListingPhotoModel {
   final String id;
   final String url;
   final int position;
 
-  const ListingPhotoModel({required this.id, required this.url, required this.position});
+  const ListingPhotoModel({
+    required this.id,
+    required this.url,
+    required this.position,
+  });
 
-  factory ListingPhotoModel.fromJson(Map<String, dynamic> json) => ListingPhotoModel(
-        id: json['id'] as String,
-        url: json['url'] as String,
-        position: json['position'] as int,
-      );
+  factory ListingPhotoModel.fromJson(Map<String, dynamic> json) {
+    final raw = json['url'] as String;
+    // Resolve relative paths like /storage/... to a full URL
+    final resolvedUrl =
+        raw.startsWith('/') ? '${ApiConfig.storageBaseUrl}$raw' : raw;
+    return ListingPhotoModel(
+      id: json['id'] as String,
+      url: resolvedUrl,
+      position: (json['position'] as num).toInt(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => _$ListingPhotoModelToJson(this);
 }
 
+// ── ListingOwnerModel ─────────────────────────────────────────────────────────
+
+@JsonSerializable()
 class ListingOwnerModel {
   final String id;
   final String name;
   final String? phone;
+  @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
 
   const ListingOwnerModel({
@@ -61,12 +92,10 @@ class ListingOwnerModel {
     this.avatarUrl,
   });
 
-  factory ListingOwnerModel.fromJson(Map<String, dynamic> json) => ListingOwnerModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        phone: json['phone'] as String?,
-        avatarUrl: json['avatar_url'] as String?,
-      );
+  factory ListingOwnerModel.fromJson(Map<String, dynamic> json) =>
+      _$ListingOwnerModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ListingOwnerModelToJson(this);
 
   String get initials {
     final parts = name.trim().split(' ');
@@ -75,26 +104,45 @@ class ListingOwnerModel {
   }
 }
 
+// ── ListingModel ──────────────────────────────────────────────────────────────
+
+@JsonSerializable(explicitToJson: true)
 class ListingModel {
   final String id;
   final String title;
   final String? area;
+  @JsonKey(name: 'road_and_house')
   final String? roadAndHouse;
+  // API may return 'type' as a plain string or as a nested listing_type object
+  @JsonKey(readValue: _typeReadValue)
   final String type;
+  @JsonKey(fromJson: _toInt)
   final int price;
+  @JsonKey(fromJson: _toNullableInt)
   final int? deposit;
+  @JsonKey(fromJson: _toNullableInt)
   final int? beds;
+  @JsonKey(fromJson: _toNullableInt)
   final int? baths;
+  @JsonKey(fromJson: _toNullableInt)
   final int? size;
   final String? description;
+  @JsonKey(readValue: _statusReadValue)
   final String status;
+  @JsonKey(name: 'status_label', readValue: _statusLabelReadValue)
   final String statusLabel;
+  @JsonKey(fromJson: _toInt)
   final int views;
+  @JsonKey(name: 'coord_x', fromJson: _toNullableDouble)
   final double? coordX;
+  @JsonKey(name: 'coord_y', fromJson: _toNullableDouble)
   final double? coordY;
+  @JsonKey(defaultValue: [])
   final List<AmenityModel> amenities;
   final ListingOwnerModel? owner;
+  @JsonKey(defaultValue: [])
   final List<ListingPhotoModel> photos;
+  @JsonKey(name: 'created_at', fromJson: _createdAtFromJson)
   final String createdAt;
 
   const ListingModel({
@@ -120,60 +168,37 @@ class ListingModel {
     required this.createdAt,
   });
 
-  factory ListingModel.fromJson(Map<String, dynamic> json) => ListingModel(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        area: json['area'] as String?,
-        roadAndHouse: json['road_and_house'] as String?,
-        type: json['type'] as String,
-        price: json['price'] as int,
-        deposit: json['deposit'] as int?,
-        beds: json['beds'] as int?,
-        baths: json['baths'] as int?,
-        size: json['size'] as int?,
-        description: json['description'] as String?,
-        status: json['status'] as String,
-        statusLabel: json['status_label'] as String? ?? json['status'] as String,
-        views: json['views'] as int? ?? 0,
-        coordX: (json['coord_x'] as num?)?.toDouble(),
-        coordY: (json['coord_y'] as num?)?.toDouble(),
-        amenities: (json['amenities'] as List<dynamic>?)
-                ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [],
-        owner: json['owner'] != null
-            ? ListingOwnerModel.fromJson(json['owner'] as Map<String, dynamic>)
-            : null,
-        photos: (json['photos'] as List<dynamic>?)
-                ?.map((e) => ListingPhotoModel.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            [],
-        createdAt: json['created_at'] as String,
-      );
+  factory ListingModel.fromJson(Map<String, dynamic> json) =>
+      _$ListingModelFromJson(json);
 
-  String get priceFormatted => '৳${_formatNumber(price)}';
-  String get depositFormatted => deposit != null ? '৳${_formatNumber(deposit!)}' : 'N/A';
+  Map<String, dynamic> toJson() => _$ListingModelToJson(this);
 
-  static String _formatNumber(int n) {
-    if (n >= 100000) return '${(n / 100000).toStringAsFixed(1)}L';
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(0)}k';
-    return n.toString();
-  }
+  static final _amountFmt = NumberFormat('#,##0.00');
+
+  String get priceFormatted => '৳${_amountFmt.format(price)}';
+  String get depositFormatted =>
+      deposit != null ? '৳${_amountFmt.format(deposit!)}' : 'N/A';
 
   String? get thumbnailUrl => photos.isNotEmpty
       ? photos.reduce((a, b) => a.position < b.position ? a : b).url
       : null;
 }
 
+// ── OwnerListingModel ─────────────────────────────────────────────────────────
+
+@JsonSerializable(explicitToJson: true)
 class OwnerListingModel extends ListingModel {
+  @JsonKey(fromJson: _toInt)
   final int inquiries;
 
   const OwnerListingModel({
     required super.id,
     required super.title,
     super.area,
+    super.roadAndHouse,
     required super.type,
     required super.price,
+    super.deposit,
     super.beds,
     super.baths,
     super.size,
@@ -181,31 +206,18 @@ class OwnerListingModel extends ListingModel {
     required super.status,
     required super.statusLabel,
     super.views = 0,
+    super.coordX,
+    super.coordY,
     super.amenities = const [],
+    super.owner,
     super.photos = const [],
     required super.createdAt,
     this.inquiries = 0,
   });
 
-  factory OwnerListingModel.fromJson(Map<String, dynamic> json) {
-    final base = ListingModel.fromJson(json);
-    return OwnerListingModel(
-      id: base.id,
-      title: base.title,
-      area: base.area,
-      type: base.type,
-      price: base.price,
-      beds: base.beds,
-      baths: base.baths,
-      size: base.size,
-      description: base.description,
-      status: base.status,
-      statusLabel: base.statusLabel,
-      views: base.views,
-      amenities: base.amenities,
-      photos: base.photos,
-      createdAt: base.createdAt,
-      inquiries: json['inquiries'] as int? ?? 0,
-    );
-  }
+  factory OwnerListingModel.fromJson(Map<String, dynamic> json) =>
+      _$OwnerListingModelFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$OwnerListingModelToJson(this);
 }

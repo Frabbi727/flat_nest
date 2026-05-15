@@ -1,0 +1,120 @@
+Backend done. Now here's the complete updated API doc for your mobile app:
+
+  ---
+  Complete Status Flow (Option B — Strict Re-review)
+
+  [Draft]
+    └─ POST /listings/{id}/submit ──────────→ [Pending]
+
+  [Pending]
+    ├─ Admin approves ───────────────────────→ [Active]
+    └─ Admin rejects (with reason) ──────────→ [Rejected]
+
+  [Rejected]
+    └─ POST /listings/{id}/submit (again) ───→ [Pending]  ← rejection_reason cleared
+
+  [Active]
+    ├─ Owner edits anything ─────────────────→ [Pending]  ← auto re-review, notification sent
+    └─ POST /listings/{id}/mark-rented ──────→ [Rented]
+
+  [Rented]
+    └─ (terminal — no further transitions)
+
+  ---
+  Owner App — Screen-by-screen behavior
+
+  My Listings screen (GET /owner/listings)
+
+  Show all listings regardless of status. Use status + status_label to render the badge.
+
+  ┌──────────┬─────────────┬────────────────┬──────────────────────────┐
+  │  status  │ Badge color │   Badge text   │      Actions shown       │
+  ├──────────┼─────────────┼────────────────┼──────────────────────────┤
+  │ draft    │ Grey        │ Draft          │ "Continue"               │
+  ├──────────┼─────────────┼────────────────┼──────────────────────────┤
+  │ pending  │ Yellow      │ Pending Review │ None (locked)            │
+  ├──────────┼─────────────┼────────────────┼──────────────────────────┤
+  │ active   │ Green       │ Active         │ "Edit", "Mark as Rented" │
+  ├──────────┼─────────────┼────────────────┼──────────────────────────┤
+  │ rejected │ Red         │ Rejected       │ "Fix & Resubmit"         │
+  ├──────────┼─────────────┼────────────────┼──────────────────────────┤
+  │ rented   │ Blue        │ Rented         │ None                     │
+  └──────────┴─────────────┴────────────────┴──────────────────────────┘
+
+  ---
+  Draft listing detail
+
+  GET /listings/{id}   ← use this for preview
+  Show a "Continue your listing" banner at the top with step indicators:
+  - Step 2: Photos — photos.length > 0 ? ✓ : ✗
+  - Step 3: Location — area != null ? ✓ : ✗
+
+  "Continue" button takes owner to first incomplete step.
+
+  ---
+  Pending listing detail
+
+  Show a read-only view with:
+
+  ▎ "⏳ Your listing is under review. You'll be notified once it's approved."
+
+  No edit or delete buttons. Lock the form.
+
+  ---
+  Active listing detail
+
+  Show full listing with two action buttons:
+
+  Edit Listing → opens edit form
+  - PATCH /api/v1/listings/{id} — details/amenities
+  - POST /api/v1/listings/{id}/photos — add more photos
+  - PATCH /api/v1/listings/{id}/location — update location
+
+  ▎ ⚠️ Important UX: Before the owner saves any edit, show a warning dialog:
+  ▎ "Saving changes will temporarily hide your listing until it's re-approved by admin. Continue?"
+
+  After saving → API returns listing with status: "pending" → update UI to show Pending state + toast: "Your listing has been sent for re-approval."
+
+  Mark as Rented → confirmation dialog → POST /api/v1/listings/{id}/mark-rented
+
+  ---
+  Rejected listing detail
+
+  Show the rejection reason in a prominent red card:
+  Admin note:
+  "Your photos are too dark. Please upload brighter, clearer images."
+  Show an "Edit & Resubmit" button. Owner fixes the issue (same edit endpoints), then:
+  POST /api/v1/listings/{id}/submit
+  Response: status: "pending" → show Pending state.
+
+  ---
+  Rented listing
+
+  Read-only. Show in a "Past / Rented" section. No actions.
+  Active chats on this listing remain open — let owner and renter finish their conversation.
+
+  ---
+  Renter App — What changes
+
+  GET /listings          ← only Active listings appear (backend enforces this)
+  GET /listings/{id}     ← if listing becomes Rented/Pending, return 404 or show "unavailable"
+
+  Wishlist behavior:
+  - Owner edits active listing → it goes Pending → renter's saved listing shows "Under Review" badge, greyed out
+  - Owner marks rented → show "Rented Out" badge, greyed out
+  - In both cases, disable the "Message Owner" button with: "This flat is not currently available"
+
+  ---
+  Notifications the owner receives
+
+  ┌────────────────────────────┬────────────────────────────────────┬────────────────────────────────────────────────────────────────────┐
+  │          Trigger           │               Title                │                                Body                                │
+  ├────────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────────────────────────┤
+  │ Admin approves             │ "Your listing was approved! 🎉"    │ "{title} is now live."                                             │
+  ├────────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────────────────────────┤
+  │ Admin rejects              │ "Your listing was rejected."       │ Admin's typed reason                                               │
+  ├────────────────────────────┼────────────────────────────────────┼────────────────────────────────────────────────────────────────────┤
+  │ Owner edits active listing │ "Your listing is under re-review." │ "You edited '{title}'. It's temporarily hidden until re-approved." │
+  └────────────────────────────┴────────────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+
+  All notifications: kind = "listing", reference_id = listing_id → tap opens that listing in the app.

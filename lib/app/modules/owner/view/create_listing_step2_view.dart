@@ -35,7 +35,7 @@ class CreateListingStep2View extends GetView<CreateListingController> {
           ),
           const SizedBox(height: 16),
           Obx(() {
-            final photos = controller.photos;
+            final count = controller.photos.length;
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -47,10 +47,10 @@ class CreateListingStep2View extends GetView<CreateListingController> {
                 childAspectRatio: 1,
               ),
               itemBuilder: (context, i) {
-                if (i < photos.length) {
+                if (i < count) {
                   return _PhotoSlot(
                     t: t,
-                    file: photos[i],
+                    file: controller.photos[i],
                     isCover: i == 0,
                     onRemove: () => controller.removePhoto(i),
                   );

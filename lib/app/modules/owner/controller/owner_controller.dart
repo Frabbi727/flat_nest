@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
@@ -6,7 +7,7 @@ import '../../../route/app_routes.dart';
 import '../../listing/model/listing_model.dart';
 import '../repository/owner_repository.dart';
 
-class OwnerController extends BaseController {
+class OwnerController extends BaseController with WidgetsBindingObserver {
   final OwnerRepository _ownerRepository;
   final AuthService _authService = Get.find<AuthService>();
 
@@ -19,10 +20,29 @@ class OwnerController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     fetchMyListings();
+    // Refresh when user switches to Dashboard (0) or Listings (1)
+    ever(activeTab, (tab) {
+      if (tab == 0 || tab == 1) fetchMyListings();
+    });
   }
 
-  String get ownerName => (_authService.currentUser?.name ?? 'Owner').split(' ').first;
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  // Called by the OS when app returns from background
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) fetchMyListings();
+  }
+
+  String get ownerName =>
+      (_authService.currentUser?.name ?? 'Owner').split(' ').first;
+
   String get ownerInitials {
     final name = _authService.currentUser?.name ?? 'O';
     final parts = name.trim().split(' ');
@@ -49,13 +69,14 @@ class OwnerController extends BaseController {
     }
   }
 
-  void goToCreateListing() => Get.toNamed(Routes.createListing);
-
-  void openListing(OwnerListingModel listing) {
-    // Navigate to owner listing detail/edit
+  Future<void> goToCreateListing() async {
+    await Get.toNamed(Routes.createListing);
+    fetchMyListings();
   }
 
-  void logout() async {
+  void openListing(OwnerListingModel listing) {}
+
+  Future<void> logout() async {
     await _authService.logout();
     Get.offAllNamed(Routes.login);
   }

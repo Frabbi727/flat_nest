@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/owner_controller.dart';
 import '../../listing/model/listing_model.dart';
@@ -139,6 +140,8 @@ class _DashboardTab extends GetView<OwnerController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (controller.isLoading) return _DashboardShimmer(t: t);
+
       final kpis = [
         _KPI(label: 'Active listings', value: '${controller.activeCount}', delta: 'this month', kind: 'primary'),
         _KPI(label: 'Total views', value: _fmt(controller.totalViews), delta: '7 days', kind: 'success'),
@@ -313,6 +316,109 @@ class _Header extends GetView<OwnerController> {
   }
 }
 
+// ── Dashboard shimmer ─────────────────────────────────────────────────────────
+
+class _DashboardShimmer extends StatelessWidget {
+  final FlatNestTheme t;
+  const _DashboardShimmer({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: t.borderSoft,
+      highlightColor: t.surface,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header skeleton
+            Container(
+              height: 180,
+              width: double.infinity,
+              color: t.borderSoft,
+            ),
+            const SizedBox(height: 20),
+
+            // KPI grid skeleton
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.35,
+                children: List.generate(
+                  4,
+                  (_) => Container(
+                    decoration: BoxDecoration(
+                      color: t.borderSoft,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Button skeleton
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _SBox(t: t, w: double.infinity, h: 48, radius: 12),
+            ),
+            const SizedBox(height: 24),
+
+            // Section title skeleton
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _SBox(t: t, w: 120, h: 14),
+            ),
+            const SizedBox(height: 12),
+
+            // Listing row skeletons
+            ...List.generate(
+              3,
+              (_) => Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: Container(
+                  height: 88,
+                  decoration: BoxDecoration(
+                    color: t.borderSoft,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SBox extends StatelessWidget {
+  final FlatNestTheme t;
+  final double w;
+  final double h;
+  final double radius;
+
+  const _SBox({required this.t, required this.w, required this.h, this.radius = 6});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: w == double.infinity ? null : w,
+      height: h,
+      decoration: BoxDecoration(
+        color: t.borderSoft,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+}
+
 class _KPI {
   final String label;
   final String value;
@@ -374,6 +480,12 @@ class _KPICard extends StatelessWidget {
   }
 }
 
+Widget _imgPlaceholder(FlatNestTheme t) => Container(
+      color: t.primarySoft,
+      child: Icon(Icons.home_work_rounded,
+          color: t.primary.withValues(alpha: 0.4), size: 28),
+    );
+
 class _ListingRow extends StatelessWidget {
   final FlatNestTheme t;
   final OwnerListingModel listing;
@@ -407,11 +519,15 @@ class _ListingRow extends StatelessWidget {
               width: 64,
               height: 64,
               child: listing.thumbnailUrl != null
-                  ? Image.network(listing.thumbnailUrl!, fit: BoxFit.cover)
-                  : Container(
-                      color: t.primarySoft,
-                      child: Icon(Icons.home_work_rounded, color: t.primary.withValues(alpha: 0.4), size: 28),
-                    ),
+                  ? Image.network(
+                      listing.thumbnailUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _imgPlaceholder(t),
+                      loadingBuilder: (_, child, progress) => progress == null
+                          ? child
+                          : _imgPlaceholder(t),
+                    )
+                  : _imgPlaceholder(t),
             ),
           ),
           const SizedBox(width: 12),
