@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'api_config.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/error_interceptor.dart';
+import 'interceptors/logging_interceptor.dart';
 
 class ApiClient {
   late Dio _dio;
@@ -26,14 +27,7 @@ class ApiClient {
       ErrorInterceptor(),
       // AuthInterceptor is added last so it's called first in the onError chain (to handle retries)
       AuthInterceptor(),
-      if (kDebugMode)
-        LogInterceptor(
-          requestHeader: true,
-          requestBody: true,
-          responseHeader: false,
-          responseBody: true,
-          error: true,
-        ),
+      if (kDebugMode) LoggingInterceptor(),
     ]);
   }
 
