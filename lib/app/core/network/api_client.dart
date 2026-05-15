@@ -39,8 +39,8 @@ class ApiClient {
   }
 
   // GET request
-  Future<Response> get(
-    String path, {
+  Future<Response> get({
+    required String path,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -54,8 +54,8 @@ class ApiClient {
   }
 
   // POST request
-  Future<Response> post(
-    String path, {
+  Future<Response> post({
+    required String path,
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -71,8 +71,8 @@ class ApiClient {
   }
 
   // PUT request
-  Future<Response> put(
-    String path, {
+  Future<Response> put({
+    required String path,
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -88,8 +88,8 @@ class ApiClient {
   }
 
   // PATCH request
-  Future<Response> patch(
-    String path, {
+  Future<Response> patch({
+    required String path,
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -105,8 +105,8 @@ class ApiClient {
   }
 
   // DELETE request
-  Future<Response> delete(
-    String path, {
+  Future<Response> delete({
+    required String path,
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -122,8 +122,8 @@ class ApiClient {
   }
 
   // Multipart POST request (for file uploads)
-  Future<Response> postMultipart(
-    String path, {
+  Future<Response> postMultipart({
+    required String path,
     required FormData formData,
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -134,7 +134,8 @@ class ApiClient {
       path,
       data: formData,
       queryParameters: queryParameters,
-      options: options?.copyWith(contentType: 'multipart/form-data') ??
+      options:
+          options?.copyWith(contentType: 'multipart/form-data') ??
           Options(contentType: 'multipart/form-data'),
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

@@ -1,3 +1,5 @@
+import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
+
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 import '../model/user_model.dart';
@@ -8,7 +10,7 @@ class AuthRepository extends BaseRepository {
   Future<Resource<AuthResponse>> login(String email, String password) async {
     try {
       final response = await apiClient.post(
-        '/auth/login',
+        path: ApiEndpoints.login,
         data: {'email': email, 'password': password},
       );
       return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 200);
@@ -25,7 +27,7 @@ class AuthRepository extends BaseRepository {
   }) async {
     try {
       final response = await apiClient.post(
-        '/auth/register',
+        path: ApiEndpoints.register,
         data: {
           'name': name,
           'email': email,
@@ -45,7 +47,7 @@ class AuthRepository extends BaseRepository {
   }) async {
     try {
       final response = await apiClient.patch(
-        '/auth/register/details',
+        path: ApiEndpoints.registerDetails,
         data: {'role': role, 'date_of_birth': dateOfBirth},
       );
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
@@ -56,7 +58,7 @@ class AuthRepository extends BaseRepository {
 
   Future<Resource<Map<String, dynamic>>> logout() async {
     try {
-      final response = await apiClient.post('/auth/logout');
+      final response = await apiClient.post(path: ApiEndpoints.logout);
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);

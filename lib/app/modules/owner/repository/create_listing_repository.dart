@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 
@@ -30,7 +31,7 @@ class CreateListingRepository extends BaseRepository {
       if (description != null) body['description'] = description;
       if (amenities != null) body['amenities'] = amenities;
 
-      final response = await apiClient.post('/listings', data: body);
+      final response = await apiClient.post(path: ApiEndpoints.listings, data: body);
       return Success(
         data: response.data as Map<String, dynamic>,
         statusCode: response.statusCode ?? 201,
@@ -57,7 +58,7 @@ class CreateListingRepository extends BaseRepository {
           ),
         );
       }
-      await apiClient.post('/listings/$listingId/photos', data: formData);
+      await apiClient.post(path: ApiEndpoints.listingPhotos(listingId), data: formData);
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
@@ -73,7 +74,7 @@ class CreateListingRepository extends BaseRepository {
       final body = <String, dynamic>{'area': area};
       if (roadAndHouse != null) body['road_and_house'] = roadAndHouse;
 
-      await apiClient.patch('/listings/$listingId/location', data: body);
+      await apiClient.patch(path: ApiEndpoints.listingLocation(listingId), data: body);
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
@@ -82,7 +83,7 @@ class CreateListingRepository extends BaseRepository {
 
   Future<Resource<void>> submitListing({required String listingId}) async {
     try {
-      await apiClient.post('/listings/$listingId/submit', data: {});
+      await apiClient.post(path: ApiEndpoints.listingSubmit(listingId), data: {});
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);

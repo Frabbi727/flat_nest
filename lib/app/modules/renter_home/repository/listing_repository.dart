@@ -1,3 +1,5 @@
+import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
+
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 import '../../listing/model/listing_model.dart';
@@ -19,7 +21,7 @@ class ListingRepository extends BaseRepository {
       }
 
       final response = await apiClient.get(
-        '/listings',
+        path: ApiEndpoints.listings,
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
 
@@ -35,7 +37,7 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<ListingModel>> getListingDetail(String id) async {
     try {
-      final response = await apiClient.get('/listings/$id');
+      final response = await apiClient.get(path: ApiEndpoints.listing(id));
       final listing = ListingModel.fromJson(
           response.data['data'] as Map<String, dynamic>);
       return Success(data: listing, statusCode: response.statusCode ?? 200);
@@ -46,7 +48,7 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<List<String>>> getWishlist() async {
     try {
-      final response = await apiClient.get('/wishlist');
+      final response = await apiClient.get(path: ApiEndpoints.wishlist);
       final ids = (response.data['saved_ids'] as List<dynamic>)
           .map((e) => e as String)
           .toList();
@@ -58,7 +60,7 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<void>> saveToWishlist(String listingId) async {
     try {
-      await apiClient.post('/wishlist/$listingId');
+      await apiClient.post(path: ApiEndpoints.wishlistItem(listingId));
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
@@ -67,7 +69,7 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<void>> removeFromWishlist(String listingId) async {
     try {
-      await apiClient.delete('/wishlist/$listingId');
+      await apiClient.delete(path: ApiEndpoints.listing(listingId));
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
@@ -76,7 +78,7 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<List<AmenityModel>>> getAmenities() async {
     try {
-      final response = await apiClient.get('/amenities');
+      final response = await apiClient.get(path: ApiEndpoints.amenities);
       final data = (response.data as List<dynamic>)
           .map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
           .toList();

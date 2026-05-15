@@ -1,3 +1,5 @@
+import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
+
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 import '../model/chat_model.dart';
@@ -7,7 +9,7 @@ class ChatRepository extends BaseRepository {
 
   Future<Resource<List<ChatModel>>> getChats() async {
     try {
-      final response = await apiClient.get('/chats');
+      final response = await apiClient.get(path: ApiEndpoints.chats);
       final data = (response.data['data'] as List<dynamic>)
           .map((e) => ChatModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -22,7 +24,7 @@ class ChatRepository extends BaseRepository {
     required String initialMessage,
   }) async {
     try {
-      final response = await apiClient.post('/chats', data: {
+      final response = await apiClient.post(path: ApiEndpoints.chats, data: {
         'listing_id': listingId,
         'initial_message': initialMessage,
       });
@@ -34,7 +36,7 @@ class ChatRepository extends BaseRepository {
 
   Future<Resource<List<ChatMessageModel>>> getMessages(String chatId) async {
     try {
-      final response = await apiClient.get('/chats/$chatId/messages');
+      final response = await apiClient.get(path: ApiEndpoints.chatMessages(chatId));
       final data = (response.data['messages'] as List<dynamic>)
           .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -46,7 +48,7 @@ class ChatRepository extends BaseRepository {
 
   Future<Resource<ChatMessageModel>> sendMessage(String chatId, String text) async {
     try {
-      final response = await apiClient.post('/chats/$chatId/messages', data: {'text': text});
+      final response = await apiClient.post(path: ApiEndpoints.chatMessages(chatId), data: {'text': text});
       return Success(
         data: ChatMessageModel.fromJson(response.data as Map<String, dynamic>),
         statusCode: response.statusCode ?? 201,

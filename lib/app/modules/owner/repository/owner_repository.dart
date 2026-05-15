@@ -1,3 +1,5 @@
+import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
+
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 import '../../listing/model/listing_model.dart';
@@ -7,7 +9,7 @@ class OwnerRepository extends BaseRepository {
 
   Future<Resource<List<OwnerListingModel>>> getMyListings() async {
     try {
-      final response = await apiClient.get('/owner/listings');
+      final response = await apiClient.get(path: ApiEndpoints.ownerListings);
       final data = (response.data['data'] as List<dynamic>)
           .map((e) => OwnerListingModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -41,7 +43,7 @@ class OwnerRepository extends BaseRepository {
       if (description != null) body['description'] = description;
       if (amenities != null) body['amenities'] = amenities;
 
-      final response = await apiClient.post('/listings', data: body);
+      final response = await apiClient.post(path: ApiEndpoints.listings, data: body);
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 201);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
@@ -50,7 +52,7 @@ class OwnerRepository extends BaseRepository {
 
   Future<Resource<void>> deleteListing(String id) async {
     try {
-      await apiClient.delete('/listings/$id');
+      await apiClient.delete(path: ApiEndpoints.listing(id));
       return const Success(data: null, statusCode: 200);
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
