@@ -20,8 +20,13 @@ class RegisterController extends BaseController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final phoneController = TextEditingController();
   final showPassword = false.obs;
+  final showConfirmPassword = false.obs;
+
+  // Bumped by text-controller listeners so Obx re-renders on every keystroke
+  final formTick = 0.obs;
 
   // Step 2 — Role + DOB
   final selectedRole = RxnString();
@@ -32,12 +37,23 @@ class RegisterController extends BaseController {
   // Step 3 — Avatar (path chosen on device)
   final avatarPath = RxnString();
 
+  void _tick() => formTick.value++;
+
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null && args['step'] != null) {
       currentStep.value = (args['step'] as int) - 1;
+    }
+    for (final c in [
+      nameController,
+      emailController,
+      passwordController,
+      confirmPasswordController,
+      phoneController,
+    ]) {
+      c.addListener(_tick);
     }
   }
 
@@ -46,11 +62,13 @@ class RegisterController extends BaseController {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     phoneController.dispose();
     super.onClose();
   }
 
   void togglePassword() => showPassword.value = !showPassword.value;
+  void toggleConfirmPassword() => showConfirmPassword.value = !showConfirmPassword.value;
 
   void goBack() {
     if (currentStep.value == 0) {
@@ -65,9 +83,10 @@ class RegisterController extends BaseController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final confirm = confirmPasswordController.text;
     final phone = phoneController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || phone.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty || phone.isEmpty) {
       showError('Please fill all fields');
       return;
     }
@@ -79,6 +98,10 @@ class RegisterController extends BaseController {
     }
     if (password.length < 8) {
       showError('Password must be at least 8 characters');
+      return;
+    }
+    if (password != confirm) {
+      showError('Passwords do not match');
       return;
     }
 
@@ -170,10 +193,12 @@ class RegisterController extends BaseController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final confirm = confirmPasswordController.text;
     final phone = phoneController.text.trim();
     return name.split(' ').where((w) => w.isNotEmpty).length >= 2 &&
         GetUtils.isEmail(email) &&
         password.length >= 8 &&
-        phone.length >= 9;
+        password == confirm &&
+        phone.replaceAll(RegExp(r'\D'), '').length >= 9;
   }
 }

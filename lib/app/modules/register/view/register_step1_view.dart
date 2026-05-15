@@ -19,17 +19,27 @@ class RegisterStep1View extends GetView<RegisterController> {
       title: 'Create your account',
       subtitle: 'A few details and you\'re in. We\'ll never share your information.',
       child: Obx(() {
-        final pwStrength = controller.passwordStrength;
-        final pwColors = [t.error, t.error, t.warning, t.primary, t.success];
-        final pwLabels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
+        // Touch formTick so Obx re-renders on every keystroke,
+        // and showPassword / showConfirmPassword for toggle reactivity.
+        controller.formTick.value;
+        final showPw = controller.showPassword.value;
+        final showConfirmPw = controller.showConfirmPassword.value;
+
         final name = controller.nameController.text;
         final email = controller.emailController.text;
         final password = controller.passwordController.text;
+        final confirm = controller.confirmPasswordController.text;
         final phone = controller.phoneController.text;
+
+        final pwStrength = controller.passwordStrength;
+        final pwColors = [t.error, t.error, t.warning, t.primary, t.success];
+        final pwLabels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
 
         bool nameOk = name.split(' ').where((w) => w.isNotEmpty).length >= 2;
         bool emailOk = GetUtils.isEmail(email);
         bool passOk = password.length >= 8;
+        bool confirmOk = confirm.isNotEmpty && confirm == password;
+        bool confirmMismatch = confirm.isNotEmpty && confirm != password;
         bool phoneOk = phone.replaceAll(RegExp(r'\D'), '').length >= 9;
 
         FieldState stateFor(bool ok, String val) {
@@ -41,6 +51,7 @@ class RegisterStep1View extends GetView<RegisterController> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 24),
+
             // Full name
             FNField(
               t: t,
@@ -54,6 +65,7 @@ class RegisterStep1View extends GetView<RegisterController> {
               leadingIcon: Icons.person_outline,
             ),
             const SizedBox(height: 16),
+
             // Email
             FNField(
               t: t,
@@ -68,13 +80,14 @@ class RegisterStep1View extends GetView<RegisterController> {
               leadingIcon: Icons.mail_outline,
             ),
             const SizedBox(height: 16),
+
             // Password
             FNField(
               t: t,
               label: 'Password',
               placeholder: 'At least 8 characters',
               controller: controller.passwordController,
-              obscureText: !controller.showPassword.value,
+              obscureText: !showPw,
               state: stateFor(passOk, password),
               leadingIcon: Icons.lock_outline,
               trailing: TextButton(
@@ -85,7 +98,7 @@ class RegisterStep1View extends GetView<RegisterController> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  controller.showPassword.value ? 'Hide' : 'Show',
+                  showPw ? 'Hide' : 'Show',
                   style: TextStyle(
                     color: t.primary,
                     fontWeight: FontWeight.w600,
@@ -94,6 +107,8 @@ class RegisterStep1View extends GetView<RegisterController> {
                 ),
               ),
             ),
+
+            // Strength meter (shown when password is not empty)
             if (password.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
@@ -122,14 +137,47 @@ class RegisterStep1View extends GetView<RegisterController> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color:
-                          pwStrength >= 3 ? t.success : t.inkMid,
+                      color: pwStrength >= 3 ? t.success : t.inkMid,
                     ),
                   ),
                 ],
               ),
             ],
             const SizedBox(height: 16),
+
+            // Confirm password
+            FNField(
+              t: t,
+              label: 'Re-enter password',
+              placeholder: 'Repeat your password',
+              controller: controller.confirmPasswordController,
+              obscureText: !showConfirmPw,
+              state: confirm.isEmpty
+                  ? FieldState.idle
+                  : confirmOk
+                      ? FieldState.valid
+                      : FieldState.error,
+              error: confirmMismatch ? 'Passwords do not match.' : null,
+              leadingIcon: Icons.lock_outline,
+              trailing: TextButton(
+                onPressed: controller.toggleConfirmPassword,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  showConfirmPw ? 'Hide' : 'Show',
+                  style: TextStyle(
+                    color: t.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Phone
             FNField(
               t: t,
@@ -142,11 +190,13 @@ class RegisterStep1View extends GetView<RegisterController> {
               hint: "We'll verify this number.",
             ),
             const SizedBox(height: 12),
+
             Text(
               "By continuing, you agree to FlatNest's Terms and Privacy Policy.",
               style: TextStyle(fontSize: 12, color: t.inkSoft, height: 1.5),
             ),
             const SizedBox(height: 24),
+
             _ContinueButton(
               t: t,
               enabled: controller.step1Valid,
@@ -154,6 +204,7 @@ class RegisterStep1View extends GetView<RegisterController> {
               onTap: controller.submitStep1,
             ),
             const SizedBox(height: 12),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -199,7 +250,8 @@ class _ContinueButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (enabled && !loading) ? onTap : null,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         height: 54,
         decoration: BoxDecoration(
           color: enabled ? t.primary : t.bgAlt,
