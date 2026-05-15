@@ -109,4 +109,24 @@ class ApiClient {
       cancelToken: cancelToken,
     );
   }
+
+  // Multipart POST request (for file uploads)
+  Future<Response> postMultipart(
+    String path, {
+    required FormData formData,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+    void Function(int, int)? onSendProgress,
+  }) async {
+    return await _dio.post(
+      path,
+      data: formData,
+      queryParameters: queryParameters,
+      options: options?.copyWith(contentType: 'multipart/form-data') ??
+          Options(contentType: 'multipart/form-data'),
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+    );
+  }
 }

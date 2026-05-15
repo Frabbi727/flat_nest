@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' as get_x;
+import 'package:get/get.dart';
 import '../../service/auth_service.dart';
 import '../api_client.dart';
 
 class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final authService = get_x.Get.find<AuthService>();
+    final authService = Get.find<AuthService>();
     final token = authService.token;
 
     if (token != null) {
@@ -20,7 +20,7 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Check if error is 401 (Unauthorized)
     if (err.response?.statusCode == 401) {
-      final authService = get_x.Get.find<AuthService>();
+      final authService = Get.find<AuthService>();
       
       // Attempt to refresh the token
       final isRefreshed = await authService.refreshAuthToken();
@@ -32,7 +32,7 @@ class AuthInterceptor extends Interceptor {
         
         try {
           // Get the ApiClient's Dio instance to retry
-          final dio = get_x.Get.find<ApiClient>().dio;
+          final dio = Get.find<ApiClient>().dio;
           final response = await dio.fetch(options);
           return handler.resolve(response);
         } catch (e) {
