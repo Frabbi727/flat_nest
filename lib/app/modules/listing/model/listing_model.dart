@@ -113,6 +113,14 @@ class ListingModel {
   final String? area;
   @JsonKey(name: 'road_and_house')
   final String? roadAndHouse;
+  @JsonKey(name: 'division_id', fromJson: _toNullableInt)
+  final int? divisionId;
+  @JsonKey(name: 'district_id', fromJson: _toNullableInt)
+  final int? districtId;
+  @JsonKey(name: 'upazila_id', fromJson: _toNullableInt)
+  final int? upazilaId;
+  @JsonKey(name: 'union_id', fromJson: _toNullableInt)
+  final int? unionId;
   // API may return 'type' as a plain string or as a nested listing_type object
   @JsonKey(readValue: _typeReadValue)
   final String type;
@@ -150,6 +158,10 @@ class ListingModel {
     required this.title,
     this.area,
     this.roadAndHouse,
+    this.divisionId,
+    this.districtId,
+    this.upazilaId,
+    this.unionId,
     required this.type,
     required this.price,
     this.deposit,
@@ -198,6 +210,10 @@ class OwnerListingModel extends ListingModel {
     required super.title,
     super.area,
     super.roadAndHouse,
+    super.divisionId,
+    super.districtId,
+    super.upazilaId,
+    super.unionId,
     required super.type,
     required super.price,
     super.deposit,

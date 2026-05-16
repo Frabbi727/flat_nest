@@ -144,7 +144,7 @@ class RegisterController extends BaseController {
     showLoading();
     final result = await _authRepository.saveDetails(
       role: selectedRole.value!,
-      dateOfBirth: dob,
+     // dateOfBirth: dob,
     );
     hideLoading();
 

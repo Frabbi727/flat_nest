@@ -44,12 +44,14 @@ class AuthRepository extends BaseRepository {
 
   Future<Resource<Map<String, dynamic>>> saveDetails({
     required String role,
-    required String dateOfBirth,
+   // required String dateOfBirth,
   }) async {
     try {
       final response = await apiClient.patch(
         path: ApiEndpoints.registerDetails,
-        data: {'role': role, 'date_of_birth': dateOfBirth},
+        data: {'role': role,
+        //  'date_of_birth': dateOfBirth
+        },
       );
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
     } catch (e) {

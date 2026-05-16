@@ -48,6 +48,8 @@ class CreateListingController extends BaseController {
 
   // Step 2 — Photos
   final photos = <File>[].obs;
+  // Existing photos in edit mode (network images already uploaded)
+  final existingPhotos = <ListingPhotoModel>[].obs;
 
   // Step 3 — Location (display labels)
   final division = RxnString();
@@ -384,7 +386,20 @@ class CreateListingController extends BaseController {
     if (listing.description != null) descController.text = listing.description!;
     selectedType.value = listing.type;
     if (listing.area != null) union.value = listing.area;
+    if (listing.roadAndHouse != null) roadAndHouse.text = listing.roadAndHouse!;
     selectedAmenities.assignAll(listing.amenities.map((a) => a.id));
+    // Geo IDs for cascade-loading dropdowns
+    _divisionId = listing.divisionId;
+    _districtId = listing.districtId;
+    _upazilaId = listing.upazilaId;
+    _unionId = listing.unionId;
+    // Coordinates from map pin
+    if (listing.coordX != null && listing.coordY != null) {
+      coordX.value = listing.coordX;
+      coordY.value = listing.coordY;
+    }
+    // Existing photos for preview
+    existingPhotos.assignAll(listing.photos);
   }
 
   void addPhoto(File file) {
@@ -456,6 +471,50 @@ class CreateListingController extends BaseController {
     }
     if (divisionsResult case Success(data: final data?)) {
       divisionItems.assignAll(data);
+      if (_editMode && _divisionId != null) {
+        final div = data.where((d) => d.id == _divisionId).firstOrNull;
+        if (div != null) division.value = div.name;
+        _loadGeoForEditMode();
+      }
+    }
+  }
+
+  Future<void> _loadGeoForEditMode() async {
+    if (_divisionId == null) return;
+
+    districtsLoading.value = true;
+    final distResult = await _repo.getDistricts(_divisionId!);
+    districtsLoading.value = false;
+    if (distResult case Success(data: final data?)) {
+      districtItems.assignAll(data);
+      if (_districtId != null) {
+        final match = data.where((d) => d.id == _districtId).firstOrNull;
+        if (match != null) district.value = match.name;
+      }
+    }
+
+    if (_districtId == null) return;
+    upazilasLoading.value = true;
+    final upResult = await _repo.getUpazilas(_districtId!);
+    upazilasLoading.value = false;
+    if (upResult case Success(data: final data?)) {
+      upazilaItems.assignAll(data);
+      if (_upazilaId != null) {
+        final match = data.where((d) => d.id == _upazilaId).firstOrNull;
+        if (match != null) upazila.value = match.name;
+      }
+    }
+
+    if (_upazilaId == null) return;
+    unionsLoading.value = true;
+    final unResult = await _repo.getUnions(_upazilaId!);
+    unionsLoading.value = false;
+    if (unResult case Success(data: final data?)) {
+      unionItems.assignAll(data);
+      if (_unionId != null) {
+        final match = data.where((d) => d.id == _unionId).firstOrNull;
+        if (match != null) union.value = match.name;
+      }
     }
   }
 
