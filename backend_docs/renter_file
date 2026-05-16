@@ -1,0 +1,37 @@
+Here's the full API reference:
+
+  Base URL: GET /api/v1/listings
+
+  GET /api/v1/listings?search=dhaka&division_id=1&district_id=2&upazila_id=3&union_id=4&listing_type_id=1&minPrice=5000&maxPrice=20000&beds=2&amenities=1,2,
+  3&page=1
+
+  All supported query params:
+
+  ┌─────────────┬─────────┬──────────────────────────────────────────────────┐
+  │      Param      │  Type   │                   Description                    │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ search          │ string  │ Keyword search in title, area, road, description │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ division_id     │ integer │ Filter by division                               │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ district_id     │ integer │ Filter by district                               │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ upazila_id      │ integer │ Filter by upazila                                │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ union_id        │ integer │ Filter by union                                  │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ listing_type_id │ integer │ Filter by listing type                           │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ minPrice        │ integer │ Minimum price                                    │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ maxPrice        │ integer │ Maximum price                                    │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ beds            │ integer │ Minimum number of beds                           │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ amenities       │ string  │ Comma-separated amenity IDs (must match all)     │
+  ├─────────────────┼─────────┼──────────────────────────────────────────────────┤
+  │ page            │ integer │ Page number (15 per page)                        │
+  └─────────────────┴─────────┴──────────────────────────────────────────────────┘
+
+  All params are optional — you can use any combination.
+/

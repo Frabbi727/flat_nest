@@ -25,22 +25,29 @@ class DiscoveryView extends GetView<RenterHomeController> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _SearchBar(t: t, onFilterTap: () => _openFilters(context, t)),
                 ),
-                // Filter chips
+                // Filter chips (All + API listing types)
                 SizedBox(
                   height: 48,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     scrollDirection: Axis.horizontal,
-                    itemCount: RenterHomeController.filterChips.length,
+                    itemCount: controller.listingTypes.length + 1,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (_, i) {
-                      final chip = RenterHomeController.filterChips[i];
-                      final active = controller.selectedChip.value == chip;
+                      if (i == 0) {
+                        return _Chip(
+                          t: t,
+                          label: 'All',
+                          active: controller.selectedTypeId.value == null,
+                          onTap: () => controller.selectType(null),
+                        );
+                      }
+                      final type = controller.listingTypes[i - 1];
                       return _Chip(
                         t: t,
-                        label: chip,
-                        active: active,
-                        onTap: () => controller.selectChip(chip),
+                        label: type.label,
+                        active: controller.selectedTypeId.value == type.id,
+                        onTap: () => controller.selectType(type.id),
                       );
                     },
                   ),
@@ -435,7 +442,7 @@ class _FeaturedCard extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Near you',
+          'All Listings',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,

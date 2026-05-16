@@ -23,14 +23,14 @@ class LoggingInterceptor extends Interceptor {
 
     final buffer = StringBuffer();
 
+    final queryString = options.queryParameters.isNotEmpty
+        ? '?${options.queryParameters.entries.map((e) => '${e.key}=${e.value}').join('&')}'
+        : '';
+
     buffer.writeln('┌──────────────────────── REQUEST ────────────────────────');
     buffer.writeln('│ METHOD : ${options.method}');
-    buffer.writeln('│ URL    : ${options.baseUrl}${options.path}');
+    buffer.writeln('│ URL    : ${options.baseUrl}${options.path}$queryString');
     buffer.writeln('│ TIME   : $startTime');
-
-    if (options.queryParameters.isNotEmpty) {
-      buffer.writeln('│ QUERY  : ${options.queryParameters}');
-    }
 
     if (options.headers.isNotEmpty) {
       buffer.writeln('│ HEADERS: ${options.headers}');
@@ -56,9 +56,13 @@ class LoggingInterceptor extends Interceptor {
 
     final buffer = StringBuffer();
 
+    final resQuery = response.requestOptions.queryParameters.isNotEmpty
+        ? '?${response.requestOptions.queryParameters.entries.map((e) => '${e.key}=${e.value}').join('&')}'
+        : '';
+
     buffer.writeln('┌────────────────────── RESPONSE ────────────────────────');
     buffer.writeln('│ STATUS : ${response.statusCode}');
-    buffer.writeln('│ URL    : ${response.requestOptions.path}');
+    buffer.writeln('│ URL    : ${response.requestOptions.path}$resQuery');
     buffer.writeln('│ TIME   : ${duration != null ? '$duration ms' : 'N/A'}');
     buffer.writeln('│ BODY   : ${_formatJson(response.data)}');
     buffer.writeln('└─────────────────────────────────────────────────────────');
@@ -77,10 +81,14 @@ class LoggingInterceptor extends Interceptor {
 
     final buffer = StringBuffer();
 
+    final errQuery = err.requestOptions.queryParameters.isNotEmpty
+        ? '?${err.requestOptions.queryParameters.entries.map((e) => '${e.key}=${e.value}').join('&')}'
+        : '';
+
     buffer.writeln('┌──────────────────────── ERROR ──────────────────────────');
     buffer.writeln('│ STATUS : ${err.response?.statusCode}');
     buffer.writeln('│ TYPE   : ${err.type}');
-    buffer.writeln('│ URL    : ${err.requestOptions.path}');
+    buffer.writeln('│ URL    : ${err.requestOptions.path}$errQuery');
     buffer.writeln('│ TIME   : ${duration != null ? '$duration ms' : 'N/A'}');
     buffer.writeln('│ MESSAGE: ${err.message}');
     buffer.writeln('│ ERROR  : ${err.error}');
