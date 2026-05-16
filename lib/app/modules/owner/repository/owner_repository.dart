@@ -36,6 +36,24 @@ class OwnerRepository extends BaseRepository {
     }
   }
 
+  Future<Resource<void>> markRented(String id) async {
+    try {
+      await apiClient.post(path: ApiEndpoints.listingMarkRented(id), data: {});
+      return const Success(data: null, statusCode: 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<void>> resubmitListing(String id) async {
+    try {
+      await apiClient.post(path: ApiEndpoints.listingSubmit(id), data: {});
+      return const Success(data: null, statusCode: 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
   Future<Resource<void>> deleteListing(String id) async {
     try {
       await apiClient.delete(path: ApiEndpoints.listing(id));

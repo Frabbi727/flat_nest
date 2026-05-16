@@ -15,6 +15,7 @@ class ApiEndpoints {
   static String listingPhotos(String id) => '/listings/$id/photos';
   static String listingLocation(String id) => '/listings/$id/location';
   static String listingSubmit(String id) => '/listings/$id/submit';
+  static String listingMarkRented(String id) => '/listings/$id/mark-rented';
 
   // ── Owner ─────────────────────────────────────────────────────────────────
   static const String ownerListings = '/owner/listings';

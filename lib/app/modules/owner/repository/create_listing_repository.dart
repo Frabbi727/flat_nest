@@ -7,6 +7,7 @@ import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 import '../model/create_listing_request.dart';
+import '../model/edit_listing_request.dart';
 import '../model/save_location_request.dart';
 
 class CreateListingRepository extends BaseRepository {
@@ -144,6 +145,22 @@ class CreateListingRepository extends BaseRepository {
     try {
       await apiClient.post(path: ApiEndpoints.listingSubmit(listingId), data: {});
       return const Success(data: null, statusCode: 200);
+    } catch (e) {
+      return Error(e.toString(), statusCode: 500);
+    }
+  }
+
+  Future<Resource<Map<String, dynamic>>> patchListing(
+      String id, EditListingRequest request) async {
+    try {
+      final response = await apiClient.patch(
+        path: ApiEndpoints.listing(id),
+        data: request.toJson(),
+      );
+      return Success(
+        data: response.data as Map<String, dynamic>,
+        statusCode: response.statusCode ?? 200,
+      );
     } catch (e) {
       return Error(e.toString(), statusCode: 500);
     }

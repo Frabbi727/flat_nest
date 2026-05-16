@@ -190,6 +190,8 @@ class ListingModel {
 class OwnerListingModel extends ListingModel {
   @JsonKey(fromJson: _toInt)
   final int inquiries;
+  @JsonKey(name: 'rejection_reason')
+  final String? rejectionReason;
 
   const OwnerListingModel({
     required super.id,
@@ -213,6 +215,7 @@ class OwnerListingModel extends ListingModel {
     super.photos = const [],
     required super.createdAt,
     this.inquiries = 0,
+    this.rejectionReason,
   });
 
   factory OwnerListingModel.fromJson(Map<String, dynamic> json) =>

@@ -8,6 +8,7 @@ import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 import '../model/create_listing_request.dart';
+import '../model/edit_listing_request.dart';
 import '../model/save_location_request.dart';
 import '../repository/create_listing_repository.dart';
 
@@ -20,6 +21,10 @@ class CreateListingController extends BaseController {
   // Wizard state
   final currentStep = 0.obs;
   String? _listingId;
+  bool _editMode = false;
+  bool _autoSubmit = false;
+
+  bool get editMode => _editMode;
 
   // Step 1 — Details
   final titleController = TextEditingController();
@@ -194,6 +199,32 @@ class CreateListingController extends BaseController {
     final desc = descController.text.trim();
 
     showLoading();
+
+    if (_editMode && _listingId != null) {
+      final result = await _repo.patchListing(
+        _listingId!,
+        EditListingRequest(
+          title: titleController.text.trim(),
+          listingTypeId: selectedTypeId.value,
+          price: price,
+          beds: beds,
+          baths: baths,
+          deposit: deposit,
+          size: size,
+          description: desc.isEmpty ? null : desc,
+          amenities: selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
+        ),
+      );
+      hideLoading();
+      switch (result) {
+        case Success():
+          currentStep.value = 1;
+        case Error(message: final msg):
+          showError(msg);
+      }
+      return;
+    }
+
     final result = await _repo.createListing(CreateListingRequest(
       title: titleController.text.trim(),
       listingTypeId: selectedTypeId.value!,
@@ -219,6 +250,12 @@ class CreateListingController extends BaseController {
   }
 
   Future<void> _submitStep2() async {
+    // In edit mode, skip upload if no new photos were added
+    if (_editMode && photos.isEmpty) {
+      currentStep.value = 2;
+      return;
+    }
+
     if (photos.isEmpty) {
       showError('Please add at least one photo');
       return;
@@ -273,6 +310,33 @@ class CreateListingController extends BaseController {
   Future<void> _submitStep4() async {
     if (_listingId == null) return;
 
+    if (_editMode) {
+      if (_autoSubmit) {
+        showLoading();
+        final result = await _repo.submitListing(listingId: _listingId!);
+        hideLoading();
+        switch (result) {
+          case Success():
+            Get.offAllNamed(Routes.ownerHome);
+            Get.snackbar(
+              'Submitted for Review',
+              'Your listing has been sent for re-approval.',
+              duration: const Duration(seconds: 4),
+            );
+          case Error(message: final msg):
+            showError(msg);
+        }
+      } else {
+        Get.back();
+        Get.snackbar(
+          'Changes Saved',
+          'Your listing has been sent for re-approval.',
+          duration: const Duration(seconds: 4),
+        );
+      }
+      return;
+    }
+
     showLoading();
     final result = await _repo.submitListing(listingId: _listingId!);
     hideLoading();
@@ -288,6 +352,19 @@ class CreateListingController extends BaseController {
       case Error(message: final msg):
         showError(msg);
     }
+  }
+
+  void _prefillFromListing(OwnerListingModel listing) {
+    titleController.text = listing.title;
+    priceController.text = '${listing.price}';
+    if (listing.deposit != null) depositController.text = '${listing.deposit}';
+    if (listing.beds != null) bedsController.text = '${listing.beds}';
+    if (listing.baths != null) bathsController.text = '${listing.baths}';
+    if (listing.size != null) sizeController.text = '${listing.size}';
+    if (listing.description != null) descController.text = listing.description!;
+    selectedType.value = listing.type;
+    if (listing.area != null) union.value = listing.area;
+    selectedAmenities.assignAll(listing.amenities.map((a) => a.id));
   }
 
   void addPhoto(File file) {
@@ -307,9 +384,18 @@ class CreateListingController extends BaseController {
   }
 
   @override
-  @override
   void onInit() {
     super.onInit();
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      _listingId = args['listingId'] as String?;
+      _editMode = args['editMode'] as bool? ?? false;
+      _autoSubmit = args['autoSubmit'] as bool? ?? false;
+      final step = args['initialStep'] as int? ?? 0;
+      currentStep.value = step;
+      final listing = args['listing'] as OwnerListingModel?;
+      if (listing != null) _prefillFromListing(listing);
+    }
     _fetchListingTypes();
   }
 
@@ -332,9 +418,17 @@ class CreateListingController extends BaseController {
 
     if (typesResult case Success(data: final data?)) {
       listingTypes.assignAll(data);
+      // In edit mode, try to match the existing type by name; otherwise default to first
       if (data.isNotEmpty) {
-        selectedType.value = data.first.name;
-        selectedTypeId.value = data.first.id;
+        final match = _editMode
+            ? data.where((t) => t.name == selectedType.value).firstOrNull
+            : null;
+        if (match != null) {
+          selectedTypeId.value = match.id;
+        } else if (!_editMode) {
+          selectedType.value = data.first.name;
+          selectedTypeId.value = data.first.id;
+        }
       }
     }
     if (amenitiesResult case Success(data: final data?)) {

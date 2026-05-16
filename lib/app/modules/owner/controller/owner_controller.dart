@@ -74,7 +74,46 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
     fetchMyListings();
   }
 
-  void openListing(OwnerListingModel listing) {}
+  Future<void> continueDraft(OwnerListingModel listing) async {
+    final step = listing.photos.isEmpty ? 1 : (listing.area == null ? 2 : 3);
+    await Get.toNamed(Routes.createListing, arguments: {
+      'listingId': listing.id,
+      'initialStep': step,
+      'listing': listing,
+    });
+    fetchMyListings();
+  }
+
+  Future<void> navigateToEdit(OwnerListingModel listing) async {
+    await Get.toNamed(Routes.createListing, arguments: {
+      'listingId': listing.id,
+      'editMode': true,
+      'listing': listing,
+    });
+    fetchMyListings();
+  }
+
+  Future<void> fixAndResubmit(OwnerListingModel listing) async {
+    await Get.toNamed(Routes.createListing, arguments: {
+      'listingId': listing.id,
+      'editMode': true,
+      'autoSubmit': true,
+      'listing': listing,
+    });
+    fetchMyListings();
+  }
+
+  Future<void> markRented(String listingId) async {
+    showLoading();
+    final result = await _ownerRepository.markRented(listingId);
+    hideLoading();
+    switch (result) {
+      case Success():
+        fetchMyListings();
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
 
   Future<void> logout() async {
     await _authService.logout();

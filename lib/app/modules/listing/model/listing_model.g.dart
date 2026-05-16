@@ -136,6 +136,7 @@ OwnerListingModel _$OwnerListingModelFromJson(Map<String, dynamic> json) =>
           [],
       createdAt: _createdAtFromJson(json['created_at']),
       inquiries: _toInt(json['inquiries']),
+      rejectionReason: json['rejection_reason'] as String?,
     );
 
 Map<String, dynamic> _$OwnerListingModelToJson(OwnerListingModel instance) =>
@@ -161,4 +162,5 @@ Map<String, dynamic> _$OwnerListingModelToJson(OwnerListingModel instance) =>
       'photos': instance.photos.map((e) => e.toJson()).toList(),
       'created_at': instance.createdAt,
       'inquiries': instance.inquiries,
+      'rejection_reason': instance.rejectionReason,
     };

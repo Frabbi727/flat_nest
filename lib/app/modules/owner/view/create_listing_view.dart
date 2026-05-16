@@ -62,7 +62,7 @@ class CreateListingView extends GetView<CreateListingController> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Post a flat',
+                  controller.editMode ? 'Edit listing' : 'Post a flat',
                   style: AppTextStyles.h2.copyWith(color: t.ink, fontSize: 17),
                 ),
                 const Spacer(),
@@ -165,7 +165,9 @@ class CreateListingView extends GetView<CreateListingController> {
                       )
                     : Text(
                         step == _steps.length - 1
-                            ? 'Submit for review'
+                            ? (controller.editMode
+                                ? 'Save Changes'
+                                : 'Submit for review')
                             : 'Continue →',
                         style: const TextStyle(
                           fontSize: 15,
