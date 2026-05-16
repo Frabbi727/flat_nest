@@ -151,7 +151,7 @@ class CreateListingStep3View extends GetView<CreateListingController> {
 
 // ── Geo dropdown ─────────────────────────────────────────────────────────────
 
-class _GeoSelect extends StatelessWidget {
+class _GeoSelect extends StatefulWidget {
   final FlatNestTheme t;
   final String label;
   final String placeholder;
@@ -177,16 +177,57 @@ class _GeoSelect extends StatelessWidget {
   });
 
   @override
+  State<_GeoSelect> createState() => _GeoSelectState();
+}
+
+class _GeoSelectState extends State<_GeoSelect> {
+  final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+  String _query = '';
+
+  @override
+  void didUpdateWidget(_GeoSelect old) {
+    super.didUpdateWidget(old);
+    // Clear search whenever the dropdown opens
+    if (widget.isOpen && !old.isOpen) {
+      _searchController.clear();
+      _query = '';
+      // Auto-focus the search field when dropdown opens
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _searchFocus.requestFocus();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  List<GeoItemModel> get _filtered {
+    if (_query.isEmpty) return widget.items;
+    final q = _query.toLowerCase();
+    return widget.items
+        .where((item) => item.name.toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final t = widget.t;
+    final filtered = _filtered;
+
     return Opacity(
-      opacity: isDisabled ? 0.5 : 1,
+      opacity: widget.isDisabled ? 0.5 : 1,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              label,
+              widget.label,
               style: AppTextStyles.bodySmall.copyWith(
                 color: t.inkMid,
                 fontWeight: FontWeight.w600,
@@ -196,7 +237,9 @@ class _GeoSelect extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             GestureDetector(
-              onTap: isDisabled || isLoading ? null : onToggle,
+              onTap: widget.isDisabled || widget.isLoading
+                  ? null
+                  : widget.onToggle,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 height: 48,
@@ -205,10 +248,10 @@ class _GeoSelect extends StatelessWidget {
                   color: t.surface,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isOpen ? t.primary : t.borderSoft,
-                    width: isOpen ? 1.5 : 1,
+                    color: widget.isOpen ? t.primary : t.borderSoft,
+                    width: widget.isOpen ? 1.5 : 1,
                   ),
-                  boxShadow: isOpen
+                  boxShadow: widget.isOpen
                       ? [
                           BoxShadow(
                             color: t.primary.withValues(alpha: 0.12),
@@ -222,16 +265,17 @@ class _GeoSelect extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        value ?? placeholder,
+                        widget.value ?? widget.placeholder,
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: value != null ? t.ink : t.inkFaint,
-                          fontWeight:
-                              value != null ? FontWeight.w600 : FontWeight.w500,
+                          color: widget.value != null ? t.ink : t.inkFaint,
+                          fontWeight: widget.value != null
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                           fontSize: 15,
                         ),
                       ),
                     ),
-                    if (isLoading)
+                    if (widget.isLoading)
                       SizedBox(
                         width: 18,
                         height: 18,
@@ -243,7 +287,7 @@ class _GeoSelect extends StatelessWidget {
                     else
                       AnimatedRotation(
                         duration: const Duration(milliseconds: 200),
-                        turns: isOpen ? 0.5 : 0,
+                        turns: widget.isOpen ? 0.5 : 0,
                         child: Icon(
                           Icons.keyboard_arrow_down_rounded,
                           color: t.inkSoft,
@@ -254,13 +298,12 @@ class _GeoSelect extends StatelessWidget {
                 ),
               ),
             ),
-            if (isOpen && items.isNotEmpty)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
+            if (widget.isOpen && widget.items.isNotEmpty)
+              Container(
                 margin: const EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
                   color: t.surface,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: t.borderSoft),
                   boxShadow: [
                     BoxShadow(
@@ -272,79 +315,222 @@ class _GeoSelect extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    // Search field
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
                       decoration: BoxDecoration(
                         color: t.bgAlt,
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
                         ),
-                        border: Border(bottom: BorderSide(color: t.borderSoft)),
+                        border: Border(
+                            bottom: BorderSide(color: t.borderSoft)),
                       ),
-                      child: Row(
-                        children: [
-                          Text(
-                            '${items.length} option${items.length == 1 ? '' : 's'}',
-                            style: AppTextStyles.caption.copyWith(
-                              color: t.inkSoft,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.4,
-                            ),
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _searchFocus,
+                        onChanged: (v) => setState(() => _query = v),
+                        style: TextStyle(fontSize: 14, color: t.ink),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          hintText: 'Search ${widget.label.toLowerCase()}…',
+                          hintStyle:
+                              TextStyle(fontSize: 13, color: t.inkFaint),
+                          prefixIcon: Icon(Icons.search_rounded,
+                              size: 18, color: t.inkSoft),
+                          suffixIcon: _query.isNotEmpty
+                              ? GestureDetector(
+                                  onTap: () {
+                                    _searchController.clear();
+                                    setState(() => _query = '');
+                                  },
+                                  child: Icon(Icons.close_rounded,
+                                      size: 16, color: t.inkSoft),
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: t.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: t.borderSoft),
                           ),
-                        ],
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: t.borderSoft),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                                color: t.primary, width: 1.5),
+                          ),
+                        ),
                       ),
                     ),
+
+                    // Results count
+                    if (_query.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 6),
+                        width: double.infinity,
+                        color: t.bgAlt,
+                        child: Text(
+                          filtered.isEmpty
+                              ? 'No results for "$_query"'
+                              : '${filtered.length} result${filtered.length == 1 ? '' : 's'}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: filtered.isEmpty ? t.error : t.inkSoft,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                    // List
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        itemCount: items.length,
-                        separatorBuilder: (_, __) =>
-                            Divider(height: 1, color: t.borderSoft),
-                        itemBuilder: (context, i) {
-                          final item = items[i];
-                          final selected = item.name == value;
-                          return GestureDetector(
-                            onTap: () => onPick(item),
-                            child: Container(
-                              color: selected ? t.primarySoft : t.surface,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              child: Row(
+                      constraints: const BoxConstraints(maxHeight: 220),
+                      child: filtered.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      item.name,
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        color:
-                                            selected ? t.primaryInk : t.ink,
-                                        fontWeight: selected
-                                            ? FontWeight.w600
-                                            : FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
-                                    ),
+                                  Icon(Icons.search_off_rounded,
+                                      size: 32,
+                                      color: t.inkFaint),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Nothing found',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: t.inkSoft,
+                                        fontWeight: FontWeight.w500),
                                   ),
-                                  if (selected)
-                                    Icon(Icons.check_rounded,
-                                        color: t.primary, size: 16),
                                 ],
                               ),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: filtered.length,
+                              separatorBuilder: (_, __) =>
+                                  Divider(height: 1, color: t.borderSoft),
+                              itemBuilder: (context, i) {
+                                final item = filtered[i];
+                                final selected = item.name == widget.value;
+                                return GestureDetector(
+                                  onTap: () {
+                                    widget.onPick(item);
+                                    // Clear search after picking
+                                    _searchController.clear();
+                                    setState(() => _query = '');
+                                  },
+                                  child: Container(
+                                    color: selected
+                                        ? t.primarySoft
+                                        : t.surface,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 12),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _query.isNotEmpty
+                                              ? _HighlightText(
+                                                  text: item.name,
+                                                  query: _query,
+                                                  t: t,
+                                                  selected: selected,
+                                                )
+                                              : Text(
+                                                  item.name,
+                                                  style: AppTextStyles
+                                                      .bodyMedium
+                                                      .copyWith(
+                                                    color: selected
+                                                        ? t.primaryInk
+                                                        : t.ink,
+                                                    fontWeight: selected
+                                                        ? FontWeight.w600
+                                                        : FontWeight.w500,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                        ),
+                                        if (selected)
+                                          Icon(Icons.check_rounded,
+                                              color: t.primary, size: 16),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
                     ),
                   ],
                 ),
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Highlight text ────────────────────────────────────────────────────────────
+
+class _HighlightText extends StatelessWidget {
+  final String text;
+  final String query;
+  final FlatNestTheme t;
+  final bool selected;
+
+  const _HighlightText({
+    required this.text,
+    required this.query,
+    required this.t,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final q = query.toLowerCase();
+    final lower = text.toLowerCase();
+    final spans = <TextSpan>[];
+    int start = 0;
+
+    while (start < text.length) {
+      final idx = lower.indexOf(q, start);
+      if (idx == -1) {
+        spans.add(TextSpan(text: text.substring(start)));
+        break;
+      }
+      if (idx > start) {
+        spans.add(TextSpan(text: text.substring(start, idx)));
+      }
+      spans.add(TextSpan(
+        text: text.substring(idx, idx + q.length),
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: selected ? t.primaryInk : t.primary,
+          backgroundColor: t.primary.withValues(alpha: selected ? 0.15 : 0.1),
+        ),
+      ));
+      start = idx + q.length;
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: selected ? t.primaryInk : t.ink,
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
+        children: spans,
       ),
     );
   }
