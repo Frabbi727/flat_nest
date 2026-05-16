@@ -17,17 +17,24 @@ class ErrorInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         final statusCode = err.response?.statusCode;
         final data = err.response?.data;
-        if (statusCode == 401) {
-          errorMessage = 'Session expired. Please login again.';
-        } else if (data is Map) {
+        if (data is Map) {
           final errors = data['errors'] as Map?;
           if (errors != null && errors.isNotEmpty) {
             errorMessage = errors.values
                 .expand((v) => v is List ? v : [v])
                 .join('\n');
           } else {
-            errorMessage = (data['message'] as String?) ?? 'Error $statusCode';
+            final msg = data['message'] as String?;
+            if (msg != null && msg.isNotEmpty) {
+              errorMessage = msg;
+            } else if (statusCode == 401) {
+              errorMessage = 'Session expired. Please login again.';
+            } else {
+              errorMessage = 'Error $statusCode';
+            }
           }
+        } else if (statusCode == 401) {
+          errorMessage = 'Session expired. Please login again.';
         } else {
           errorMessage = 'Error $statusCode';
         }
