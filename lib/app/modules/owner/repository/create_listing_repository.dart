@@ -16,36 +16,27 @@ class CreateListingRepository extends BaseRepository {
   Future<Resource<List<ListingTypeModel>>> getListingTypes() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listingTypes);
-      final list = (response.data as List<dynamic>)
-          .map((e) => ListingTypeModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, ListingTypeModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<List<AmenityModel>>> getAmenities() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.amenities);
-      final list = (response.data as List<dynamic>)
-          .map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, AmenityModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<List<GeoItemModel>>> getDivisions() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.geoDivisions);
-      final list = (response.data as List<dynamic>)
-          .map((e) => GeoItemModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, GeoItemModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -53,12 +44,9 @@ class CreateListingRepository extends BaseRepository {
     try {
       final response =
           await apiClient.get(path: ApiEndpoints.geoDistricts(divisionId));
-      final list = (response.data as List<dynamic>)
-          .map((e) => GeoItemModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, GeoItemModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -66,12 +54,9 @@ class CreateListingRepository extends BaseRepository {
     try {
       final response =
           await apiClient.get(path: ApiEndpoints.geoUpazilas(districtId));
-      final list = (response.data as List<dynamic>)
-          .map((e) => GeoItemModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, GeoItemModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -79,12 +64,9 @@ class CreateListingRepository extends BaseRepository {
     try {
       final response =
           await apiClient.get(path: ApiEndpoints.geoUnions(upazilaId));
-      final list = (response.data as List<dynamic>)
-          .map((e) => GeoItemModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: list, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, GeoItemModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -95,12 +77,9 @@ class CreateListingRepository extends BaseRepository {
         path: ApiEndpoints.listings,
         data: request.toJson(),
       );
-      return Success(
-        data: response.data as Map<String, dynamic>,
-        statusCode: response.statusCode ?? 201,
-      );
+      return parseResponse<Map<String, dynamic>>(response, (j) => j);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -121,32 +100,34 @@ class CreateListingRepository extends BaseRepository {
           ),
         );
       }
-      await apiClient.post(path: ApiEndpoints.listingPhotos(listingId), data: formData);
-      return const Success(data: null, statusCode: 200);
+      final response = await apiClient.post(
+          path: ApiEndpoints.listingPhotos(listingId), data: formData);
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> saveLocation(
       String listingId, SaveLocationRequest request) async {
     try {
-      await apiClient.patch(
+      final response = await apiClient.patch(
         path: ApiEndpoints.listingLocation(listingId),
         data: request.toJson(),
       );
-      return const Success(data: null, statusCode: 200);
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> submitListing({required String listingId}) async {
     try {
-      await apiClient.post(path: ApiEndpoints.listingSubmit(listingId), data: {});
-      return const Success(data: null, statusCode: 200);
+      final response = await apiClient.post(
+          path: ApiEndpoints.listingSubmit(listingId), data: {});
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -157,12 +138,9 @@ class CreateListingRepository extends BaseRepository {
         path: ApiEndpoints.listing(id),
         data: request.toJson(),
       );
-      return Success(
-        data: response.data as Map<String, dynamic>,
-        statusCode: response.statusCode ?? 200,
-      );
+      return parseResponse<Map<String, dynamic>>(response, (j) => j);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 }

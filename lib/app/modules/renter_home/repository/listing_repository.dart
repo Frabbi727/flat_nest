@@ -1,6 +1,7 @@
 import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
 
 import '../../../core/base/base_repository.dart';
+import '../../../core/network/api_response.dart';
 import '../../../core/network/resource.dart';
 import '../../listing/model/listing_model.dart';
 
@@ -24,67 +25,64 @@ class ListingRepository extends BaseRepository {
         path: ApiEndpoints.listings,
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
-
-      final data = (response.data['data'] as List<dynamic>)
-          .map((e) => ListingModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      return Success(data: data, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, ListingModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<ListingModel>> getListingDetail(String id) async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listing(id));
-      final listing = ListingModel.fromJson(
-          response.data['data'] as Map<String, dynamic>);
-      return Success(data: listing, statusCode: response.statusCode ?? 200);
+      return parseResponse(response, ListingModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<List<String>>> getWishlist() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.wishlist);
-      final ids = (response.data['saved_ids'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList();
-      return Success(data: ids, statusCode: response.statusCode ?? 200);
+      final body = ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (j) => (j as List).map((e) => e as String).toList(),
+      );
+      if (body.success) {
+        return Success(
+            data: body.data ?? [], statusCode: response.statusCode ?? 200);
+      }
+      return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> saveToWishlist(String listingId) async {
     try {
-      await apiClient.post(path: ApiEndpoints.wishlistItem(listingId));
-      return const Success(data: null, statusCode: 200);
+      final response =
+          await apiClient.post(path: ApiEndpoints.wishlistItem(listingId));
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> removeFromWishlist(String listingId) async {
     try {
-      await apiClient.delete(path: ApiEndpoints.listing(listingId));
-      return const Success(data: null, statusCode: 200);
+      final response =
+          await apiClient.delete(path: ApiEndpoints.listing(listingId));
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<List<AmenityModel>>> getAmenities() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.amenities);
-      final data = (response.data as List<dynamic>)
-          .map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: data, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, AmenityModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 }

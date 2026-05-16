@@ -7,7 +7,7 @@ class ApiConfig {
     switch (environment) {
       case ApiEnvironment.dev:
        return 'http://10.144.25.202:8000/api/v1';
-      //   return 'http://92.168.0.108:8000/api/v1';
+       //  return 'http://92.168.0.108:8000/api/v1';
       case ApiEnvironment.staging:
         return 'http://10.144.25.202:8000/api/v1';
       case ApiEnvironment.prod:

@@ -14,7 +14,7 @@ class AuthRepository extends BaseRepository {
         path: ApiEndpoints.login,
         data: {'email': email, 'password': password},
       );
-      return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 200);
+      return parseResponse(response, AuthResponse.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
@@ -36,27 +36,25 @@ class AuthRepository extends BaseRepository {
           'phone': phone,
         },
       );
-      return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 201);
+      return parseResponse(response, AuthResponse.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  Future<Resource<Map<String, dynamic>>> saveDetails({
-    required String role,
-  }) async {
+  Future<Resource<void>> saveDetails({required String role}) async {
     try {
       final response = await apiClient.patch(
         path: ApiEndpoints.registerDetails,
         data: {'role': role},
       );
-      return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
+      return parseVoidResponse(response);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  Future<Resource<Map<String, dynamic>>> uploadAvatar(String filePath) async {
+  Future<Resource<void>> uploadAvatar(String filePath) async {
     try {
       final formData = FormData.fromMap({
         'avatar': await MultipartFile.fromFile(
@@ -68,19 +66,16 @@ class AuthRepository extends BaseRepository {
         path: ApiEndpoints.registerAvatar,
         data: formData,
       );
-      return Success(
-        data: response.data as Map<String, dynamic>,
-        statusCode: response.statusCode ?? 200,
-      );
+      return parseVoidResponse(response);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  Future<Resource<Map<String, dynamic>>> logout() async {
+  Future<Resource<void>> logout() async {
     try {
       final response = await apiClient.post(path: ApiEndpoints.logout);
-      return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
+      return parseVoidResponse(response);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

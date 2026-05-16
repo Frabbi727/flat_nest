@@ -1,0 +1,39 @@
+All 38 routes load cleanly. Every endpoint now follows the unified shape. Here's the complete contract your mobile app can rely on:
+
+  Every success response:
+  {
+    "success": true,
+    "data": { ... } | [ ... ] | null,
+    "message": "string | null",
+    "errors": null
+  }
+
+  Paginated responses (GET /listings, GET /notifications) add a meta block:
+  {
+    "success": true,
+    "data": [ ... ],
+    "meta": { "current_page": 1, "last_page": 3, "per_page": 15, "total": 42 },
+    "message": null,
+    "errors": null
+  }
+
+  Every error response:
+  {
+    "success": false,
+    "data": null,
+    "message": "Human readable text",
+    "code": "MACHINE_CODE",
+    "errors": null
+  }
+
+  Validation errors (422):
+  {
+    "success": false,
+    "data": null,
+    "message": "The given data was invalid.",
+    "code": "VALIDATION_ERROR",
+    "errors": { "email": ["The email has already been taken."] }
+  }
+
+  All try/catch blocks were removed from controllers — exceptions bubble to the global handler automatically. AuthController keeps its two catches only for
+  the specific INVALID_CREDENTIALS / INVALID_REFRESH_TOKEN codes.

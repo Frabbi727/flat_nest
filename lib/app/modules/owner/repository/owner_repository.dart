@@ -11,12 +11,9 @@ class OwnerRepository extends BaseRepository {
   Future<Resource<List<OwnerListingModel>>> getMyListings() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.ownerListings);
-      final data = (response.data['data'] as List<dynamic>)
-          .map((e) => OwnerListingModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: data, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, OwnerListingModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -27,39 +24,39 @@ class OwnerRepository extends BaseRepository {
         path: ApiEndpoints.listing(id),
         data: request.toJson(),
       );
-      return Success(
-        data: ListingModel.fromJson(response.data as Map<String, dynamic>),
-        statusCode: response.statusCode ?? 200,
-      );
+      return parseResponse(response, ListingModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> markRented(String id) async {
     try {
-      await apiClient.post(path: ApiEndpoints.listingMarkRented(id), data: {});
-      return const Success(data: null, statusCode: 200);
+      final response = await apiClient.post(
+          path: ApiEndpoints.listingMarkRented(id), data: {});
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> resubmitListing(String id) async {
     try {
-      await apiClient.post(path: ApiEndpoints.listingSubmit(id), data: {});
-      return const Success(data: null, statusCode: 200);
+      final response =
+          await apiClient.post(path: ApiEndpoints.listingSubmit(id), data: {});
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<void>> deleteListing(String id) async {
     try {
-      await apiClient.delete(path: ApiEndpoints.listing(id));
-      return const Success(data: null, statusCode: 200);
+      final response =
+          await apiClient.delete(path: ApiEndpoints.listing(id));
+      return parseVoidResponse(response);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 }

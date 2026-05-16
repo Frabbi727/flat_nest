@@ -138,9 +138,6 @@ class RegisterController extends BaseController {
       return;
     }
 
-    final dob =
-        '${dobYear.value}-${dobMonth.value.toString().padLeft(2, '0')}-${dobDay.value.toString().padLeft(2, '0')}';
-
     showLoading();
     final result = await _authRepository.saveDetails(
       role: selectedRole.value!,
@@ -177,13 +174,6 @@ class RegisterController extends BaseController {
     hideLoading();
 
     switch (result) {
-      case Success(data: final data?):
-        final avatarUrl = data['avatar_url'] as String?;
-        final user = _authService.currentUser;
-        if (user != null && avatarUrl != null) {
-          _authService.saveUser(user.copyWith(avatarUrl: avatarUrl));
-        }
-        _navigateToHome();
       case Success():
         _navigateToHome();
       case Error(message: final msg):

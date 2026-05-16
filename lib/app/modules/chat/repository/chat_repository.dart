@@ -10,12 +10,9 @@ class ChatRepository extends BaseRepository {
   Future<Resource<List<ChatModel>>> getChats() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.chats);
-      final data = (response.data['data'] as List<dynamic>)
-          .map((e) => ChatModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: data, statusCode: response.statusCode ?? 200);
+      return parseListResponse(response, ChatModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -28,33 +25,30 @@ class ChatRepository extends BaseRepository {
         'listing_id': listingId,
         'initial_message': initialMessage,
       });
-      return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 201);
+      return parseResponse<Map<String, dynamic>>(response, (j) => j);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<List<ChatMessageModel>>> getMessages(String chatId) async {
     try {
-      final response = await apiClient.get(path: ApiEndpoints.chatMessages(chatId));
-      final data = (response.data['messages'] as List<dynamic>)
-          .map((e) => ChatMessageModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      return Success(data: data, statusCode: response.statusCode ?? 200);
+      final response =
+          await apiClient.get(path: ApiEndpoints.chatMessages(chatId));
+      return parseListResponse(response, ChatMessageModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  Future<Resource<ChatMessageModel>> sendMessage(String chatId, String text) async {
+  Future<Resource<ChatMessageModel>> sendMessage(
+      String chatId, String text) async {
     try {
-      final response = await apiClient.post(path: ApiEndpoints.chatMessages(chatId), data: {'text': text});
-      return Success(
-        data: ChatMessageModel.fromJson(response.data as Map<String, dynamic>),
-        statusCode: response.statusCode ?? 201,
-      );
+      final response = await apiClient.post(
+          path: ApiEndpoints.chatMessages(chatId), data: {'text': text});
+      return parseResponse(response, ChatMessageModel.fromJson);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 }
