@@ -133,11 +133,11 @@ class RegisterStep3View extends GetView<RegisterController> {
   void _showPickerSheet(BuildContext context, FlatNestTheme t) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
+      builder: (_) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
@@ -169,7 +169,7 @@ class RegisterStep3View extends GetView<RegisterController> {
             const SizedBox(height: 8),
           ],
         ),
-      ),
+
     );
   }
 }

@@ -13,8 +13,7 @@ class ChatListView extends GetView<ChatController> {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Column(
+      body:  Column(
           children: [
             // Top bar
             Padding(
@@ -70,7 +69,7 @@ class ChatListView extends GetView<ChatController> {
             ),
           ],
         ),
-      ),
+
     );
   }
 }

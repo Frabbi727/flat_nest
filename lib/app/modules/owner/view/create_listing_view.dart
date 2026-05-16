@@ -19,8 +19,7 @@ class CreateListingView extends GetView<CreateListingController> {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Column(
+      body:  Column(
           children: [
             _buildHeader(t),
             Expanded(
@@ -34,7 +33,7 @@ class CreateListingView extends GetView<CreateListingController> {
             _buildFooter(t),
           ],
         ),
-      ),
+
     );
   }
 

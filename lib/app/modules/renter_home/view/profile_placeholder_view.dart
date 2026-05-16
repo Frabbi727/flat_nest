@@ -15,8 +15,7 @@ class ProfilePlaceholderView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body:  SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
@@ -83,7 +82,7 @@ class ProfilePlaceholderView extends StatelessWidget {
             ],
           ),
         ),
-      ),
+
     );
   }
 

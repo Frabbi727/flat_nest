@@ -13,8 +13,7 @@ class WishlistView extends GetView<RenterHomeController> {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Column(
+      body:  Column(
           children: [
             // Top bar
             Padding(
@@ -73,7 +72,7 @@ class WishlistView extends GetView<RenterHomeController> {
             ),
           ],
         ),
-      ),
+
     );
   }
 }

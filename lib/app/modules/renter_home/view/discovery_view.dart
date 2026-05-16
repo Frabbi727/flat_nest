@@ -15,8 +15,7 @@ class DiscoveryView extends GetView<RenterHomeController> {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Obx(() => Column(
+      body:  Obx(() => Column(
               children: [
                 // TopBar
                 _TopBar(t: t, userName: controller.userName),
@@ -91,7 +90,7 @@ class DiscoveryView extends GetView<RenterHomeController> {
                 ),
               ],
             )),
-      ),
+
     );
   }
 
@@ -100,6 +99,7 @@ class DiscoveryView extends GetView<RenterHomeController> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (_) => FiltersSheet(t: t),
     );
   }

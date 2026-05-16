@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'app/core/network/api_client.dart';
 import 'app/core/service/auth_service.dart';
@@ -10,27 +11,27 @@ import 'app/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+  ));
+
   await initServices();
-  
+
   runApp(const MyApp());
 }
 
 Future<void> initServices() async {
   Get.log('Starting services...');
-  
-  // Initialize ApiClient
+
   Get.put(ApiClient(), permanent: true);
-  
-  // Initialize LocalizationService
   await Get.putAsync(() => LocalizationService().init());
-  
-  // Initialize ThemeService
   await Get.putAsync(() => ThemeService().init());
-  
-  // Initialize AuthService
   await Get.putAsync(() => AuthService().init());
-  
+
   Get.log('All services started!');
 }
 
@@ -54,6 +55,11 @@ class MyApp extends StatelessWidget {
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       defaultTransition: Transition.fade,
+      builder: (context, child) => SafeArea(
+        top: false,
+        bottom: true,
+        child: child!,
+      ),
     );
   }
 }

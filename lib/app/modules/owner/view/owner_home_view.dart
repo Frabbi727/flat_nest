@@ -59,6 +59,7 @@ class _OwnerBottomNav extends GetView<OwnerController> {
       ),
       child: SafeArea(
         top: false,
+        bottom: false,
         child: SizedBox(
           height: 60,
           child: Row(
@@ -923,8 +924,7 @@ class _ProfileTab extends GetView<OwnerController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: t.bg,
-      body: SafeArea(
-        child: Center(
+      body:  Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -962,7 +962,7 @@ class _ProfileTab extends GetView<OwnerController> {
             ],
           ),
         ),
-      ),
+
     );
   }
 }

@@ -363,8 +363,7 @@ class _MapPickerViewState extends State<MapPickerView> {
             top: 0,
             left: 0,
             right: 0,
-            child: SafeArea(
-              child: Padding(
+            child:  Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Row(
                   children: [
@@ -381,7 +380,7 @@ class _MapPickerViewState extends State<MapPickerView> {
                   ],
                 ),
               ),
-            ),
+
           ),
 
           // ── Title chip ───────────────────────────────────────────────────

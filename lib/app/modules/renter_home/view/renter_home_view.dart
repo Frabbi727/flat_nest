@@ -64,6 +64,7 @@ class _BottomNav extends GetView<RenterHomeController> {
       ),
       child: SafeArea(
         top: false,
+        bottom: false,
         child: SizedBox(
           height: 60,
           child: Row(
