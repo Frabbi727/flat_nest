@@ -35,7 +35,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       ),
                     ),
                     Positioned(
-                      top: 64,
+                      top: MediaQuery.of(context).padding.top + 8,
                       right: 16,
                       child: TextButton(
                         onPressed: controller.skip,

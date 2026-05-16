@@ -15,88 +15,99 @@ class DiscoveryView extends GetView<RenterHomeController> {
 
     return Scaffold(
       backgroundColor: t.bg,
-      body:  Obx(() => Column(
-              children: [
-                // TopBar
-                _TopBar(t: t, userName: controller.userName),
-                // Search + filter
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _SearchBar(t: t, onFilterTap: () => _openFilters(context, t)),
+      body: Obx(
+        () => Column(
+          children: [
+            // TopBar
+            _TopBar(t: t, userName: controller.userName),
+            // Search + filter
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _SearchBar(
+                t: t,
+                onFilterTap: () => _openFilters(context, t),
+              ),
+            ),
+            // Filter chips (All + API listing types)
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
                 ),
-                // Filter chips (All + API listing types)
-                SizedBox(
-                  height: 48,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: controller.listingTypes.length + 1,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (_, i) {
-                      if (i == 0) {
-                        return _Chip(
-                          t: t,
-                          label: 'All',
-                          active: controller.selectedTypeId.value == null,
-                          onTap: () => controller.selectType(null),
-                        );
-                      }
-                      final type = controller.listingTypes[i - 1];
-                      return _Chip(
-                        t: t,
-                        label: type.label,
-                        active: controller.selectedTypeId.value == type.id,
-                        onTap: () => controller.selectType(type.id),
-                      );
-                    },
-                  ),
-                ),
-                // Listings
-                Expanded(
-                  child: controller.isLoading
-                      ? Center(child: CircularProgressIndicator(color: t.primary))
-                      : controller.listings.isEmpty
-                          ? _EmptyState(t: t)
-                          : RefreshIndicator(
-                              onRefresh: controller.fetchListings,
-                              color: t.primary,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-                                itemCount: controller.listings.length,
-                                itemBuilder: (_, i) {
-                                  final listing = controller.listings[i];
-                                  final isFeatured = i == 0;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: Obx(() {
-                                      final saved = controller.isSaved(listing.id);
-                                      final loading = controller.isToggling(listing.id);
-                                      return isFeatured
-                                          ? _FeaturedCard(
-                                              t: t,
-                                              listing: listing,
-                                              saved: saved,
-                                              isLoading: loading,
-                                              onToggleSave: () => controller.toggleSave(listing),
-                                              onTap: () => controller.openListing(listing),
-                                            )
-                                          : ListingCardWidget(
-                                              t: t,
-                                              listing: listing,
-                                              saved: saved,
-                                              isLoading: loading,
-                                              onToggleSave: () => controller.toggleSave(listing),
-                                              onTap: () => controller.openListing(listing),
-                                            );
-                                    }),
-                                  );
-                                },
-                              ),
-                            ),
-                ),
-              ],
-            )),
-
+                scrollDirection: Axis.horizontal,
+                itemCount: controller.listingTypes.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  if (i == 0) {
+                    return _Chip(
+                      t: t,
+                      label: 'All',
+                      active: controller.selectedTypeId.value == null,
+                      onTap: () => controller.selectType(null),
+                    );
+                  }
+                  final type = controller.listingTypes[i - 1];
+                  return _Chip(
+                    t: t,
+                    label: type.label,
+                    active: controller.selectedTypeId.value == type.id,
+                    onTap: () => controller.selectType(type.id),
+                  );
+                },
+              ),
+            ),
+            // Listings
+            Expanded(
+              child: controller.isLoading
+                  ? Center(child: CircularProgressIndicator(color: t.primary))
+                  : controller.listings.isEmpty
+                  ? _EmptyState(t: t)
+                  : RefreshIndicator(
+                      onRefresh: controller.fetchListings,
+                      color: t.primary,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                        itemCount: controller.listings.length,
+                        itemBuilder: (_, i) {
+                          final listing = controller.listings[i];
+                          final isFeatured = i == 0;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Obx(() {
+                              final saved = controller.isSaved(listing.id);
+                              final loading = controller.isToggling(listing.id);
+                              return isFeatured
+                                  ? _FeaturedCard(
+                                      t: t,
+                                      listing: listing,
+                                      saved: saved,
+                                      isLoading: loading,
+                                      onToggleSave: () =>
+                                          controller.toggleSave(listing),
+                                      onTap: () =>
+                                          controller.openListing(listing),
+                                    )
+                                  : ListingCardWidget(
+                                      t: t,
+                                      listing: listing,
+                                      saved: saved,
+                                      isLoading: loading,
+                                      onToggleSave: () =>
+                                          controller.toggleSave(listing),
+                                      onTap: () =>
+                                          controller.openListing(listing),
+                                    );
+                            }),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -363,7 +374,10 @@ class _FeaturedCard extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.55),
+                        ],
                         stops: const [0.3, 1.0],
                       ),
                     ),
@@ -374,7 +388,10 @@ class _FeaturedCard extends StatelessWidget {
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: t.primary,
                       borderRadius: BorderRadius.circular(20),
@@ -393,7 +410,12 @@ class _FeaturedCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: _HeartButton(t: t, saved: saved, isLoading: isLoading, onTap: onToggleSave),
+                  child: _HeartButton(
+                    t: t,
+                    saved: saved,
+                    isLoading: isLoading,
+                    onTap: onToggleSave,
+                  ),
                 ),
                 // Info
                 Positioned(
@@ -429,7 +451,10 @@ class _FeaturedCard extends StatelessWidget {
                         children: [
                           Text(
                             '🛏 ${listing.beds ?? '-'} BR · 🚿 ${listing.baths ?? '-'} Bath',
-                            style: const TextStyle(fontSize: 12, color: Colors.white70),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
                           ),
                           Text(
                             '${listing.priceFormatted}/mo',
@@ -466,7 +491,11 @@ class _FeaturedCard extends StatelessWidget {
     return Container(
       color: t.primarySoft,
       child: Center(
-        child: Icon(Icons.home_work_rounded, size: 64, color: t.primary.withValues(alpha: 0.3)),
+        child: Icon(
+          Icons.home_work_rounded,
+          size: 64,
+          color: t.primary.withValues(alpha: 0.3),
+        ),
       ),
     );
   }
@@ -478,7 +507,12 @@ class _HeartButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTap;
 
-  const _HeartButton({required this.t, required this.saved, this.isLoading = false, required this.onTap});
+  const _HeartButton({
+    required this.t,
+    required this.saved,
+    this.isLoading = false,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -494,7 +528,10 @@ class _HeartButton extends StatelessWidget {
         child: isLoading
             ? Padding(
                 padding: const EdgeInsets.all(9),
-                child: CircularProgressIndicator(strokeWidth: 2, color: t.inkSoft),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: t.inkSoft,
+                ),
               )
             : Icon(
                 saved ? Icons.favorite : Icons.favorite_border,
@@ -508,6 +545,7 @@ class _HeartButton extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final FlatNestTheme t;
+
   const _EmptyState({required this.t});
 
   @override
@@ -520,7 +558,11 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No listings found',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: t.ink),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: t.ink,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
