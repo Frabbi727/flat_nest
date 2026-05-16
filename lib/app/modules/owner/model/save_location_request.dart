@@ -5,6 +5,8 @@ class SaveLocationRequest {
   final int upazilaId;
   final int unionId;
   final String? roadAndHouse;
+  final double? coordX;
+  final double? coordY;
 
   const SaveLocationRequest({
     required this.area,
@@ -13,6 +15,8 @@ class SaveLocationRequest {
     required this.upazilaId,
     required this.unionId,
     this.roadAndHouse,
+    this.coordX,
+    this.coordY,
   });
 
   Map<String, dynamic> toJson() {
@@ -24,6 +28,8 @@ class SaveLocationRequest {
       'union_id': unionId,
     };
     if (roadAndHouse != null) map['road_and_house'] = roadAndHouse;
+    if (coordX != null) map['coord_x'] = coordX;
+    if (coordY != null) map['coord_y'] = coordY;
     return map;
   }
 }

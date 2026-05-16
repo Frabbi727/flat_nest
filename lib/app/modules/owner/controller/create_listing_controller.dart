@@ -56,6 +56,24 @@ class CreateListingController extends BaseController {
   final union = RxnString();
   final roadAndHouse = TextEditingController();
   final activeDropdown = RxnString();
+  final coordX = RxnDouble();
+  final coordY = RxnDouble();
+  final pinnedAddress = RxnString();
+
+  void setCoordinates(double lat, double lng, {String? address}) {
+    coordX.value = lat;
+    coordY.value = lng;
+    pinnedAddress.value = address;
+    if (address != null && roadAndHouse.text.trim().isEmpty) {
+      roadAndHouse.text = address;
+    }
+  }
+
+  void clearCoordinates() {
+    coordX.value = null;
+    coordY.value = null;
+    pinnedAddress.value = null;
+  }
 
   // Geo API item lists
   final divisionItems = <GeoItemModel>[].obs;
@@ -295,6 +313,8 @@ class CreateListingController extends BaseController {
         upazilaId: _upazilaId!,
         unionId: _unionId!,
         roadAndHouse: rh.isEmpty ? null : rh,
+        coordX: coordX.value,
+        coordY: coordY.value,
       ),
     );
     hideLoading();

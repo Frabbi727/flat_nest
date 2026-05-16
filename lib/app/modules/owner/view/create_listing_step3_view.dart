@@ -4,6 +4,7 @@ import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../../listing/model/geo_model.dart';
 import '../controller/create_listing_controller.dart';
+import 'map_picker_view.dart';
 
 class CreateListingStep3View extends GetView<CreateListingController> {
   const CreateListingStep3View({super.key});
@@ -86,6 +87,13 @@ class CreateListingStep3View extends GetView<CreateListingController> {
                   ),
                 ),
               ),
+
+              // ── Map pin card ──────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: _MapPinCard(t: t),
+              ),
+
               if (controller.union.value != null) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -338,6 +346,181 @@ class _GeoSelect extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Map pin card ──────────────────────────────────────────────────────────────
+
+class _MapPinCard extends GetView<CreateListingController> {
+  final FlatNestTheme t;
+  const _MapPinCard({required this.t});
+
+  Future<void> _openPicker() async {
+    final result = await MapPickerView.open(
+      lat: controller.coordX.value,
+      lng: controller.coordY.value,
+    );
+    if (result != null) {
+      controller.setCoordinates(result.lat, result.lng, address: result.address);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pin exact location',
+          style: AppTextStyles.bodySmall.copyWith(
+            color: t.inkMid,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+            letterSpacing: 0.1,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Obx(() {
+          final lat = controller.coordX.value;
+          final lng = controller.coordY.value;
+          final hasPin = lat != null && lng != null;
+
+          if (!hasPin) {
+            return GestureDetector(
+              onTap: _openPicker,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: t.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: t.primary.withValues(alpha: 0.4),
+                      style: BorderStyle.solid),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: t.primarySoft,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.add_location_alt_rounded,
+                          color: t.primary, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tap to pin on map',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: t.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Helps renters find your flat faster',
+                            style: TextStyle(fontSize: 11, color: t.inkSoft),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: t.inkSoft, size: 20),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Coordinates pinned — show summary card
+          return Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: t.primarySoft,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: t.primary.withValues(alpha: 0.35)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: t.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.location_on_rounded,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (controller.pinnedAddress.value != null)
+                        Text(
+                          controller.pinnedAddress.value!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: t.primaryInk,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      Text(
+                        '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: t.primaryInk.withValues(alpha: 0.7),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _openPicker,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: t.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Edit',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: t.primary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: controller.clearCoordinates,
+                  child: Icon(Icons.close_rounded,
+                      size: 18, color: t.primaryInk.withValues(alpha: 0.5)),
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 4),
+        Text(
+          'Optional — helps renters navigate directly to your flat',
+          style: AppTextStyles.caption.copyWith(color: t.inkSoft, fontSize: 11),
+        ),
+      ],
     );
   }
 }
