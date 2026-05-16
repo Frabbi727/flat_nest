@@ -15,8 +15,8 @@ class RegisterStep2View extends GetView<RegisterController> {
       t: t,
       step: 1,
       onBack: controller.goBack,
-      title: 'Tell us about you',
-      subtitle: 'Pick the option that fits best — you can switch later.',
+      title: 'Your role',
+      subtitle: 'Pick how you\'ll use FlatNest — you can switch anytime.',
       child: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -52,41 +52,6 @@ class RegisterStep2View extends GetView<RegisterController> {
                 icon: Icons.home_work_outlined,
                 selected: controller.selectedRole.value == 'owner',
                 onTap: () => controller.selectedRole.value = 'owner',
-              ),
-              const SizedBox(height: 28),
-              // DOB section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    'DATE OF BIRTH',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: t.inkMid,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  Text(
-                    '${controller.dobLabel} · age ${controller.age}',
-                    style: TextStyle(fontSize: 12, color: t.inkSoft),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _DOBPicker(t: t, controller: controller),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Icon(Icons.info_outline, size: 12, color: t.inkSoft),
-                  const SizedBox(width: 4),
-                  Text(
-                    'You must be 18 or older to use FlatNest.',
-                    style: TextStyle(fontSize: 11, color: t.inkSoft),
-                  ),
-                ],
               ),
               const SizedBox(height: 28),
               _ContinueBtn(
@@ -223,65 +188,6 @@ class _RoleCard extends StatelessWidget {
                   ? const Icon(Icons.check, color: Colors.white, size: 14)
                   : null,
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DOBPicker extends StatelessWidget {
-  final FlatNestTheme t;
-  final RegisterController controller;
-
-  const _DOBPicker({required this.t, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final picked = await showDatePicker(
-          context: context,
-          initialDate: DateTime(
-              controller.dobYear.value,
-              controller.dobMonth.value,
-              controller.dobDay.value),
-          firstDate: DateTime(1920),
-          lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-          builder: (ctx, child) => Theme(
-            data: Theme.of(ctx).copyWith(
-              colorScheme: ColorScheme.light(primary: t.primary),
-            ),
-            child: child!,
-          ),
-        );
-        if (picked != null) {
-          controller.dobDay.value = picked.day;
-          controller.dobMonth.value = picked.month;
-          controller.dobYear.value = picked.year;
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          color: t.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: t.borderSoft),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.cake_outlined, color: t.inkSoft, size: 20),
-            const SizedBox(width: 12),
-            Obx(() => Text(
-                  controller.dobLabel,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: t.primary,
-                  ),
-                )),
-            const Spacer(),
-            Icon(Icons.chevron_right, color: t.inkSoft),
           ],
         ),
       ),

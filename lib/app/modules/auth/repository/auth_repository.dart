@@ -16,7 +16,7 @@ class AuthRepository extends BaseRepository {
       );
       return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 200);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -38,24 +38,21 @@ class AuthRepository extends BaseRepository {
       );
       return Success(data: AuthResponse.fromJson(response.data), statusCode: response.statusCode ?? 201);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
   Future<Resource<Map<String, dynamic>>> saveDetails({
     required String role,
-   // required String dateOfBirth,
   }) async {
     try {
       final response = await apiClient.patch(
         path: ApiEndpoints.registerDetails,
-        data: {'role': role,
-        //  'date_of_birth': dateOfBirth
-        },
+        data: {'role': role},
       );
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -76,7 +73,7 @@ class AuthRepository extends BaseRepository {
         statusCode: response.statusCode ?? 200,
       );
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
@@ -85,7 +82,7 @@ class AuthRepository extends BaseRepository {
       final response = await apiClient.post(path: ApiEndpoints.logout);
       return Success(data: response.data as Map<String, dynamic>, statusCode: response.statusCode ?? 200);
     } catch (e) {
-      return Error(e.toString(), statusCode: 500);
+      return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 }
