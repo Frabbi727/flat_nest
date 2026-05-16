@@ -19,7 +19,7 @@ class LoginView extends GetView<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 72),
+              SizedBox(height: MediaQuery.of(context).padding.top + 24),
               _buildLogo(t),
               const SizedBox(height: 24),
               _buildHeader(t),

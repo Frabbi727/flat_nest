@@ -22,6 +22,9 @@ class RenterHomeController extends BaseController {
   final listings = <ListingModel>[].obs;
   final savedIds = RxSet<String>({});
 
+  // Wishlist — independent of the discovery filter state
+  final _wishlistItems = <ListingModel>[].obs;
+
   // Reference data (from API)
   final listingTypes = <ListingTypeModel>[].obs;
   final amenities = <AmenityModel>[].obs;
@@ -102,8 +105,9 @@ class RenterHomeController extends BaseController {
 
   Future<void> fetchWishlist() async {
     final result = await _listingRepository.getWishlist();
-    if (result case Success(data: final ids?)) {
-      savedIds.assignAll(ids);
+    if (result case Success(data: final items?)) {
+      _wishlistItems.value = items;
+      savedIds.assignAll(items.map((l) => l.id).toSet());
     }
   }
 
@@ -198,31 +202,51 @@ class RenterHomeController extends BaseController {
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
 
-  void toggleSave(String listingId) async {
-    final wasSaved = savedIds.contains(listingId);
+  void toggleSave(ListingModel listing) async {
+    final wasSaved = savedIds.contains(listing.id);
+
+    // Optimistic update
     if (wasSaved) {
-      savedIds.remove(listingId);
+      savedIds.remove(listing.id);
+      _wishlistItems.removeWhere((l) => l.id == listing.id);
     } else {
-      savedIds.add(listingId);
+      savedIds.add(listing.id);
+      _wishlistItems.add(listing);
     }
 
-    final result = wasSaved
-        ? await _listingRepository.removeFromWishlist(listingId)
-        : await _listingRepository.saveToWishlist(listingId);
+    final result = await _listingRepository.toggleWishlist(listing.id);
 
-    if (result is Error<void>) {
-      if (wasSaved) {
-        savedIds.add(listingId);
-      } else {
-        savedIds.remove(listingId);
-      }
+    switch (result) {
+      case Success(data: final message?):
+        final isNowSaved = message == 'Saved';
+        if (isNowSaved && !savedIds.contains(listing.id)) {
+          savedIds.add(listing.id);
+          if (!_wishlistItems.any((l) => l.id == listing.id)) {
+            _wishlistItems.add(listing);
+          }
+        } else if (!isNowSaved && savedIds.contains(listing.id)) {
+          savedIds.remove(listing.id);
+          _wishlistItems.removeWhere((l) => l.id == listing.id);
+        }
+      case Error():
+        // Revert optimistic update
+        if (wasSaved) {
+          savedIds.add(listing.id);
+          if (!_wishlistItems.any((l) => l.id == listing.id)) {
+            _wishlistItems.add(listing);
+          }
+        } else {
+          savedIds.remove(listing.id);
+          _wishlistItems.removeWhere((l) => l.id == listing.id);
+        }
+      default:
+        break;
     }
   }
 
   bool isSaved(String listingId) => savedIds.contains(listingId);
 
-  List<ListingModel> get wishlistListings =>
-      listings.where((l) => savedIds.contains(l.id)).toList();
+  List<ListingModel> get wishlistListings => _wishlistItems;
 
   void openListing(ListingModel listing) {
     Get.toNamed(Routes.listingDetail, arguments: listing);

@@ -16,21 +16,24 @@ class OwnerHomeView extends GetView<OwnerController> {
       backgroundColor: t.bg,
       body: Obx(() {
         final tab = controller.activeTab.value;
-        return Column(
-          children: [
-            Expanded(
-              child: IndexedStack(
-                index: tab,
-                children: [
-                  _DashboardTab(t: t),
-                  _MyListingsTab(t: t),
-                  _MessagesPlaceholder(t: t),
-                  _ProfileTab(t: t),
-                ],
+        return SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: IndexedStack(
+                  index: tab,
+                  children: [
+                    _DashboardTab(t: t),
+                    _MyListingsTab(t: t),
+                    _MessagesPlaceholder(t: t),
+                    _ProfileTab(t: t),
+                  ],
+                ),
               ),
-            ),
-            _OwnerBottomNav(t: t, activeTab: tab),
-          ],
+              _OwnerBottomNav(t: t, activeTab: tab),
+            ],
+          ),
         );
       }),
     );

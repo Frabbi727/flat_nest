@@ -25,7 +25,9 @@ class RegChrome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: t.bg,
-      body:  Column(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
           children: [
             // Top bar
             Padding(
@@ -122,7 +124,7 @@ class RegChrome extends StatelessWidget {
             ),
           ],
         ),
-
+      )
     );
   }
 }

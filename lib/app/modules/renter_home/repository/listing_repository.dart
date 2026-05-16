@@ -3,6 +3,7 @@ import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/resource.dart';
+
 import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
@@ -52,38 +53,28 @@ class ListingRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<List<String>>> getWishlist() async {
+  Future<Resource<List<ListingModel>>> getWishlist() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.wishlist);
+      return parseListResponse(response, ListingModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<String>> toggleWishlist(String listingId) async {
+    try {
+      final response =
+          await apiClient.post(path: ApiEndpoints.wishlistToggle(listingId));
       final body = ApiResponse.fromJson(
         response.data as Map<String, dynamic>,
-        (j) => (j as List).map((e) => e as String).toList(),
+        (_) => null,
       );
       if (body.success) {
         return Success(
-            data: body.data ?? [], statusCode: response.statusCode ?? 200);
+            data: body.message ?? 'Saved', statusCode: response.statusCode ?? 200);
       }
       return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
-    } catch (e) {
-      return Error(parseError(e), statusCode: parseStatusCode(e));
-    }
-  }
-
-  Future<Resource<void>> saveToWishlist(String listingId) async {
-    try {
-      final response =
-          await apiClient.post(path: ApiEndpoints.wishlistItem(listingId));
-      return parseVoidResponse(response);
-    } catch (e) {
-      return Error(parseError(e), statusCode: parseStatusCode(e));
-    }
-  }
-
-  Future<Resource<void>> removeFromWishlist(String listingId) async {
-    try {
-      final response =
-          await apiClient.delete(path: ApiEndpoints.listing(listingId));
-      return parseVoidResponse(response);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

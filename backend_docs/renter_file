@@ -34,4 +34,26 @@ Here's the full API reference:
   └─────────────────┴─────────┴──────────────────────────────────────────────────┘
 
   All params are optional — you can use any combination.
-/
+
+
+ Now the response will look like:
+
+   {
+       "success": true,
+       "message": "Saved",
+       "data": {
+           "saved": true
+       }
+   }
+
+   or when removed:
+
+   {
+       "success": true,
+       "message": "Removed",
+       "data": {
+           "saved": false
+       }
+   }
+
+   The frontend can use data.saved to toggle the heart icon directly.

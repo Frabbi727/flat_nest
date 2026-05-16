@@ -60,7 +60,7 @@ class WishlistView extends GetView<RenterHomeController> {
                             t: t,
                             listing: items[i],
                             saved: true,
-                            onToggleSave: () => controller.toggleSave(items[i].id),
+                            onToggleSave: () => controller.toggleSave(items[i]),
                             onTap: () => controller.openListing(items[i]),
                           ),
                         ),

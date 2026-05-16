@@ -18,15 +18,18 @@ class RenterHomeView extends GetView<RenterHomeController> {
       final tab = controller.activeTab.value;
       return Scaffold(
         backgroundColor: t.bg,
-        body: IndexedStack(
-          index: tab,
-          children: const [
-            DiscoveryView(),
-            _MapPlaceholder(),
-            WishlistView(),
-            MessagesPlaceholderView(),
-            ProfilePlaceholderView(),
-          ],
+        body: SafeArea(
+          bottom: false,
+          child: IndexedStack(
+            index: tab,
+            children: const [
+              DiscoveryView(),
+              _MapPlaceholder(),
+              WishlistView(),
+              MessagesPlaceholderView(),
+              ProfilePlaceholderView(),
+            ],
+          ),
         ),
         bottomNavigationBar: _BottomNav(t: t, activeTab: tab),
       );

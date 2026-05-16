@@ -35,14 +35,16 @@ class _ListingDetailViewState extends State<ListingDetailView> {
         children: [
           CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _PhotoSection(
-                t: t,
-                listing: listing,
-                photoIndex: _photoIndex,
-                onPhotoChange: (i) => setState(() => _photoIndex = i),
-                saved: controller.isSaved(listing.id),
-                onToggleSave: () => controller.toggleSave(listing.id),
-              )),
+              SliverToBoxAdapter(
+                child: Obx(() => _PhotoSection(
+                  t: t,
+                  listing: listing,
+                  photoIndex: _photoIndex,
+                  onPhotoChange: (i) => setState(() => _photoIndex = i),
+                  saved: controller.isSaved(listing.id),
+                  onToggleSave: () => controller.toggleSave(listing),
+                )),
+              ),
               SliverToBoxAdapter(child: _ContentSection(t: t, listing: listing)),
               const SliverToBoxAdapter(child: SizedBox(height: 110)),
             ],

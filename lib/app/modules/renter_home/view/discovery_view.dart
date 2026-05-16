@@ -73,14 +73,14 @@ class DiscoveryView extends GetView<RenterHomeController> {
                                             t: t,
                                             listing: listing,
                                             saved: controller.isSaved(listing.id),
-                                            onToggleSave: () => controller.toggleSave(listing.id),
+                                            onToggleSave: () => controller.toggleSave(listing),
                                             onTap: () => controller.openListing(listing),
                                           )
                                         : ListingCardWidget(
                                             t: t,
                                             listing: listing,
                                             saved: controller.isSaved(listing.id),
-                                            onToggleSave: () => controller.toggleSave(listing.id),
+                                            onToggleSave: () => controller.toggleSave(listing),
                                             onTap: () => controller.openListing(listing),
                                           ),
                                   );

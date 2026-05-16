@@ -22,7 +22,7 @@ class ApiEndpoints {
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
   static const String wishlist = '/wishlist';
-  static String wishlistItem(String id) => '/wishlist/$id';
+  static String wishlistToggle(String id) => '/wishlist/$id/toggle';
 
   // ── Chat ──────────────────────────────────────────────────────────────────
   static const String chats = '/chats';
