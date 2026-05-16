@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
@@ -24,6 +25,10 @@ class RenterHomeController extends BaseController {
 
   // Wishlist — independent of the discovery filter state
   final _wishlistItems = <ListingModel>[].obs;
+
+  // Search
+  final searchQuery = ''.obs;
+  final searchTextController = TextEditingController();
 
   // Per-listing toggle loading state
   final _togglingIds = RxSet<String>({});
@@ -57,9 +62,20 @@ class RenterHomeController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    debounce(
+      searchQuery,
+      (_) => fetchListings(),
+      time: const Duration(milliseconds: 500),
+    );
     _loadReferenceData();
     fetchListings();
     fetchWishlist();
+  }
+
+  @override
+  void onClose() {
+    searchTextController.dispose();
+    super.onClose();
   }
 
   String get userName =>
@@ -85,6 +101,7 @@ class RenterHomeController extends BaseController {
 
   Future<void> fetchListings() async {
     showLoading();
+    final query = searchQuery.value.trim();
     final result = await _listingRepository.getListings(
       listingTypeId: selectedTypeId.value,
       maxPrice: filterMaxPrice.value < 80000 ? filterMaxPrice.value : null,
@@ -93,6 +110,7 @@ class RenterHomeController extends BaseController {
       districtId: filterDistrictId.value,
       upazilaId: filterUpazilaId.value,
       unionId: filterUnionId.value,
+      search: query.isEmpty ? null : query,
     );
     hideLoading();
 
@@ -194,6 +212,8 @@ class RenterHomeController extends BaseController {
     districts.clear();
     upazilas.clear();
     unions.clear();
+    searchQuery.value = '';
+    searchTextController.clear();
     fetchListings();
   }
 

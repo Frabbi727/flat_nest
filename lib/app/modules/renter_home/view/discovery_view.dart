@@ -215,7 +215,7 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends GetView<RenterHomeController> {
   final FlatNestTheme t;
   final VoidCallback onFilterTap;
 
@@ -236,9 +236,17 @@ class _SearchBar extends StatelessWidget {
           Icon(Icons.search, color: t.inkSoft, size: 20),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              'Search flats by area or feature',
-              style: TextStyle(color: t.inkFaint, fontSize: 14),
+            child: TextField(
+              controller: controller.searchTextController,
+              onChanged: (v) => controller.searchQuery.value = v,
+              style: TextStyle(color: t.ink, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Search flats by area or feature',
+                hintStyle: TextStyle(color: t.inkFaint, fontSize: 14),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
             ),
           ),
           GestureDetector(
