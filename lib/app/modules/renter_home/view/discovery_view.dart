@@ -68,21 +68,27 @@ class DiscoveryView extends GetView<RenterHomeController> {
                                   final isFeatured = i == 0;
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 16),
-                                    child: isFeatured
-                                        ? _FeaturedCard(
-                                            t: t,
-                                            listing: listing,
-                                            saved: controller.isSaved(listing.id),
-                                            onToggleSave: () => controller.toggleSave(listing),
-                                            onTap: () => controller.openListing(listing),
-                                          )
-                                        : ListingCardWidget(
-                                            t: t,
-                                            listing: listing,
-                                            saved: controller.isSaved(listing.id),
-                                            onToggleSave: () => controller.toggleSave(listing),
-                                            onTap: () => controller.openListing(listing),
-                                          ),
+                                    child: Obx(() {
+                                      final saved = controller.isSaved(listing.id);
+                                      final loading = controller.isToggling(listing.id);
+                                      return isFeatured
+                                          ? _FeaturedCard(
+                                              t: t,
+                                              listing: listing,
+                                              saved: saved,
+                                              isLoading: loading,
+                                              onToggleSave: () => controller.toggleSave(listing),
+                                              onTap: () => controller.openListing(listing),
+                                            )
+                                          : ListingCardWidget(
+                                              t: t,
+                                              listing: listing,
+                                              saved: saved,
+                                              isLoading: loading,
+                                              onToggleSave: () => controller.toggleSave(listing),
+                                              onTap: () => controller.openListing(listing),
+                                            );
+                                    }),
                                   );
                                 },
                               ),
@@ -285,6 +291,7 @@ class _FeaturedCard extends StatelessWidget {
   final FlatNestTheme t;
   final ListingModel listing;
   final bool saved;
+  final bool isLoading;
   final VoidCallback onToggleSave;
   final VoidCallback onTap;
 
@@ -292,6 +299,7 @@ class _FeaturedCard extends StatelessWidget {
     required this.t,
     required this.listing,
     required this.saved,
+    this.isLoading = false,
     required this.onToggleSave,
     required this.onTap,
   });
@@ -385,7 +393,7 @@ class _FeaturedCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: _HeartButton(t: t, saved: saved, onTap: onToggleSave),
+                  child: _HeartButton(t: t, saved: saved, isLoading: isLoading, onTap: onToggleSave),
                 ),
                 // Info
                 Positioned(
@@ -467,14 +475,15 @@ class _FeaturedCard extends StatelessWidget {
 class _HeartButton extends StatelessWidget {
   final FlatNestTheme t;
   final bool saved;
+  final bool isLoading;
   final VoidCallback onTap;
 
-  const _HeartButton({required this.t, required this.saved, required this.onTap});
+  const _HeartButton({required this.t, required this.saved, this.isLoading = false, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         width: 36,
         height: 36,
@@ -482,11 +491,16 @@ class _HeartButton extends StatelessWidget {
           shape: BoxShape.circle,
           color: Colors.white.withValues(alpha: 0.9),
         ),
-        child: Icon(
-          saved ? Icons.favorite : Icons.favorite_border,
-          color: saved ? t.secondary : t.inkSoft,
-          size: 18,
-        ),
+        child: isLoading
+            ? Padding(
+                padding: const EdgeInsets.all(9),
+                child: CircularProgressIndicator(strokeWidth: 2, color: t.inkSoft),
+              )
+            : Icon(
+                saved ? Icons.favorite : Icons.favorite_border,
+                color: saved ? t.secondary : t.inkSoft,
+                size: 18,
+              ),
       ),
     );
   }

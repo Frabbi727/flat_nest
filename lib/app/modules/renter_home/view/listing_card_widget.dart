@@ -6,6 +6,7 @@ class ListingCardWidget extends StatelessWidget {
   final FlatNestTheme t;
   final ListingModel listing;
   final bool saved;
+  final bool isLoading;
   final VoidCallback onToggleSave;
   final VoidCallback onTap;
 
@@ -14,6 +15,7 @@ class ListingCardWidget extends StatelessWidget {
     required this.t,
     required this.listing,
     required this.saved,
+    this.isLoading = false,
     required this.onToggleSave,
     required this.onTap,
   });
@@ -64,7 +66,7 @@ class ListingCardWidget extends StatelessWidget {
                   top: 6,
                   right: 6,
                   child: GestureDetector(
-                    onTap: onToggleSave,
+                    onTap: isLoading ? null : onToggleSave,
                     child: Container(
                       width: 34,
                       height: 34,
@@ -72,11 +74,19 @@ class ListingCardWidget extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
-                      child: Icon(
-                        saved ? Icons.favorite : Icons.favorite_border,
-                        color: saved ? t.secondary : t.inkSoft,
-                        size: 17,
-                      ),
+                      child: isLoading
+                          ? Padding(
+                              padding: const EdgeInsets.all(9),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: t.inkSoft,
+                              ),
+                            )
+                          : Icon(
+                              saved ? Icons.favorite : Icons.favorite_border,
+                              color: saved ? t.secondary : t.inkSoft,
+                              size: 17,
+                            ),
                     ),
                   ),
                 ),

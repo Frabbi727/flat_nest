@@ -25,6 +25,9 @@ class RenterHomeController extends BaseController {
   // Wishlist — independent of the discovery filter state
   final _wishlistItems = <ListingModel>[].obs;
 
+  // Per-listing toggle loading state
+  final _togglingIds = RxSet<String>({});
+
   // Reference data (from API)
   final listingTypes = <ListingTypeModel>[].obs;
   final amenities = <AmenityModel>[].obs;
@@ -203,32 +206,37 @@ class RenterHomeController extends BaseController {
   // ── Wishlist ──────────────────────────────────────────────────────────────
 
   void toggleSave(ListingModel listing) async {
+    if (_togglingIds.contains(listing.id)) return;
     final wasSaved = savedIds.contains(listing.id);
 
-    // Optimistic update
+    // Optimistic update — instant visual feedback
+    _togglingIds.add(listing.id);
     if (wasSaved) {
       savedIds.remove(listing.id);
       _wishlistItems.removeWhere((l) => l.id == listing.id);
     } else {
       savedIds.add(listing.id);
-      _wishlistItems.add(listing);
+      if (!_wishlistItems.any((l) => l.id == listing.id)) {
+        _wishlistItems.add(listing);
+      }
     }
 
     final result = await _listingRepository.toggleWishlist(listing.id);
+    _togglingIds.remove(listing.id);
 
     switch (result) {
-      case Success(data: final message?):
-        final isNowSaved = message == 'Saved';
-        if (isNowSaved && !savedIds.contains(listing.id)) {
+      case Success(data: final isSaved?):
+        // Sync with server truth
+        if (isSaved && !savedIds.contains(listing.id)) {
           savedIds.add(listing.id);
           if (!_wishlistItems.any((l) => l.id == listing.id)) {
             _wishlistItems.add(listing);
           }
-        } else if (!isNowSaved && savedIds.contains(listing.id)) {
+        } else if (!isSaved && savedIds.contains(listing.id)) {
           savedIds.remove(listing.id);
           _wishlistItems.removeWhere((l) => l.id == listing.id);
         }
-      case Error():
+      case Error(message: final msg):
         // Revert optimistic update
         if (wasSaved) {
           savedIds.add(listing.id);
@@ -239,12 +247,15 @@ class RenterHomeController extends BaseController {
           savedIds.remove(listing.id);
           _wishlistItems.removeWhere((l) => l.id == listing.id);
         }
+        showError(msg);
       default:
         break;
     }
   }
 
   bool isSaved(String listingId) => savedIds.contains(listingId);
+
+  bool isToggling(String listingId) => _togglingIds.contains(listingId);
 
   List<ListingModel> get wishlistListings => _wishlistItems;
 

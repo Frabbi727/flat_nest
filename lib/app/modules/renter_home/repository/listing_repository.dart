@@ -62,17 +62,17 @@ class ListingRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<String>> toggleWishlist(String listingId) async {
+  Future<Resource<bool>> toggleWishlist(String listingId) async {
     try {
       final response =
           await apiClient.post(path: ApiEndpoints.wishlistToggle(listingId));
       final body = ApiResponse.fromJson(
         response.data as Map<String, dynamic>,
-        (_) => null,
+        (j) => (j as Map<String, dynamic>)['saved'] as bool,
       );
       if (body.success) {
         return Success(
-            data: body.message ?? 'Saved', statusCode: response.statusCode ?? 200);
+            data: body.data ?? false, statusCode: response.statusCode ?? 200);
       }
       return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
     } catch (e) {

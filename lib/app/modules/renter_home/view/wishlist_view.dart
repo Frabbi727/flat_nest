@@ -54,16 +54,20 @@ class WishlistView extends GetView<RenterHomeController> {
                       child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                         itemCount: items.length,
-                        itemBuilder: (_, i) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: ListingCardWidget(
-                            t: t,
-                            listing: items[i],
-                            saved: true,
-                            onToggleSave: () => controller.toggleSave(items[i]),
-                            onTap: () => controller.openListing(items[i]),
-                          ),
-                        ),
+                        itemBuilder: (_, i) {
+                          final item = items[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Obx(() => ListingCardWidget(
+                              t: t,
+                              listing: item,
+                              saved: controller.isSaved(item.id),
+                              isLoading: controller.isToggling(item.id),
+                              onToggleSave: () => controller.toggleSave(item),
+                              onTap: () => controller.openListing(item),
+                            )),
+                          );
+                        },
                       ),
                     ),
                   ],

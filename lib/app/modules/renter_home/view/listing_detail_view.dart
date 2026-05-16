@@ -42,6 +42,7 @@ class _ListingDetailViewState extends State<ListingDetailView> {
                   photoIndex: _photoIndex,
                   onPhotoChange: (i) => setState(() => _photoIndex = i),
                   saved: controller.isSaved(listing.id),
+                  isLoading: controller.isToggling(listing.id),
                   onToggleSave: () => controller.toggleSave(listing),
                 )),
               ),
@@ -85,6 +86,7 @@ class _PhotoSection extends StatelessWidget {
   final int photoIndex;
   final ValueChanged<int> onPhotoChange;
   final bool saved;
+  final bool isLoading;
   final VoidCallback onToggleSave;
 
   const _PhotoSection({
@@ -93,6 +95,7 @@ class _PhotoSection extends StatelessWidget {
     required this.photoIndex,
     required this.onPhotoChange,
     required this.saved,
+    this.isLoading = false,
     required this.onToggleSave,
   });
 
@@ -138,7 +141,7 @@ class _PhotoSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: onToggleSave,
+                  onTap: isLoading ? null : onToggleSave,
                   child: Container(
                     width: 40,
                     height: 40,
@@ -146,11 +149,19 @@ class _PhotoSection extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.white.withValues(alpha: 0.95),
                     ),
-                    child: Icon(
-                      saved ? Icons.favorite : Icons.favorite_border,
-                      color: saved ? t.secondary : t.inkSoft,
-                      size: 18,
-                    ),
+                    child: isLoading
+                        ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: t.inkSoft,
+                            ),
+                          )
+                        : Icon(
+                            saved ? Icons.favorite : Icons.favorite_border,
+                            color: saved ? t.secondary : t.inkSoft,
+                            size: 18,
+                          ),
                   ),
                 ),
               ],
