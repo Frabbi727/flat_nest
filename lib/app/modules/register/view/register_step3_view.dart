@@ -75,26 +75,6 @@ class RegisterStep3View extends GetView<RegisterController> {
             ),
             const SizedBox(height: 32),
 
-            // Take photo
-            _ActionButton(
-              t: t,
-              label: 'Take a photo',
-              icon: Icons.camera_alt_outlined,
-              primary: true,
-              onTap: () => controller.pickImage(ImageSource.camera),
-            ),
-            const SizedBox(height: 12),
-
-            // Choose from gallery
-            _ActionButton(
-              t: t,
-              label: 'Choose from gallery',
-              icon: Icons.image_outlined,
-              primary: false,
-              onTap: () => controller.pickImage(ImageSource.gallery),
-            ),
-            const SizedBox(height: 32),
-
             // Finish button
             GestureDetector(
               onTap: isLoading ? null : controller.finishRegistration,
@@ -194,48 +174,3 @@ class RegisterStep3View extends GetView<RegisterController> {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final FlatNestTheme t;
-  final String label;
-  final IconData icon;
-  final bool primary;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.t,
-    required this.label,
-    required this.icon,
-    required this.primary,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: primary ? t.primary : t.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: primary ? null : Border.all(color: t.border),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: primary ? Colors.white : t.ink, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: primary ? Colors.white : t.ink,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

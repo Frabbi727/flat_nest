@@ -23,8 +23,58 @@ class CreateListingController extends BaseController {
   String? _listingId;
   bool _editMode = false;
   bool _autoSubmit = false;
+  bool _anyStepChanged = false;
 
   bool get editMode => _editMode;
+
+  // Edit-mode initial snapshots — set once from the listing, used for dirty checking
+  String _initTitle = '';
+  int _initPrice = 0;
+  int? _initDeposit;
+  int _initBeds = 0;
+  int _initBaths = 0;
+  int? _initSize;
+  String _initDesc = '';
+  String _initTypeName = '';
+  List<int> _initAmenities = const [];
+  int? _initDivisionId;
+  int? _initDistrictId;
+  int? _initUpazilaId;
+  int? _initUnionId;
+  String _initRoadHouse = '';
+  double? _initCoordX;
+  double? _initCoordY;
+
+  bool get _step1Unchanged {
+    if (!_editMode) return false;
+    final price = int.tryParse(priceController.text.replaceAll(',', '')) ?? 0;
+    final deposit = int.tryParse(depositController.text.replaceAll(',', ''));
+    final size = int.tryParse(sizeController.text);
+    final beds = int.tryParse(bedsController.text) ?? 0;
+    final baths = int.tryParse(bathsController.text) ?? 0;
+    final currentAmenities = (List<int>.from(selectedAmenities)..sort()).join(',');
+    final initAmenities = (List<int>.from(_initAmenities)..sort()).join(',');
+    return titleController.text.trim() == _initTitle &&
+        price == _initPrice &&
+        deposit == _initDeposit &&
+        beds == _initBeds &&
+        baths == _initBaths &&
+        size == _initSize &&
+        descController.text.trim() == _initDesc &&
+        selectedType.value == _initTypeName &&
+        currentAmenities == initAmenities;
+  }
+
+  bool get _step3Unchanged {
+    if (!_editMode) return false;
+    return _divisionId == _initDivisionId &&
+        _districtId == _initDistrictId &&
+        _upazilaId == _initUpazilaId &&
+        _unionId == _initUnionId &&
+        roadAndHouse.text.trim() == _initRoadHouse &&
+        coordX.value == _initCoordX &&
+        coordY.value == _initCoordY;
+  }
 
   // Step 1 — Details
   final titleController = TextEditingController();
@@ -218,6 +268,18 @@ class CreateListingController extends BaseController {
     final baths = int.tryParse(bathsController.text) ?? 0;
     final desc = descController.text.trim();
 
+    // Skip API if nothing changed
+    if (_step1Unchanged) {
+      Get.snackbar(
+        'No changes',
+        'Nothing was changed — moving to the next step.',
+        duration: const Duration(seconds: 2),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      currentStep.value = 1;
+      return;
+    }
+
     showLoading();
 
     if (_editMode && _listingId != null) {
@@ -238,6 +300,7 @@ class CreateListingController extends BaseController {
       hideLoading();
       switch (result) {
         case Success():
+          _anyStepChanged = true;
           currentStep.value = 1;
         case Error(message: final msg):
           showError(msg);
@@ -291,6 +354,7 @@ class CreateListingController extends BaseController {
 
     switch (result) {
       case Success():
+        _anyStepChanged = true;
         currentStep.value = 2;
       case Error(message: final msg):
         showError(msg);
@@ -298,6 +362,18 @@ class CreateListingController extends BaseController {
   }
 
   Future<void> _submitStep3() async {
+    // Skip API if nothing changed
+    if (_step3Unchanged) {
+      Get.snackbar(
+        'No changes',
+        'Nothing was changed — moving to the next step.',
+        duration: const Duration(seconds: 2),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      currentStep.value = 3;
+      return;
+    }
+
     if (!step3Valid) {
       showError('Please select at least the union/area');
       return;
@@ -323,6 +399,7 @@ class CreateListingController extends BaseController {
 
     switch (result) {
       case Success():
+        _anyStepChanged = true;
         currentStep.value = 3;
       case Error(message: final msg):
         showError(msg);
@@ -350,11 +427,19 @@ class CreateListingController extends BaseController {
         }
       } else {
         Get.back();
-        Get.snackbar(
-          'Changes Saved',
-          'Your listing has been sent for re-approval.',
-          duration: const Duration(seconds: 4),
-        );
+        if (_anyStepChanged) {
+          Get.snackbar(
+            'Changes Saved',
+            'Your listing has been sent for re-approval.',
+            duration: const Duration(seconds: 4),
+          );
+        } else {
+          Get.snackbar(
+            'No changes made',
+            'Everything looks the same — no updates were sent.',
+            duration: const Duration(seconds: 3),
+          );
+        }
       }
       return;
     }
@@ -400,6 +485,24 @@ class CreateListingController extends BaseController {
     }
     // Existing photos for preview
     existingPhotos.assignAll(listing.photos);
+
+    // Snapshot for dirty checking
+    _initTitle = listing.title;
+    _initPrice = listing.price;
+    _initDeposit = listing.deposit;
+    _initBeds = listing.beds ?? 0;
+    _initBaths = listing.baths ?? 0;
+    _initSize = listing.size;
+    _initDesc = listing.description ?? '';
+    _initTypeName = listing.type;
+    _initAmenities = listing.amenities.map((a) => a.id).toList();
+    _initDivisionId = listing.divisionId;
+    _initDistrictId = listing.districtId;
+    _initUpazilaId = listing.upazilaId;
+    _initUnionId = listing.unionId;
+    _initRoadHouse = listing.roadAndHouse ?? '';
+    _initCoordX = listing.coordX;
+    _initCoordY = listing.coordY;
   }
 
   void addPhoto(File file) {
