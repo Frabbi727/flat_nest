@@ -162,33 +162,74 @@ class _Step1Form extends StatelessWidget {
           _FormGroup(
             t: t,
             label: 'Type',
-            child: Obx(() => Wrap(
+            child: Obx(() {
+              if (controller.typesLoading.value) {
+                return Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: controller.listingTypes.map((type) {
-                    final active = controller.selectedTypeId.value == type.id;
-                    return GestureDetector(
-                      onTap: () => controller.pickListingType(type),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: active ? t.primary : t.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: active ? t.primary : t.borderSoft),
-                        ),
-                        child: Text(
-                          type.label,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: active ? Colors.white : t.ink,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
+                  children: [72.0, 88.0, 64.0, 80.0]
+                      .map((w) => Container(
+                            width: w,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: t.borderSoft,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ))
+                      .toList(),
+                );
+              }
+              if (controller.listingTypes.isEmpty) {
+                return Row(
+                  children: [
+                    Icon(Icons.error_outline_rounded, size: 16, color: t.inkSoft),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Failed to load types.',
+                      style: AppTextStyles.caption.copyWith(color: t.inkSoft),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: controller.retryLoadTypes,
+                      child: Text(
+                        'Retry',
+                        style: AppTextStyles.caption.copyWith(
+                          color: t.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    );
-                  }).toList(),
-                )),
+                    ),
+                  ],
+                );
+              }
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: controller.listingTypes.map((type) {
+                  final active = controller.selectedTypeId.value == type.id;
+                  return GestureDetector(
+                    onTap: () => controller.pickListingType(type),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: active ? t.primary : t.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: active ? t.primary : t.borderSoft),
+                      ),
+                      child: Text(
+                        type.label,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: active ? Colors.white : t.ink,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            }),
           ),
           Row(
             children: [

@@ -257,7 +257,21 @@ class CreateListingController extends BaseController {
 
   Future<void> _submitStep1() async {
     if (!step1Valid) {
-      showError('Please fill title, rent, beds, and baths');
+      final title = titleController.text.trim();
+      final price = int.tryParse(priceController.text.replaceAll(',', '')) ?? 0;
+      final beds = int.tryParse(bedsController.text) ?? 0;
+      final baths = int.tryParse(bathsController.text) ?? 0;
+      if (selectedTypeId.value == null) {
+        showError('Please select a listing type');
+      } else if (title.isEmpty) {
+        showError('Please enter a listing title');
+      } else if (price <= 0) {
+        showError('Please enter the monthly rent');
+      } else if (beds <= 0) {
+        showError('Please enter the number of bedrooms');
+      } else if (baths <= 0) {
+        showError('Please enter the number of bathrooms');
+      }
       return;
     }
 
@@ -554,20 +568,24 @@ class CreateListingController extends BaseController {
     final amenitiesResult = results[1] as Resource<List<AmenityModel>>;
     final divisionsResult = results[2] as Resource<List<GeoItemModel>>;
 
-    if (typesResult case Success(data: final data?)) {
-      listingTypes.assignAll(data);
-      // In edit mode, try to match the existing type by name; otherwise default to first
-      if (data.isNotEmpty) {
-        final match = _editMode
-            ? data.where((t) => t.name == selectedType.value).firstOrNull
-            : null;
-        if (match != null) {
-          selectedTypeId.value = match.id;
-        } else if (!_editMode) {
-          selectedType.value = data.first.name;
-          selectedTypeId.value = data.first.id;
+    switch (typesResult) {
+      case Success(data: final data?):
+        listingTypes.assignAll(data);
+        if (data.isNotEmpty) {
+          final match = _editMode
+              ? data.where((t) => t.name == selectedType.value).firstOrNull
+              : null;
+          if (match != null) {
+            selectedTypeId.value = match.id;
+          } else if (!_editMode) {
+            selectedType.value = data.first.name;
+            selectedTypeId.value = data.first.id;
+          }
         }
-      }
+      case Error(message: final msg):
+        showError('Could not load listing types: $msg');
+      default:
+        break;
     }
     if (amenitiesResult case Success(data: final data?)) {
       amenities.assignAll(data);
@@ -581,6 +599,8 @@ class CreateListingController extends BaseController {
       }
     }
   }
+
+  void retryLoadTypes() => _fetchListingTypes();
 
   Future<void> _loadGeoForEditMode() async {
     if (_divisionId == null) return;
