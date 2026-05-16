@@ -236,69 +236,111 @@ class _GeoSelectState extends State<_GeoSelect> {
               ),
             ),
             const SizedBox(height: 6),
-            GestureDetector(
-              onTap: widget.isDisabled || widget.isLoading
-                  ? null
-                  : widget.onToggle,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: t.surface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: widget.isOpen ? t.primary : t.borderSoft,
-                    width: widget.isOpen ? 1.5 : 1,
-                  ),
-                  boxShadow: widget.isOpen
-                      ? [
-                          BoxShadow(
-                            color: t.primary.withValues(alpha: 0.12),
-                            blurRadius: 0,
-                            spreadRadius: 4,
-                          ),
-                        ]
-                      : null,
+            // Trigger / search — same slot, one element
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: widget.isOpen ? t.primary : t.borderSoft,
+                  width: widget.isOpen ? 1.5 : 1,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.value ?? widget.placeholder,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: widget.value != null ? t.ink : t.inkFaint,
-                          fontWeight: widget.value != null
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          fontSize: 15,
+                boxShadow: widget.isOpen
+                    ? [
+                        BoxShadow(
+                          color: t.primary.withValues(alpha: 0.12),
+                          blurRadius: 0,
+                          spreadRadius: 4,
                         ),
+                      ]
+                    : null,
+              ),
+              child: widget.isOpen
+                  // ── Open: inline search field ──
+                  ? Row(
+                      children: [
+                        Icon(Icons.search_rounded, size: 18, color: t.inkSoft),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocus,
+                            onChanged: (v) => setState(() => _query = v),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: t.ink,
+                              fontSize: 15,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText:
+                                  'Search ${widget.label.toLowerCase()}…',
+                              hintStyle: TextStyle(
+                                  fontSize: 15, color: t.inkFaint),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                        if (_query.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                            child: Icon(Icons.close_rounded,
+                                size: 18, color: t.inkSoft),
+                          )
+                        else
+                          GestureDetector(
+                            onTap: widget.onToggle,
+                            child: Icon(Icons.keyboard_arrow_up_rounded,
+                                size: 20, color: t.inkSoft),
+                          ),
+                      ],
+                    )
+                  // ── Closed: tap-to-open display ──
+                  : GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: widget.isDisabled || widget.isLoading
+                          ? null
+                          : widget.onToggle,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.value ?? widget.placeholder,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color:
+                                    widget.value != null ? t.ink : t.inkFaint,
+                                fontWeight: widget.value != null
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          if (widget.isLoading)
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: t.primary,
+                              ),
+                            )
+                          else
+                            Icon(Icons.keyboard_arrow_down_rounded,
+                                color: t.inkSoft, size: 20),
+                        ],
                       ),
                     ),
-                    if (widget.isLoading)
-                      SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: t.primary,
-                        ),
-                      )
-                    else
-                      AnimatedRotation(
-                        duration: const Duration(milliseconds: 200),
-                        turns: widget.isOpen ? 0.5 : 0,
-                        child: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: t.inkSoft,
-                          size: 20,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
             ),
-            if (widget.isOpen && widget.items.isNotEmpty)
+
+            // ── Dropdown list ──
+            if (widget.isOpen)
               Container(
                 margin: const EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
@@ -313,110 +355,45 @@ class _GeoSelectState extends State<_GeoSelect> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    // Search field
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
-                      decoration: BoxDecoration(
-                        color: t.bgAlt,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        border: Border(
-                            bottom: BorderSide(color: t.borderSoft)),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        focusNode: _searchFocus,
-                        onChanged: (v) => setState(() => _query = v),
-                        style: TextStyle(fontSize: 14, color: t.ink),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          hintText: 'Search ${widget.label.toLowerCase()}…',
-                          hintStyle:
-                              TextStyle(fontSize: 13, color: t.inkFaint),
-                          prefixIcon: Icon(Icons.search_rounded,
-                              size: 18, color: t.inkSoft),
-                          suffixIcon: _query.isNotEmpty
-                              ? GestureDetector(
-                                  onTap: () {
-                                    _searchController.clear();
-                                    setState(() => _query = '');
-                                  },
-                                  child: Icon(Icons.close_rounded,
-                                      size: 16, color: t.inkSoft),
-                                )
-                              : null,
-                          filled: true,
-                          fillColor: t.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: t.borderSoft),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 240),
+                  child: widget.items.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: t.primary,
+                              ),
+                            ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: t.borderSoft),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                                color: t.primary, width: 1.5),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Results count
-                    if (_query.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 6),
-                        width: double.infinity,
-                        color: t.bgAlt,
-                        child: Text(
-                          filtered.isEmpty
-                              ? 'No results for "$_query"'
-                              : '${filtered.length} result${filtered.length == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: filtered.isEmpty ? t.error : t.inkSoft,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-
-                    // List
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 220),
-                      child: filtered.isEmpty
+                        )
+                      : filtered.isEmpty
                           ? Padding(
-                              padding: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(24),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.search_off_rounded,
-                                      size: 32,
-                                      color: t.inkFaint),
+                                      size: 30, color: t.inkFaint),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Nothing found',
+                                    'Nothing found for "$_query"',
                                     style: TextStyle(
                                         fontSize: 13,
                                         color: t.inkSoft,
                                         fontWeight: FontWeight.w500),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                             )
                           : ListView.separated(
                               shrinkWrap: true,
-                              padding: EdgeInsets.zero,
+                              padding: const EdgeInsets.symmetric(vertical: 4),
                               itemCount: filtered.length,
                               separatorBuilder: (_, __) =>
                                   Divider(height: 1, color: t.borderSoft),
@@ -426,7 +403,6 @@ class _GeoSelectState extends State<_GeoSelect> {
                                 return GestureDetector(
                                   onTap: () {
                                     widget.onPick(item);
-                                    // Clear search after picking
                                     _searchController.clear();
                                     setState(() => _query = '');
                                   },
@@ -435,7 +411,7 @@ class _GeoSelectState extends State<_GeoSelect> {
                                         ? t.primarySoft
                                         : t.surface,
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 12),
+                                        horizontal: 14, vertical: 13),
                                     child: Row(
                                       children: [
                                         Expanded(
@@ -470,8 +446,6 @@ class _GeoSelectState extends State<_GeoSelect> {
                                 );
                               },
                             ),
-                    ),
-                  ],
                 ),
               ),
           ],
