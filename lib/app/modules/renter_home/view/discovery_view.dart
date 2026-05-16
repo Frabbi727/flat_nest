@@ -19,7 +19,11 @@ class DiscoveryView extends GetView<RenterHomeController> {
         () => Column(
           children: [
             // TopBar
-            _TopBar(t: t, userName: controller.userName),
+            _TopBar(
+              t: t,
+              userName: controller.userName,
+              locationLabel: controller.locationLabel.value,
+            ),
             // Search + filter
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -28,6 +32,50 @@ class DiscoveryView extends GetView<RenterHomeController> {
                 onFilterTap: () => _openFilters(context, t),
               ),
             ),
+            // Reset filter strip — only when filters are active
+            if (controller.hasActiveFilters)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Row(
+                  children: [
+                    Icon(Icons.filter_alt_outlined, size: 14, color: t.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Filters applied',
+                      style: TextStyle(fontSize: 12, color: t.inkMid),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: controller.resetFilters,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: t.primarySoft,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.close, size: 12, color: t.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Reset',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: t.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // Filter chips (All + API listing types)
             SizedBox(
               height: 48,
@@ -125,8 +173,13 @@ class DiscoveryView extends GetView<RenterHomeController> {
 class _TopBar extends StatelessWidget {
   final FlatNestTheme t;
   final String userName;
+  final String locationLabel;
 
-  const _TopBar({required this.t, required this.userName});
+  const _TopBar({
+    required this.t,
+    required this.userName,
+    required this.locationLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,11 +193,13 @@ class _TopBar extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 12, color: t.inkSoft),
-                    const SizedBox(width: 2),
-                    Text(
-                      'Dhaka, Bangladesh',
-                      style: TextStyle(fontSize: 12, color: t.inkSoft),
+                    Icon(Icons.location_on, size: 18, color: t.inkSoft),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        locationLabel,
+                        style: TextStyle(fontSize: 12, color: t.inkSoft),
+                      ),
                     ),
                   ],
                 ),

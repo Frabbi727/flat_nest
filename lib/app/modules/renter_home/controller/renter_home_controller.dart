@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
@@ -25,6 +27,9 @@ class RenterHomeController extends BaseController {
 
   // Wishlist — independent of the discovery filter state
   final _wishlistItems = <ListingModel>[].obs;
+
+  // Location
+  final locationLabel = 'Fetching location...'.obs;
 
   // Search
   final searchQuery = ''.obs;
@@ -68,7 +73,7 @@ class RenterHomeController extends BaseController {
       time: const Duration(milliseconds: 500),
     );
     _loadReferenceData();
-    fetchListings();
+    _fetchLocation(); // fetches location then calls fetchListings()
     fetchWishlist();
   }
 
@@ -80,6 +85,103 @@ class RenterHomeController extends BaseController {
 
   String get userName =>
       (_authService.currentUser?.name ?? 'there').split(' ').first;
+
+  // ── Location ──────────────────────────────────────────────────────────────
+
+  Future<void> _fetchLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        locationLabel.value = 'Location unavailable';
+        fetchListings();
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
+      ).timeout(const Duration(seconds: 10));
+
+      locationLabel.value = await _reverseGeocode(
+        position.latitude,
+        position.longitude,
+      );
+    } catch (_) {
+      locationLabel.value = 'Location unavailable';
+    }
+    fetchListings();
+  }
+
+  Future<String> _reverseGeocode(double lat, double lng) async {
+    try {
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 8),
+        receiveTimeout: const Duration(seconds: 8),
+        headers: {
+          'User-Agent': 'FlatNest/1.0 (rental listing app)',
+          'Accept-Language': 'en',
+        },
+      ));
+      final response = await dio.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'format': 'json',
+          'lat': lat,
+          'lon': lng,
+          'addressdetails': 1,
+          'zoom': 18,
+        },
+      );
+      final data = response.data as Map<String, dynamic>;
+      final addr = data['address'] as Map<String, dynamic>? ?? {};
+      final displayName = data['display_name'] as String?;
+      return _buildLocationLabel(addr, displayName);
+    } catch (_) {
+      return 'Your location';
+    }
+  }
+
+  String _buildLocationLabel(Map<String, dynamic> addr, String? displayName) {
+    // Same priority order as map_picker_view — most specific first
+    final candidates = [
+      addr['road'],
+      addr['neighbourhood'],
+      addr['hamlet'],
+      addr['suburb'],
+      addr['village'],
+      addr['town'],
+      addr['city_district'],
+      addr['city'],
+      addr['county'],
+      addr['state'],
+    ];
+
+    final parts = candidates
+        .whereType<String>()
+        .where((s) => s.isNotEmpty)
+        .take(2)
+        .toList();
+
+    if (parts.isNotEmpty) return parts.join(', ');
+
+    // Fallback: first 2 segments of display_name
+    if (displayName != null) {
+      final segments = displayName
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .take(2)
+          .toList();
+      if (segments.isNotEmpty) return segments.join(', ');
+    }
+
+    return 'Your location';
+  }
 
   Future<void> _loadReferenceData() async {
     final results = await Future.wait([
@@ -203,6 +305,7 @@ class RenterHomeController extends BaseController {
   }
 
   void resetFilters() {
+    selectedTypeId.value = null;
     filterMaxPrice.value = 80000;
     filterAmenityIds.clear();
     filterDivisionId.value = null;
@@ -221,7 +324,8 @@ class RenterHomeController extends BaseController {
       selectedTypeId.value != null ||
       filterMaxPrice.value < 80000 ||
       filterAmenityIds.isNotEmpty ||
-      filterDivisionId.value != null;
+      filterDivisionId.value != null ||
+      searchQuery.value.isNotEmpty;
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
 
