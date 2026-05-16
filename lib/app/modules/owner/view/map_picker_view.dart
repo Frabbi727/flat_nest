@@ -360,27 +360,26 @@ class _MapPickerViewState extends State<MapPickerView> {
 
           // ── Top bar ──────────────────────────────────────────────────────
           Positioned(
-            top: 0,
+            top: MediaQuery.of(context).padding.top,
             left: 0,
             right: 0,
-            child:  Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Row(
-                  children: [
-                    _MapBtn(
-                      icon: Icons.arrow_back_rounded,
-                      onTap: () => Get.back(),
-                    ),
-                    const Spacer(),
-                    _MapBtn(
-                      icon: Icons.my_location_rounded,
-                      loading: _loadingLocation,
-                      onTap: _goToCurrentLocation,
-                    ),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  _MapBtn(
+                    icon: Icons.arrow_back_rounded,
+                    onTap: () => Get.back(),
+                  ),
+                  const Spacer(),
+                  _MapBtn(
+                    icon: Icons.my_location_rounded,
+                    loading: _loadingLocation,
+                    onTap: _goToCurrentLocation,
+                  ),
+                ],
               ),
-
+            ),
           ),
 
           // ── Title chip ───────────────────────────────────────────────────
