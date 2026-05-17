@@ -23,6 +23,7 @@ class _NearbyMapViewState extends State<NearbyMapView> {
 
   late final MapController _mapController;
   late final RenterHomeController _c;
+  Worker? _tabWorker;
 
   LatLng _currentCenter = _defaultCenter;
   LatLng? _userPosition;
@@ -36,13 +37,37 @@ class _NearbyMapViewState extends State<NearbyMapView> {
     super.initState();
     _mapController = MapController();
     _c = Get.find<RenterHomeController>();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _goToUserAndFetch());
+
+    // Re-fetch every time the user switches to the Map tab (index 1).
+    // Uses the last known position so no location re-prompt on repeat visits.
+    _tabWorker = ever(_c.activeTab, (int tab) {
+      if (tab == 1 && mounted) _onTabActivated();
+    });
+
+    // Handle the case where Map tab is active from app start
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_c.activeTab.value == 1) _onTabActivated();
+    });
   }
 
   @override
   void dispose() {
+    _tabWorker?.dispose();
     _mapController.dispose();
     super.dispose();
+  }
+
+  void _onTabActivated() {
+    if (_searchCenter != null) {
+      // Already located before — just refresh the listings silently
+      _c.fetchNearbyListings(
+        lat: _searchCenter!.latitude,
+        lng: _searchCenter!.longitude,
+      );
+    } else {
+      // First visit — locate user then fetch
+      _goToUserAndFetch();
+    }
   }
 
   Future<void> _goToUserAndFetch() async {
