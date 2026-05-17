@@ -187,15 +187,23 @@ class _NearbyMapViewState extends State<NearbyMapView> {
                 if (_searchCenter != null)
                   CircleLayer(
                     circles: [
+                      // Filled area — gives the "zone" feel
                       CircleMarker(
                         point: _searchCenter!,
-                        radius: radius * 1000, // km → meters
+                        radius: radius * 1000,
                         useRadiusInMeter: true,
-                        color:
-                            t.primary.withValues(alpha: 0.08),
-                        borderStrokeWidth: 2.0,
-                        borderColor:
-                            t.primary.withValues(alpha: 0.5),
+                        color: t.primary.withValues(alpha: 0.13),
+                        borderStrokeWidth: 0,
+                        borderColor: Colors.transparent,
+                      ),
+                      // Solid border ring — makes the edge crisp and clear
+                      CircleMarker(
+                        point: _searchCenter!,
+                        radius: radius * 1000,
+                        useRadiusInMeter: true,
+                        color: Colors.transparent,
+                        borderStrokeWidth: 3.0,
+                        borderColor: t.primary.withValues(alpha: 0.75),
                       ),
                     ],
                   ),
