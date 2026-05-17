@@ -36,8 +36,8 @@ class SaveLocationRequest {
     if (houseName != null && houseName!.isNotEmpty) map['house_name'] = houseName;
     if (block != null && block!.isNotEmpty) map['block'] = block;
     if (section != null && section!.isNotEmpty) map['section'] = section;
-    if (lat != null) map['coord_x'] = lat;
-    if (lng != null) map['coord_y'] = lng;
+    if (lat != null) map['coord_y'] = lat;   // lat → coord_y (latitude = Y-axis)
+    if (lng != null) map['coord_x'] = lng;   // lng → coord_x (longitude = X-axis)
     return map;
   }
 }

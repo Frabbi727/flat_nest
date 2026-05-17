@@ -11,6 +11,7 @@ class ApiEndpoints {
 
   // ── Listings ──────────────────────────────────────────────────────────────
   static const String listings = '/listings';
+  static const String nearbyListings = '/listings/nearby';
   static String listing(String id) => '/listings/$id';
   static String listingPhotos(String id) => '/listings/$id/photos';
   static String listingLocation(String id) => '/listings/$id/location';

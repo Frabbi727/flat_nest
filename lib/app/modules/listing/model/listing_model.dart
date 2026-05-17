@@ -164,10 +164,12 @@ class ListingModel {
   final String statusLabel;
   @JsonKey(fromJson: _toInt)
   final int views;
-  @JsonKey(name: 'coord_x', fromJson: _toNullableDouble)
-  final double? lat;
   @JsonKey(name: 'coord_y', fromJson: _toNullableDouble)
-  final double? lng;
+  final double? lat;   // coord_y = latitude (Y-axis)
+  @JsonKey(name: 'coord_x', fromJson: _toNullableDouble)
+  final double? lng;   // coord_x = longitude (X-axis)
+  @JsonKey(name: 'distance_km', fromJson: _toNullableDouble)
+  final double? distanceKm;
   @JsonKey(defaultValue: [])
   final List<AmenityModel> amenities;
   final ListingOwnerModel? owner;
@@ -210,6 +212,7 @@ class ListingModel {
     this.views = 0,
     this.lat,
     this.lng,
+    this.distanceKm,
     this.amenities = const [],
     this.owner,
     this.photos = const [],
@@ -284,6 +287,7 @@ class OwnerListingModel extends ListingModel {
     super.views = 0,
     super.lat,
     super.lng,
+    super.distanceKm,
     super.amenities = const [],
     super.owner,
     super.photos = const [],

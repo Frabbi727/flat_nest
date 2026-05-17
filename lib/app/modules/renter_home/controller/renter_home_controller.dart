@@ -406,6 +406,38 @@ class RenterHomeController extends BaseController {
       filterSortBy.value != null ||
       searchQuery.value.isNotEmpty;
 
+  // ── Nearby / Map ─────────────────────────────────────────────────────────
+
+  final nearbyListings = <ListingModel>[].obs;
+  final nearbyLoading = false.obs;
+  final nearbyError = RxnString();
+  final nearbyRadius = 5.0.obs;
+
+  Future<void> fetchNearbyListings({
+    required double lat,
+    required double lng,
+    double? radius,
+  }) async {
+    nearbyLoading.value = true;
+    nearbyError.value = null;
+    final r = radius ?? nearbyRadius.value;
+    // API: coord_x = longitude, coord_y = latitude
+    final result = await _listingRepository.fetchNearbyListings(
+      coordX: lng,
+      coordY: lat,
+      radius: r,
+    );
+    nearbyLoading.value = false;
+    switch (result) {
+      case Success(data: final data?):
+        nearbyListings.value = data;
+      case Success():
+        nearbyListings.clear();
+      case Error(message: final msg):
+        nearbyError.value = msg;
+    }
+  }
+
   // ── Wishlist ──────────────────────────────────────────────────────────────
 
   void toggleSave(ListingModel listing) async {

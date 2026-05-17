@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/renter_home_controller.dart';
 import 'discovery_view.dart';
+import 'nearby_map_view.dart';
 import 'wishlist_view.dart';
 import 'messages_placeholder_view.dart';
 import 'profile_placeholder_view.dart';
@@ -24,7 +25,7 @@ class RenterHomeView extends GetView<RenterHomeController> {
             index: tab,
             children: const [
               DiscoveryView(),
-              _MapPlaceholder(),
+              NearbyMapView(),
               WishlistView(),
               MessagesPlaceholderView(),
               ProfilePlaceholderView(),
@@ -119,26 +120,3 @@ class _NavItem {
   });
 }
 
-class _MapPlaceholder extends StatelessWidget {
-  const _MapPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context).extension<FlatNestTheme>()!;
-    return Scaffold(
-      backgroundColor: t.bg,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.map_outlined, size: 64, color: t.inkFaint),
-            const SizedBox(height: 16),
-            Text('Map view', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: t.ink)),
-            const SizedBox(height: 8),
-            Text('Coming soon', style: TextStyle(fontSize: 13, color: t.inkMid)),
-          ],
-        ),
-      ),
-    );
-  }
-}

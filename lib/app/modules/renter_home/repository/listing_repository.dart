@@ -71,6 +71,37 @@ class ListingRepository extends BaseRepository {
     }
   }
 
+  Future<Resource<List<ListingModel>>> fetchNearbyListings({
+    required double coordX, // user longitude → coord_x
+    required double coordY, // user latitude  → coord_y
+    double? radius,
+    int? listingTypeId,
+    int? priceMin,
+    int? priceMax,
+    int? beds,
+    int? baths,
+  }) async {
+    try {
+      final params = <String, dynamic>{
+        'coord_x': coordX,
+        'coord_y': coordY,
+      };
+      if (radius != null) params['radius'] = radius;
+      if (listingTypeId != null) params['listing_type_id'] = listingTypeId;
+      if (priceMin != null) params['price_min'] = priceMin;
+      if (priceMax != null) params['price_max'] = priceMax;
+      if (beds != null) params['beds'] = beds;
+      if (baths != null) params['baths'] = baths;
+      final response = await apiClient.get(
+        path: ApiEndpoints.nearbyListings,
+        queryParameters: params,
+      );
+      return parseListResponse(response, ListingModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
   Future<Resource<ListingModel>> getListingDetail(String id) async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listing(id));
