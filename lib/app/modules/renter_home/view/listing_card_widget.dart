@@ -150,6 +150,46 @@ class ListingCardWidget extends StatelessWidget {
                       ],
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: listing.isAvailableNow ? t.successSoft : t.bgAlt,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '📅 ${listing.availableFromFormatted}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: listing.isAvailableNow ? t.success : t.inkMid,
+                          ),
+                        ),
+                      ),
+                      if (listing.floorNo != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(color: t.bgAlt, borderRadius: BorderRadius.circular(6)),
+                          child: Text(
+                            '🏢 Floor ${listing.floorNo}',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: t.inkMid),
+                          ),
+                        ),
+                      if (listing.facing != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(color: t.bgAlt, borderRadius: BorderRadius.circular(6)),
+                          child: Text(
+                            '🧭 ${listing.facing!.label}',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: t.inkMid),
+                          ),
+                        ),
+                    ],
+                  ),
                   if (listing.amenities.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Wrap(

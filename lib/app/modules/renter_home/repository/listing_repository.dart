@@ -5,6 +5,7 @@ import '../../../core/network/api_response.dart';
 import '../../../core/network/resource.dart';
 
 import '../../listing/model/geo_model.dart';
+import '../../listing/model/listing_facing_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 
@@ -13,21 +14,47 @@ class ListingRepository extends BaseRepository {
 
   Future<Resource<List<ListingModel>>> getListings({
     int? listingTypeId,
-    int? maxPrice,
+    int? priceMin,
+    int? priceMax,
+    int? baths,
+    int? facingId,
+    int? floorMin,
+    int? floorMax,
+    int? sizeMin,
+    int? sizeMax,
+    String? availableFromStart,
+    String? availableFromEnd,
+    String? sortBy,
     List<int>? amenityIds,
     int? divisionId,
     int? districtId,
     int? upazilaId,
     int? unionId,
     String? search,
+    int? beds,
   }) async {
     try {
       final Map<String, dynamic> queryParams = {};
       if (listingTypeId != null) queryParams['listing_type_id'] = listingTypeId;
-      if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
+      if (priceMin != null) queryParams['price_min'] = priceMin;
+      if (priceMax != null) queryParams['price_max'] = priceMax;
+      if (baths != null) queryParams['baths'] = baths;
+      if (facingId != null) queryParams['facing_id'] = facingId;
+      if (floorMin != null) queryParams['floor_min'] = floorMin;
+      if (floorMax != null) queryParams['floor_max'] = floorMax;
+      if (sizeMin != null) queryParams['size_min'] = sizeMin;
+      if (sizeMax != null) queryParams['size_max'] = sizeMax;
+      if (availableFromStart != null) {
+        queryParams['available_from_start'] = availableFromStart;
+      }
+      if (availableFromEnd != null) {
+        queryParams['available_from_end'] = availableFromEnd;
+      }
+      if (sortBy != null) queryParams['sort_by'] = sortBy;
       if (amenityIds != null && amenityIds.isNotEmpty) {
         queryParams['amenities'] = amenityIds.join(',');
       }
+      if (beds != null) queryParams['beds'] = beds;
       if (divisionId != null) queryParams['division_id'] = divisionId;
       if (districtId != null) queryParams['district_id'] = districtId;
       if (upazilaId != null) queryParams['upazila_id'] = upazilaId;
@@ -84,6 +111,16 @@ class ListingRepository extends BaseRepository {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listingTypes);
       return parseListResponse(response, ListingTypeModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<List<ListingFacingModel>>> fetchListingFacings() async {
+    try {
+      final response =
+          await apiClient.get(path: ApiEndpoints.metaListingFacings);
+      return parseListResponse(response, ListingFacingModel.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

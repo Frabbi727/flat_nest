@@ -74,20 +74,6 @@ class CreateListingStep3View extends GetView<CreateListingController> {
                 onToggle: () => controller.toggleDropdown('union'),
                 onPick: controller.pickUnion,
               ),
-              _FormGroup(
-                t: t,
-                label: 'Road & house number',
-                hint: 'Shown only to renters you\'ve replied to.',
-                child: TextField(
-                  controller: controller.roadAndHouse,
-                  style:
-                      AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
-                  decoration: _inputDeco(t).copyWith(
-                    hintText: 'House 24, Road 11',
-                  ),
-                ),
-              ),
-
               // ── Map pin card ──────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.only(bottom: 18),
@@ -125,6 +111,66 @@ class CreateListingStep3View extends GetView<CreateListingController> {
                 ),
                 const SizedBox(height: 20),
               ],
+
+              // ── Address detail fields ─────────────────────────────────
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: t.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: t.borderSoft),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, size: 14, color: t.inkSoft),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'These details help renters find your flat easily (optional)',
+                        style: AppTextStyles.caption.copyWith(color: t.inkSoft),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _FormGroup(
+                t: t,
+                label: 'Road',
+                child: TextField(
+                  controller: controller.roadController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+                  decoration: _inputDeco(t).copyWith(hintText: 'e.g. Road 5, House 12'),
+                ),
+              ),
+              _FormGroup(
+                t: t,
+                label: 'House / Building Name',
+                child: TextField(
+                  controller: controller.houseNameController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+                  decoration: _inputDeco(t).copyWith(hintText: 'e.g. Green Villa'),
+                ),
+              ),
+              _FormGroup(
+                t: t,
+                label: 'Block',
+                child: TextField(
+                  controller: controller.blockController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+                  decoration: _inputDeco(t).copyWith(hintText: 'e.g. Block B'),
+                ),
+              ),
+              _FormGroup(
+                t: t,
+                label: 'Section',
+                child: TextField(
+                  controller: controller.sectionController,
+                  style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+                  decoration: _inputDeco(t).copyWith(hintText: 'e.g. Section 12'),
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           )),
     );
@@ -690,14 +736,12 @@ class _MapPinCard extends GetView<CreateListingController> {
 class _FormGroup extends StatelessWidget {
   final FlatNestTheme t;
   final String label;
-  final String? hint;
   final Widget child;
 
   const _FormGroup({
     required this.t,
     required this.label,
     required this.child,
-    this.hint,
   });
 
   @override
@@ -718,13 +762,6 @@ class _FormGroup extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           child,
-          if (hint != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              hint!,
-              style: AppTextStyles.caption.copyWith(color: t.inkSoft, fontSize: 11),
-            ),
-          ],
         ],
       ),
     );

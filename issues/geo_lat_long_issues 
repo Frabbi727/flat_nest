@@ -1,0 +1,79 @@
+🧾 Prompt: Validate Geo Coordinate System (Frontend + Backend Consistency Check)
+
+I am building a Flutter + Laravel flat rental application with location-based features such as map display and radius search.
+
+I currently store location data in the database as:
+
+coord_x
+coord_y
+
+These fields are not explicitly labeled as latitude or longitude in the database.
+
+❗ Current Frontend Implementation
+
+From Flutter, I am sending data like this:
+
+lat: controller.coordX.value,
+lng: controller.coordY.value,
+
+So effectively:
+
+coordX is being used as latitude
+coordY is being used as longitude
+🌍 Global Standard Requirement
+
+Please validate my system against global geolocation standards used by:
+
+Google Maps
+OpenStreetMap
+GIS systems
+
+Standard convention:
+
+latitude  = Y axis (lat)
+longitude = X axis (lng)
+
+So correct mapping should normally be:
+
+lat → latitude
+lng → longitude
+
+And database convention (recommended):
+
+coord_x = longitude
+coord_y = latitude
+🧠 What I need you to analyze
+
+Please check and confirm:
+
+Is my current mapping correct or inverted?
+Does this setup follow global geolocation standards?
+Can this design cause future issues in:
+radius search (Haversine formula)
+map rendering (Google Maps)
+nearby listing feature
+API integrations
+Even if the backend currently only stores data (no calculations yet):
+Is this safe long-term?
+Or is this considered a design flaw?
+What is the risk level if I keep current implementation?
+Low / Medium / High
+⚠️ Important constraint
+I do NOT want to change database structure now unless necessary
+I want the safest frontend/backend mapping strategy
+I want to avoid future migration or coordinate confusion issues
+🎯 Final goal
+
+Ensure:
+
+Full consistency between Flutter frontend, Laravel backend, and database
+Compliance with global geolocation standards
+No future issues in maps, search radius, or external API integrations
+🚀 Expected output
+
+Please provide:
+
+Verdict (Correct / Incorrect / Risky)
+Explanation
+Recommended final mapping
+Long-term impact analysis

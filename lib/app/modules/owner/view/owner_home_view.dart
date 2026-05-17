@@ -618,6 +618,80 @@ class _ListingRow extends GetView<OwnerController> {
                       ],
                     ),
 
+                    // Availability, floor, facing
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        _SmallInfoTag(
+                          text: '📅 ${listing.availableFromFormatted}',
+                          bgColor: listing.isAvailableNow ? t.successSoft : t.bgAlt,
+                          textColor: listing.isAvailableNow ? t.success : t.inkMid,
+                        ),
+                        if (listing.floorNo != null)
+                          _SmallInfoTag(text: '🏢 Floor ${listing.floorNo}', bgColor: t.bgAlt, textColor: t.inkMid),
+                        if (listing.facing != null)
+                          _SmallInfoTag(text: '🧭 ${listing.facing!.label}', bgColor: t.bgAlt, textColor: t.inkMid),
+                      ],
+                    ),
+
+                    // Address sub-section
+                    if (listing.road != null || listing.houseName != null || listing.block != null || listing.section != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, size: 12, color: t.inkSoft),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              [
+                                if (listing.road != null) listing.road!,
+                                if (listing.houseName != null) listing.houseName!,
+                                if (listing.block != null) 'Block ${listing.block}',
+                                if (listing.section != null) 'Section ${listing.section}',
+                              ].join(', '),
+                              style: TextStyle(fontSize: 10, color: t.inkMid),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    // Owner contact sub-section
+                    if (listing.ownerName != null || listing.ownerPhone != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.person_outline, size: 12, color: t.inkSoft),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              [
+                                if (listing.ownerName != null) listing.ownerName!,
+                                if (listing.ownerPhone != null) listing.ownerPhone!,
+                              ].join(' · '),
+                              style: TextStyle(fontSize: 10, color: t.inkMid),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (listing.preferredContact != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: t.primarySoft,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                _contactLabel(listing.preferredContact!),
+                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: t.primaryInk),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+
                     // Pending banner
                     if (listing.status == 'pending') ...[
                       const SizedBox(height: 10),
@@ -701,6 +775,12 @@ class _ListingRow extends GetView<OwnerController> {
       ),
     );
   }
+
+  String _contactLabel(String contact) => switch (contact) {
+    'whatsapp' => 'WhatsApp',
+    'both' => 'Call/WA',
+    _ => 'Call',
+  };
 
   Widget _buildActions(BuildContext context) {
     switch (listing.status) {
@@ -858,10 +938,16 @@ class _MyListingsTab extends GetView<OwnerController> {
           ),
         ],
       ),
-      body: Obx(() => controller.isLoading
-          ? Center(child: CircularProgressIndicator(color: t.primary))
-          : controller.myListings.isEmpty
-              ? Center(
+      body: Column(
+        children: [
+          _buildFilterBar(),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading) {
+                return Center(child: CircularProgressIndicator(color: t.primary));
+              }
+              if (controller.myListings.isEmpty) {
+                return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -882,15 +968,110 @@ class _MyListingsTab extends GetView<OwnerController> {
                       ),
                     ],
                   ),
-                )
-              : ListView.builder(
+                );
+              }
+              return NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollEndNotification &&
+                      notification.metrics.extentAfter < 200) {
+                    controller.loadMoreListings();
+                  }
+                  return false;
+                },
+                child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-                  itemCount: controller.myListings.length,
-                  itemBuilder: (_, i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _ListingRow(t: t, listing: controller.myListings[i]),
-                  ),
-                )),
+                  itemCount: controller.myListings.length + 1,
+                  itemBuilder: (_, i) {
+                    if (i == controller.myListings.length) {
+                      return Obx(() => controller.isLoadingMore.value
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(child: CircularProgressIndicator(color: t.primary)),
+                            )
+                          : const SizedBox.shrink());
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _ListingRow(t: t, listing: controller.myListings[i]),
+                    );
+                  },
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterBar() {
+    return Container(
+      color: t.surface,
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+      child: Obx(() {
+        final currentStatus = controller.filterStatus.value;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _statusChip('All', null, currentStatus == null),
+              const SizedBox(width: 6),
+              _statusChip('Active', 'active', currentStatus == 'active'),
+              const SizedBox(width: 6),
+              _statusChip('Pending', 'pending', currentStatus == 'pending'),
+              const SizedBox(width: 6),
+              _statusChip('Draft', 'draft', currentStatus == 'draft'),
+              const SizedBox(width: 6),
+              _statusChip('Rejected', 'rejected', currentStatus == 'rejected'),
+              const SizedBox(width: 6),
+              _statusChip('Rented', 'rented', currentStatus == 'rented'),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _statusChip(String label, String? status, bool active) {
+    return GestureDetector(
+      onTap: () => controller.applyOwnerFilters(
+        status: status,
+        typeId: controller.filterTypeId.value,
+      ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? t.primary : t.bg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: active ? t.primary : t.borderSoft),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: active ? Colors.white : t.inkMid,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SmallInfoTag extends StatelessWidget {
+  final String text;
+  final Color bgColor;
+  final Color textColor;
+
+  const _SmallInfoTag({required this.text, required this.bgColor, required this.textColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(6)),
+      child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: textColor)),
     );
   }
 }

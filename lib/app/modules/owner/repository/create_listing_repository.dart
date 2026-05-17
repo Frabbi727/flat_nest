@@ -4,6 +4,7 @@ import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
 import '../../listing/model/geo_model.dart';
+import '../../listing/model/listing_facing_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 import '../model/create_listing_request.dart';
@@ -17,6 +18,16 @@ class CreateListingRepository extends BaseRepository {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listingTypes);
       return parseListResponse(response, ListingTypeModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<List<ListingFacingModel>>> fetchListingFacings() async {
+    try {
+      final response =
+          await apiClient.get(path: ApiEndpoints.metaListingFacings);
+      return parseListResponse(response, ListingFacingModel.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
@@ -108,14 +119,27 @@ class CreateListingRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<void>> saveLocation(
+  Future<Resource<ListingModel>> saveLocation(
       String listingId, SaveLocationRequest request) async {
     try {
       final response = await apiClient.patch(
         path: ApiEndpoints.listingLocation(listingId),
         data: request.toJson(),
       );
-      return parseVoidResponse(response);
+      return parseResponse(response, ListingModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<ListingModel>> updateOwnerInfo(
+      String listingId, Map<String, dynamic> data) async {
+    try {
+      final response = await apiClient.patch(
+        path: ApiEndpoints.listingOwnerInfo(listingId),
+        data: data,
+      );
+      return parseResponse(response, ListingModel.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
 import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
@@ -47,11 +48,22 @@ class RenterHomeController extends BaseController {
 
   // Filter sheet state
   final filterMaxPrice = 80000.obs;
+  final filterPriceMin = 0.obs;
   final filterAmenityIds = <int>[].obs;
   final filterDivisionId = RxnInt();
   final filterDistrictId = RxnInt();
   final filterUpazilaId = RxnInt();
   final filterUnionId = RxnInt();
+  // New filter fields
+  final filterBaths = RxnInt();
+  final filterFacingId = RxnInt();
+  final filterFloorMin = RxnInt();
+  final filterFloorMax = RxnInt();
+  final filterSizeMin = RxnInt();
+  final filterSizeMax = RxnInt();
+  final filterAvailableFromStart = RxnString();
+  final filterAvailableFromEnd = RxnString();
+  final filterSortBy = RxnString();
 
   // Geo dropdown data
   final divisions = <GeoItemModel>[].obs;
@@ -75,6 +87,7 @@ class RenterHomeController extends BaseController {
     _loadReferenceData();
     _fetchLocation(); // fetches location then calls fetchListings()
     fetchWishlist();
+    Get.find<MetaService>().loadMeta();
   }
 
   @override
@@ -206,7 +219,17 @@ class RenterHomeController extends BaseController {
     final query = searchQuery.value.trim();
     final result = await _listingRepository.getListings(
       listingTypeId: selectedTypeId.value,
-      maxPrice: filterMaxPrice.value < 80000 ? filterMaxPrice.value : null,
+      priceMin: filterPriceMin.value > 0 ? filterPriceMin.value : null,
+      priceMax: filterMaxPrice.value < 80000 ? filterMaxPrice.value : null,
+      baths: filterBaths.value,
+      facingId: filterFacingId.value,
+      floorMin: filterFloorMin.value,
+      floorMax: filterFloorMax.value,
+      sizeMin: filterSizeMin.value,
+      sizeMax: filterSizeMax.value,
+      availableFromStart: filterAvailableFromStart.value,
+      availableFromEnd: filterAvailableFromEnd.value,
+      sortBy: filterSortBy.value,
       amenityIds: filterAmenityIds.isNotEmpty ? [...filterAmenityIds] : null,
       divisionId: filterDivisionId.value,
       districtId: filterDistrictId.value,
@@ -297,21 +320,51 @@ class RenterHomeController extends BaseController {
 
   void applyFilters({
     double? maxPrice,
+    double? minPrice,
     List<int>? amenityIds,
+    int? baths,
+    int? facingId,
+    int? floorMin,
+    int? floorMax,
+    int? sizeMin,
+    int? sizeMax,
+    String? availableFromStart,
+    String? availableFromEnd,
+    String? sortBy,
   }) {
     if (maxPrice != null) filterMaxPrice.value = maxPrice.round();
+    if (minPrice != null) filterPriceMin.value = minPrice.round();
     if (amenityIds != null) filterAmenityIds.value = amenityIds;
+    filterBaths.value = baths;
+    filterFacingId.value = facingId;
+    filterFloorMin.value = floorMin;
+    filterFloorMax.value = floorMax;
+    filterSizeMin.value = sizeMin;
+    filterSizeMax.value = sizeMax;
+    filterAvailableFromStart.value = availableFromStart;
+    filterAvailableFromEnd.value = availableFromEnd;
+    filterSortBy.value = sortBy;
     fetchListings();
   }
 
   void resetFilters() {
     selectedTypeId.value = null;
     filterMaxPrice.value = 80000;
+    filterPriceMin.value = 0;
     filterAmenityIds.clear();
     filterDivisionId.value = null;
     filterDistrictId.value = null;
     filterUpazilaId.value = null;
     filterUnionId.value = null;
+    filterBaths.value = null;
+    filterFacingId.value = null;
+    filterFloorMin.value = null;
+    filterFloorMax.value = null;
+    filterSizeMin.value = null;
+    filterSizeMax.value = null;
+    filterAvailableFromStart.value = null;
+    filterAvailableFromEnd.value = null;
+    filterSortBy.value = null;
     districts.clear();
     upazilas.clear();
     unions.clear();
@@ -320,11 +373,37 @@ class RenterHomeController extends BaseController {
     fetchListings();
   }
 
+  int get activeFilterCount {
+    int count = 0;
+    if (filterMaxPrice.value < 80000) count++;
+    if (filterPriceMin.value > 0) count++;
+    if (filterAmenityIds.isNotEmpty) count++;
+    if (filterDivisionId.value != null) count++;
+    if (filterBaths.value != null) count++;
+    if (filterFacingId.value != null) count++;
+    if (filterFloorMin.value != null || filterFloorMax.value != null) count++;
+    if (filterSizeMin.value != null || filterSizeMax.value != null) count++;
+    if (filterAvailableFromStart.value != null ||
+        filterAvailableFromEnd.value != null) count++;
+    if (filterSortBy.value != null) count++;
+    return count;
+  }
+
   bool get hasActiveFilters =>
       selectedTypeId.value != null ||
       filterMaxPrice.value < 80000 ||
+      filterPriceMin.value > 0 ||
       filterAmenityIds.isNotEmpty ||
       filterDivisionId.value != null ||
+      filterBaths.value != null ||
+      filterFacingId.value != null ||
+      filterFloorMin.value != null ||
+      filterFloorMax.value != null ||
+      filterSizeMin.value != null ||
+      filterSizeMax.value != null ||
+      filterAvailableFromStart.value != null ||
+      filterAvailableFromEnd.value != null ||
+      filterSortBy.value != null ||
       searchQuery.value.isNotEmpty;
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
@@ -387,7 +466,7 @@ class RenterHomeController extends BaseController {
     Get.toNamed(Routes.listingDetail, arguments: listing);
   }
 
-  void logout() async {
+  Future<void> logout() async {
     await _authService.logout();
     Get.offAllNamed(Routes.login);
   }

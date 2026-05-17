@@ -1,0 +1,623 @@
+I have a Flutter mobile app for a flat rental platform that is
+already live and working. I need to add new features and update
+existing ones WITHOUT breaking anything that currently works.
+
+CRITICAL: Before writing any code:
+1. Read the entire codebase first
+2. Understand current state of every file you will touch
+3. Do not delete or overwrite any existing working logic
+4. Only ADD or UPDATE what is specified below
+5. If unsure about any existing logic, keep it as is
+
+═══════════════════════════════════════════════════
+BACKEND API REFERENCE (Already Implemented)
+═══════════════════════════════════════════════════
+
+BASE URL: /api/v1
+
+────────────────────────────────
+PUBLIC ENDPOINTS (No Auth)
+────────────────────────────────
+
+GET /meta/listing-types
+Response:
+{
+  "success": true,
+  "data": [
+    { "id": 1, "label": "Family Flat",   "slug": "Family"   },
+    { "id": 2, "label": "Bachelor Room", "slug": "Bachelor" },
+    { "id": 3, "label": "Student Room",  "slug": "Student"  },
+    { "id": 4, "label": "Couple Flat",   "slug": "Couple"   },
+    { "id": 5, "label": "Sublet Room",   "slug": "Sublet"   }
+  ]
+}
+
+GET /meta/listing-facings
+Response:
+{
+  "data": [
+    { "id": 1, "label": "North",      "slug": "north"      },
+    { "id": 2, "label": "South",      "slug": "south"      },
+    { "id": 3, "label": "East",       "slug": "east"       },
+    { "id": 4, "label": "West",       "slug": "west"       },
+    { "id": 5, "label": "North-East", "slug": "north-east" },
+    { "id": 6, "label": "North-West", "slug": "north-west" },
+    { "id": 7, "label": "South-East", "slug": "south-east" },
+    { "id": 8, "label": "South-West", "slug": "south-west" }
+  ]
+}
+
+────────────────────────────────
+OWNER ENDPOINTS (Bearer Token)
+────────────────────────────────
+
+POST /listings
+New optional fields added:
+  available_from  → date YYYY-MM-DD (today or future)
+  floor_no        → integer 0-100
+  facing_id       → integer (from /meta/listing-facings)
+
+Response changed: now returns full listing object
+  { "success": true, "message": "...", "data": {...listing} }
+
+PATCH /listings/{id}/location
+area is now optional (was required before)
+New optional fields:
+  road        → string max 255
+  house_name  → string max 255
+  block       → string max 100
+  section     → string max 100
+Response changed: now returns full listing object
+
+PATCH /listings/{id}/owner-info  ← NEW ENDPOINT
+All fields optional:
+  owner_name        → string
+  owner_phone       → string
+  owner_alt_phone   → string
+  owner_email       → email
+  preferred_contact → call | whatsapp | both
+If owner_name, owner_phone, owner_email not sent,
+server auto-fills from auth user profile.
+Response: { "success": true, "data": {...listing} }
+
+PATCH /listings/{id}
+Now accepts ALL fields in one request including:
+  available_from, floor_no, facing_id,
+  road, house_name, block, section,
+  owner_name, owner_phone, owner_alt_phone,
+  owner_email, preferred_contact,
+  division_id, district_id, upazila_id, union_id,
+  area, coord_x, coord_y
+
+GET /owner/listings
+Now paginated (was plain array before)
+Response:
+{
+  "success": true,
+  "data": [...listings...],
+  "meta": {
+    "current_page": 1,
+    "last_page": 3,
+    "per_page": 15,
+    "total": 42
+  }
+}
+New filter params:
+  status   → pending|active|draft|rejected|rented
+  type_id  → integer
+  page     → integer
+
+────────────────────────────────
+RENTER ENDPOINTS
+────────────────────────────────
+
+GET /listings
+RENAMED params (old ones no longer work):
+  minPrice → price_min
+  maxPrice → price_max
+
+New filter params:
+  baths                → integer (exact match)
+  facing_id            → integer
+  floor_min            → integer
+  floor_max            → integer
+  size_min             → integer
+  size_max             → integer
+  available_from_start → date YYYY-MM-DD
+  available_from_end   → date YYYY-MM-DD
+  sort_by              → price_asc | price_desc |
+                         newest | oldest | available_soon
+
+Full param list:
+  search, listing_type_id,
+  price_min, price_max,
+  beds, baths,
+  facing_id,
+  floor_min, floor_max,
+  size_min, size_max,
+  available_from_start, available_from_end,
+  division_id, district_id, upazila_id, union_id,
+  amenities, sort_by, page
+
+────────────────────────────────
+STANDARD LISTING OBJECT
+────────────────────────────────
+
+Every listing response returns this shape:
+{
+  "id": "uuid",
+  "owner_id": "uuid",
+  "title": "...",
+  "listing_type_id": 1,
+  "listing_type": { "id": 1, "label": "Family Flat", "slug": "Family" },
+  "price": 25000,
+  "deposit": 50000,
+  "available_from": "2026-06-01",
+  "beds": 2,
+  "baths": 2,
+  "size": 1200,
+  "floor_no": 4,
+  "facing_id": 1,
+  "facing": { "id": 1, "label": "North", "slug": "north" },
+  "description": "...",
+  "division_id": 1,
+  "district_id": 3,
+  "upazila_id": 12,
+  "union_id": null,
+  "division": { "id": 1, "name": "Dhaka" },
+  "district": { "id": 3, "name": "Dhaka" },
+  "upazila":  { "id": 12, "name": "Dhanmondi" },
+  "union":    null,
+  "area": "Dhanmondi",
+  "road": "Road 5",
+  "house_name": "Green Villa",
+  "block": "B",
+  "section": "12",
+  "coord_x": 23.7461,
+  "coord_y": 90.3742,
+  "owner_name": "John Doe",
+  "owner_phone": "01700000000",
+  "owner_alt_phone": null,
+  "owner_email": "john@example.com",
+  "preferred_contact": "call",
+  "status": "active",
+  "status_label": "Active",
+  "rejection_reason": null,
+  "views": 142,
+  "owner": { "id": "uuid", "name": "John", "phone": "01700000000" },
+  "photos": [ { "id": 1, "url": "...", "position": 0 } ],
+  "amenities": [ { "id": 1, "name": "parking", "label": "Parking" } ],
+  "created_at": "2026-05-17T10:00:00Z",
+  "updated_at": "2026-05-17T10:00:00Z"
+}
+
+BREAKING CHANGE in listing_type object:
+  OLD: { "id": 1, "name": "Family", "label": "Family Flat" }
+  NEW: { "id": 1, "label": "Family Flat", "slug": "Family" }
+  → Find every place using listing_type.name
+    and change to listing_type.slug
+
+═══════════════════════════════════════════════════
+TASK 1 — MODELS & API SERVICE LAYER
+═══════════════════════════════════════════════════
+
+1A. Read current Listing model/entity class first.
+    Add new fields without removing existing ones:
+      availableFrom, floorNo, facingId, facing,
+      road, houseName, block, section,
+      ownerName, ownerPhone, ownerAltPhone,
+      ownerEmail, preferredContact
+
+1B. Create new model: ListingFacing
+      id, label, slug
+
+1C. Update ListingType model if it has a 'name' field:
+    Make sure 'slug' field is mapped correctly
+    Keep 'name' field if it exists (backward compat)
+    Just add 'slug' alongside it
+
+1D. Read current API service files.
+    Add new API methods without touching existing ones:
+      fetchListingTypes()   → GET /meta/listing-types
+      fetchListingFacings() → GET /meta/listing-facings
+      updateOwnerInfo(id, data) → PATCH /listings/{id}/owner-info
+
+1E. Update existing API methods:
+    createListing() → add available_from, floor_no, facing_id
+    updateLocation() → add road, house_name, block, section
+    updateListing()  → add all new fields
+    fetchOwnerListings() → handle paginated response + new filters
+    fetchListings()  → rename minPrice→price_min,
+                        maxPrice→price_max,
+                        add all new filter params
+
+═══════════════════════════════════════════════════
+TASK 2 — OWNER: CREATE LISTING FLOW
+═══════════════════════════════════════════════════
+
+Read the current create listing flow/steps first.
+Understand how steps currently work before changing.
+
+Current steps (example):
+  Step 1: Basic Info
+  Step 2: Photos
+  Step 3: Location
+  Step 4: Preview & Submit
+
+New steps after update:
+  Step 1: Basic Info      ← ADD new fields here
+  Step 2: Photos          ← no change
+  Step 3: Location        ← ADD new fields here
+  Step 4: Owner Info      ← NEW STEP (add before preview)
+  Step 5: Preview & Submit ← no change, shift step number
+
+────────────────────────────────
+STEP 1 UPDATE — Basic Info
+────────────────────────────────
+Read existing Step 1 form. Keep all existing fields.
+Add these 3 optional fields at the bottom:
+
+  available_from
+    - Date picker (calendar)
+    - Label: "Available From"
+    - Only allow today or future dates
+    - Optional — show helper text: "Leave empty if available now"
+    - Display selected date as: "June 1, 2026"
+
+  floor_no
+    - Number input
+    - Label: "Floor Number"
+    - Optional, min 0, max 100
+    - Hint: "e.g. 3"
+
+  facing_id
+    - Dropdown
+    - Label: "Flat Facing"
+    - Load options from GET /meta/listing-facings on page init
+    - Show label (North, South etc.) in dropdown
+    - Send id value to API
+    - Optional — show "Select facing direction" as placeholder
+
+────────────────────────────────
+STEP 3 UPDATE — Location
+────────────────────────────────
+Read existing Step 3 form. Keep all existing fields.
+Make 'area' field optional if it was required before.
+Add these 4 optional fields after existing location fields:
+
+  road
+    - Text input
+    - Label: "Road"
+    - Optional
+    - Placeholder: "e.g. Road 5, House 12"
+
+  house_name
+    - Text input
+    - Label: "House / Building Name"
+    - Optional
+    - Placeholder: "e.g. Green Villa"
+
+  block
+    - Text input
+    - Label: "Block"
+    - Optional
+    - Placeholder: "e.g. Block B"
+
+  section
+    - Text input
+    - Label: "Section"
+    - Optional
+    - Placeholder: "e.g. Section 12"
+
+Show a note above these 4 fields:
+  "These details help renters find your flat easily (optional)"
+
+────────────────────────────────
+STEP 4 — Owner Info (NEW STEP)
+────────────────────────────────
+Create a new step screen between Location and Preview.
+Step title: "Owner Contact Info"
+Step subtitle: "Renters will use this to contact you"
+
+At the top of the screen add a button:
+  Button label: "Fill with my account info"
+  Button style: outlined/secondary button (not primary)
+  On tap: auto-fill all fields below with logged-in
+           user's profile data:
+    owner_name  ← user.name
+    owner_phone ← user.phone
+    owner_email ← user.email
+  Show a small success message after auto-fill:
+    "Fields filled with your account info"
+
+Fields on this step (all optional):
+
+  owner_name
+    - Text input
+    - Label: "Contact Name"
+    - Placeholder: "Full name"
+
+  owner_phone
+    - Phone input
+    - Label: "Primary Phone"
+    - Placeholder: "01XXXXXXXXX"
+
+  owner_alt_phone
+    - Phone input
+    - Label: "Alternative Phone"
+    - Placeholder: "Optional second number"
+
+  owner_email
+    - Email input
+    - Label: "Email Address"
+    - Placeholder: "your@email.com"
+
+  preferred_contact
+    - Segmented control or radio buttons
+    - Label: "Preferred Contact Method"
+    - Options: Call | WhatsApp | Both
+    - Maps to: call | whatsapp | both
+    - Default: Call
+
+On Next/Continue:
+  Call PATCH /listings/{id}/owner-info with filled values
+  If all fields empty, still call the API
+  (server will auto-fill from profile)
+  On success, proceed to Preview step
+
+On Back: go to Location step
+Show skip option: "Skip for now →"
+  (skip still calls API with empty body,
+   server auto-fills from profile)
+
+════════════════════════════════════════════════════
+TASK 3 — OWNER: EDIT LISTING FLOW
+════════════════════════════════════════════════════
+
+Read existing edit listing screen first.
+Keep all existing edit functionality working.
+Add all new fields to the edit form:
+
+  In Basic Info section add:
+    available_from (date picker, same as create)
+    floor_no (number input, same as create)
+    facing_id (dropdown, same as create)
+
+  In Location section add:
+    road, house_name, block, section
+    (all optional text inputs, same as create)
+
+  Add new Owner Info section in edit form:
+    Same fields as Step 4 above
+    Same "Fill with my account info" button
+    Pre-fill fields with existing listing data
+
+  On save/update: call PATCH /listings/{id}
+  with all fields in one request.
+
+Pre-fill ALL fields with current listing data
+when edit screen opens. Never show empty fields
+if data already exists.
+
+════════════════════════════════════════════════════
+TASK 4 — OWNER: LISTING RESPONSE HANDLING
+════════════════════════════════════════════════════
+
+POST /listings response changed.
+  OLD: returns { id, listing_step: 2 }
+  NEW: returns full listing object
+
+Read where POST /listings response is currently handled.
+Update to use new response format.
+Extract listing id from response.data.id
+Store full listing object in state if needed.
+
+PATCH /listings/{id}/location response changed.
+  OLD: returns { listing_step: 4 }
+  NEW: returns full listing object
+
+Update location step response handler accordingly.
+
+GET /owner/listings response changed.
+  OLD: plain array of listings
+  NEW: paginated { data: [...], meta: {...} }
+
+Read current owner listings screen.
+Update to handle paginated response.
+Add pagination — load more on scroll
+or show page navigation.
+Keep existing listing card UI unchanged.
+
+════════════════════════════════════════════════════
+TASK 5 — OWNER: LISTING CARD & DETAIL DISPLAY
+════════════════════════════════════════════════════
+
+Read existing owner listing card widget.
+Keep existing layout and design.
+Add these fields to the card where space allows:
+
+  available_from:
+    Show as: "📅 Available Jun 1, 2026"
+    If null: show "📅 Available Now" in green
+    Place below bedroom/bathroom info row
+
+  floor_no:
+    Show as: "🏢 Floor 4"
+    Only show if not null
+
+  facing:
+    Show as: "🧭 North Facing"
+    Only show if not null
+
+Read existing listing detail screen (owner side).
+Add new fields to detail view:
+  available_from, floor_no, facing (label),
+  road, house_name, block, section,
+  owner_name, owner_phone, owner_alt_phone,
+  owner_email, preferred_contact
+
+BREAKING CHANGE FIX:
+  Find every place in owner screens using:
+    listing_type.name
+  Change to:
+    listing_type.slug
+
+════════════════════════════════════════════════════
+TASK 6 — RENTER: LISTING CARD & DETAIL DISPLAY
+════════════════════════════════════════════════════
+
+Read existing renter listing card widget.
+Keep existing layout and design.
+Add same display fields as Task 5:
+
+  available_from → "📅 Available Jun 1" or "📅 Available Now"
+  floor_no       → "🏢 Floor 4" (only if not null)
+  facing         → "🧭 North Facing" (only if not null)
+
+Read existing renter listing detail screen.
+Add new fields to detail view:
+  All fields same as owner detail
+  Plus owner contact section:
+    Show owner_name, owner_phone, owner_alt_phone
+    Show preferred_contact as a badge/chip
+    If preferred_contact = call → show "📞 Prefers Call"
+    If preferred_contact = whatsapp → show "💬 Prefers WhatsApp"
+    If preferred_contact = both → show "📞💬 Call or WhatsApp"
+
+BREAKING CHANGE FIX:
+  Find every place in renter screens using:
+    listing_type.name
+  Change to:
+    listing_type.slug
+
+════════════════════════════════════════════════════
+TASK 7 — RENTER: FILTER PANEL UPDATE
+════════════════════════════════════════════════════
+
+Read existing filter panel/bottom sheet carefully.
+Keep all existing filters working.
+Make these changes:
+
+RENAME (critical — old params no longer work):
+  minPrice → price_min
+  maxPrice → price_max
+
+ADD these new filter inputs:
+
+  baths
+    - Chips/buttons: Any | 1 | 2 | 3+
+    - Maps to exact integer value
+    - Label: "Bathrooms"
+
+  facing_id
+    - Multi-chip or dropdown
+    - Load from GET /meta/listing-facings
+    - Label: "Facing Direction"
+    - Show direction labels (North, South etc.)
+    - Send facing id to API
+
+  floor_min / floor_max
+    - Two number inputs side by side
+    - Label: "Floor Range"
+    - Placeholder: "Min" and "Max"
+
+  size_min / size_max
+    - Two number inputs side by side
+    - Label: "Size (sqft)"
+    - Placeholder: "Min sqft" and "Max sqft"
+
+  available_from_start / available_from_end
+    - Date range picker
+    - Label: "Available From"
+    - Show as: "From [date] to [date]"
+    - Only allow today or future dates
+    - Format: YYYY-MM-DD when sending to API
+
+  sort_by
+    - Dropdown or radio list
+    - Label: "Sort By"
+    - Options:
+        "Newest First"       → newest
+        "Oldest First"       → oldest
+        "Price: Low to High" → price_asc
+        "Price: High to Low" → price_desc
+        "Available Soon"     → available_soon
+
+Show active filter count badge on filter button.
+Count increases for each active filter.
+Clear all button resets ALL filters including new ones.
+Apply button sends all active params to GET /listings.
+
+════════════════════════════════════════════════════
+TASK 8 — OWNER: FILTER UPDATE (OWNER LISTINGS)
+════════════════════════════════════════════════════
+
+Read existing owner listings filter if any.
+Add or update filter params for owner listings:
+
+  status filter:
+    Chips or dropdown
+    Options: All | Pending | Active | Draft | Rejected | Rented
+    Maps to: (empty) | pending | active | draft | rejected | rented
+
+  type_id filter:
+    Dropdown or chips
+    Load from GET /meta/listing-types
+    Label: "Listing Type"
+
+  page:
+    Handle pagination in the request
+
+Send to GET /owner/listings as query params.
+
+════════════════════════════════════════════════════
+TASK 9 — META DATA LOADING
+════════════════════════════════════════════════════
+
+On app startup or first load, fetch and cache:
+  GET /meta/listing-types   → store in app state
+  GET /meta/listing-facings → store in app state
+
+Use cached data for all dropdowns throughout app.
+Do not call these endpoints multiple times.
+If already cached, use cached version.
+
+Replace any hardcoded listing type list in the app
+with data from /meta/listing-types.
+
+════════════════════════════════════════════════════
+SAFETY RULES — READ BEFORE WRITING ANY CODE
+════════════════════════════════════════════════════
+
+1.  Read every file before editing it
+2.  Never delete existing working code
+3.  Never rename existing variables or methods
+4.  Never change existing navigation flow
+    (only add new step, do not reorder existing steps)
+5.  Never change existing UI design or theme
+    (only add new fields, keep existing layout)
+6.  Never change existing API call logic
+    (only update params, handle new response format)
+7.  If a field was optional before, keep it optional
+8.  If a field was required before, keep it required
+    EXCEPT: area in location step → now optional
+9.  road, house_name, block, section are ALWAYS optional
+    Never show validation error if they are empty
+10. listing_type.name → listing_type.slug is a breaking
+    change — find and fix EVERY occurrence
+11. minPrice → price_min and maxPrice → price_max are
+    breaking changes — fix in filter API call only
+12. Handle null values gracefully everywhere
+    If a new field is null, hide the UI element
+    Do not show "null" or empty boxes on screen
+13. Test these flows after changes:
+    → Create listing full flow (all steps)
+    → Edit listing
+    → Owner listings list with filters
+    → Renter listings list with filters
+    → Renter listing detail
+    → Owner listing detail
+14. Do not change state management approach
+    Use whatever pattern is already in the codebase
+15. Do not add new dependencies unless absolutely needed
+    Use existing packages already in the project

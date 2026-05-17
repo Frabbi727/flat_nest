@@ -252,6 +252,18 @@ class _ContentSection extends StatelessWidget {
 
   const _ContentSection({required this.t, required this.listing});
 
+  String _displayName() {
+    if (listing.ownerName != null && listing.ownerName!.isNotEmpty) return listing.ownerName!;
+    return listing.owner?.name ?? 'Owner';
+  }
+
+  String _initials() {
+    final name = _displayName();
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -339,6 +351,23 @@ class _ContentSection extends StatelessWidget {
               ],
             ),
           ),
+          // Availability, floor, facing
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _DetailTag(
+                text: '📅 ${listing.availableFromFormatted}',
+                color: listing.isAvailableNow ? t.successSoft : t.bgAlt,
+                textColor: listing.isAvailableNow ? t.success : t.inkMid,
+              ),
+              if (listing.floorNo != null)
+                _DetailTag(text: '🏢 Floor ${listing.floorNo}', color: t.bgAlt, textColor: t.inkMid),
+              if (listing.facing != null)
+                _DetailTag(text: '🧭 ${listing.facing!.label}', color: t.bgAlt, textColor: t.inkMid),
+            ],
+          ),
           // About
           if (listing.description != null) ...[
             const SizedBox(height: 24),
@@ -379,8 +408,42 @@ class _ContentSection extends StatelessWidget {
                   .toList(),
             ),
           ],
-          // Owner card
-          if (listing.owner != null) ...[
+          // Address details
+          if (listing.road != null || listing.houseName != null || listing.block != null || listing.section != null) ...[
+            const SizedBox(height: 24),
+            Text(
+              'Address Details',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.2),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: t.borderSoft),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 16, color: t.inkMid),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      [
+                        if (listing.road != null) listing.road!,
+                        if (listing.houseName != null) listing.houseName!,
+                        if (listing.block != null) 'Block ${listing.block}',
+                        if (listing.section != null) 'Section ${listing.section}',
+                      ].join(', '),
+                      style: TextStyle(fontSize: 13, color: t.inkMid, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          // Owner / Contact info
+          if (listing.owner != null || listing.ownerName != null || listing.ownerPhone != null) ...[
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(14),
@@ -389,46 +452,96 @@ class _ContentSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: t.borderSoft),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: t.primarySoft),
-                    child: Center(
-                      child: Text(
-                        listing.owner!.initials,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: t.primary),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: t.primarySoft),
+                        child: Center(
+                          child: Text(
+                            _initials(),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: t.primary),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_displayName(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: t.ink)),
+                            if (listing.ownerPhone != null)
+                              Text(listing.ownerPhone!, style: TextStyle(fontSize: 12, color: t.inkSoft)),
+                            if (listing.ownerAltPhone != null)
+                              Text(listing.ownerAltPhone!, style: TextStyle(fontSize: 12, color: t.inkSoft)),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Get.toNamed(Routes.chatList),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: t.primarySoft,
+                          foregroundColor: t.primaryInk,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Message', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(listing.owner!.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: t.ink)),
-                        Text('Owner', style: TextStyle(fontSize: 12, color: t.inkSoft)),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Get.toNamed(Routes.chatList),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: t.primarySoft,
-                      foregroundColor: t.primaryInk,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: const Text('Message', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  ),
+                  if (listing.preferredContact != null) ...[
+                    const SizedBox(height: 10),
+                    _PreferredContactBadge(t: t, contact: listing.preferredContact!),
+                  ],
                 ],
               ),
             ),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _DetailTag extends StatelessWidget {
+  final String text;
+  final Color color;
+  final Color textColor;
+
+  const _DetailTag({required this.text, required this.color, required this.textColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+      child: Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textColor)),
+    );
+  }
+}
+
+class _PreferredContactBadge extends StatelessWidget {
+  final FlatNestTheme t;
+  final String contact;
+
+  const _PreferredContactBadge({required this.t, required this.contact});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (contact) {
+      'whatsapp' => '💬 Prefers WhatsApp',
+      'both' => '📞💬 Call or WhatsApp',
+      _ => '📞 Prefers Call',
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: t.primarySoft, borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: t.primaryInk)),
     );
   }
 }

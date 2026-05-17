@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
+import '../../../core/service/auth_service.dart';
+import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
 import '../../listing/model/geo_model.dart';
+import '../../listing/model/listing_facing_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 import '../model/create_listing_request.dart';
@@ -41,9 +44,17 @@ class CreateListingController extends BaseController {
   int? _initDistrictId;
   int? _initUpazilaId;
   int? _initUnionId;
-  String _initRoadHouse = '';
   double? _initCoordX;
   double? _initCoordY;
+  // New step 1 snapshots
+  String? _initAvailableFrom;
+  int? _initFloorNo;
+  int? _initFacingId;
+  // New step 3 snapshots
+  String _initRoad = '';
+  String _initHouseName = '';
+  String _initBlock = '';
+  String _initSection = '';
 
   bool get _step1Unchanged {
     if (!_editMode) return false;
@@ -54,6 +65,9 @@ class CreateListingController extends BaseController {
     final baths = int.tryParse(bathsController.text) ?? 0;
     final currentAmenities = (List<int>.from(selectedAmenities)..sort()).join(',');
     final initAmenities = (List<int>.from(_initAmenities)..sort()).join(',');
+    final currentFloor = int.tryParse(floorNoController.text);
+    final currentAvailFrom =
+        availableFrom.value != null ? _formatDateForApi(availableFrom.value!) : null;
     return titleController.text.trim() == _initTitle &&
         price == _initPrice &&
         deposit == _initDeposit &&
@@ -62,7 +76,10 @@ class CreateListingController extends BaseController {
         size == _initSize &&
         descController.text.trim() == _initDesc &&
         selectedType.value == _initTypeName &&
-        currentAmenities == initAmenities;
+        currentAmenities == initAmenities &&
+        currentAvailFrom == _initAvailableFrom &&
+        currentFloor == _initFloorNo &&
+        selectedFacingId.value == _initFacingId;
   }
 
   bool get _step3Unchanged {
@@ -71,7 +88,10 @@ class CreateListingController extends BaseController {
         _districtId == _initDistrictId &&
         _upazilaId == _initUpazilaId &&
         _unionId == _initUnionId &&
-        roadAndHouse.text.trim() == _initRoadHouse &&
+        roadController.text.trim() == _initRoad &&
+        houseNameController.text.trim() == _initHouseName &&
+        blockController.text.trim() == _initBlock &&
+        sectionController.text.trim() == _initSection &&
         coordX.value == _initCoordX &&
         coordY.value == _initCoordY;
   }
@@ -90,9 +110,15 @@ class CreateListingController extends BaseController {
   final listingTypes = <ListingTypeModel>[].obs;
   final amenities = <AmenityModel>[].obs;
   final typesLoading = false.obs;
+  // Step 1 new fields
+  final availableFrom = Rxn<DateTime>();
+  final floorNoController = TextEditingController();
+  final selectedFacingId = RxnInt();
+  final listingFacings = <ListingFacingModel>[].obs;
+  final facingsLoading = false.obs;
 
   void pickListingType(ListingTypeModel type) {
-    selectedType.value = type.name;
+    selectedType.value = type.slug;
     selectedTypeId.value = type.id;
   }
 
@@ -111,6 +137,11 @@ class CreateListingController extends BaseController {
   final coordX = RxnDouble();
   final coordY = RxnDouble();
   final pinnedAddress = RxnString();
+  // Step 3 new address detail fields
+  final roadController = TextEditingController();
+  final houseNameController = TextEditingController();
+  final blockController = TextEditingController();
+  final sectionController = TextEditingController();
 
   void setCoordinates(double lat, double lng, {String? address}) {
     coordX.value = lat;
@@ -224,6 +255,31 @@ class CreateListingController extends BaseController {
     }
   }
 
+  // Step 4 — Owner Info
+  final ownerNameController = TextEditingController();
+  final ownerPhoneController = TextEditingController();
+  final ownerAltPhoneController = TextEditingController();
+  final ownerEmailController = TextEditingController();
+  final selectedPreferredContact = 'call'.obs;
+
+  void fillWithAccountInfo() {
+    final user = Get.find<AuthService>().currentUser;
+    if (user == null) return;
+    if (user.name.isNotEmpty) ownerNameController.text = user.name;
+    if (user.phone != null && user.phone!.isNotEmpty) {
+      ownerPhoneController.text = user.phone!;
+    }
+    if (user.email.isNotEmpty) {
+      ownerEmailController.text = user.email;
+    }
+    Get.snackbar(
+      'Done',
+      'Fields filled with your account info',
+      duration: const Duration(seconds: 2),
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
   bool get step1Valid {
     final title = titleController.text.trim();
     final price = int.tryParse(priceController.text.replaceAll(',', '')) ?? 0;
@@ -232,7 +288,8 @@ class CreateListingController extends BaseController {
     return title.isNotEmpty && price > 0 && beds > 0 && baths > 0 && selectedTypeId.value != null;
   }
 
-  bool get step3Valid => _unionId != null;
+  // area is now optional — step 3 is always valid
+  bool get step3Valid => true;
 
   void goBack() {
     if (currentStep.value == 0) {
@@ -251,9 +308,14 @@ class CreateListingController extends BaseController {
       case 2:
         _submitStep3();
       case 3:
+        _submitStep4OwnerInfo();
+      case 4:
         _submitStep4();
     }
   }
+
+  String _formatDateForApi(DateTime dt) =>
+      '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
 
   Future<void> _submitStep1() async {
     if (!step1Valid) {
@@ -281,6 +343,9 @@ class CreateListingController extends BaseController {
     final beds = int.tryParse(bedsController.text) ?? 0;
     final baths = int.tryParse(bathsController.text) ?? 0;
     final desc = descController.text.trim();
+    final floorNo = int.tryParse(floorNoController.text);
+    final availableFromStr =
+        availableFrom.value != null ? _formatDateForApi(availableFrom.value!) : null;
 
     // Skip API if nothing changed
     if (_step1Unchanged) {
@@ -309,6 +374,9 @@ class CreateListingController extends BaseController {
           size: size,
           description: desc.isEmpty ? null : desc,
           amenities: selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
+          availableFrom: availableFromStr,
+          floorNo: floorNo,
+          facingId: selectedFacingId.value,
         ),
       );
       hideLoading();
@@ -332,6 +400,9 @@ class CreateListingController extends BaseController {
       size: size,
       description: desc.isEmpty ? null : desc,
       amenities: selectedAmenities.isNotEmpty ? selectedAmenities.toList() : null,
+      availableFrom: availableFromStr,
+      floorNo: floorNo,
+      facingId: selectedFacingId.value,
     ));
     hideLoading();
 
@@ -388,23 +459,26 @@ class CreateListingController extends BaseController {
       return;
     }
 
-    if (!step3Valid) {
-      showError('Please select at least the union/area');
-      return;
-    }
     if (_listingId == null) return;
 
-    final rh = roadAndHouse.text.trim();
+    final road = roadController.text.trim();
+    final houseName = houseNameController.text.trim();
+    final block = blockController.text.trim();
+    final section = sectionController.text.trim();
+
     showLoading();
     final result = await _repo.saveLocation(
       _listingId!,
       SaveLocationRequest(
-        area: union.value!,
-        divisionId: _divisionId!,
-        districtId: _districtId!,
-        upazilaId: _upazilaId!,
-        unionId: _unionId!,
-        roadAndHouse: rh.isEmpty ? null : rh,
+        area: union.value,
+        divisionId: _divisionId,
+        districtId: _districtId,
+        upazilaId: _upazilaId,
+        unionId: _unionId,
+        road: road.isEmpty ? null : road,
+        houseName: houseName.isEmpty ? null : houseName,
+        block: block.isEmpty ? null : block,
+        section: section.isEmpty ? null : section,
         coordX: coordX.value,
         coordY: coordY.value,
       ),
@@ -419,6 +493,36 @@ class CreateListingController extends BaseController {
         showError(msg);
     }
   }
+
+  Future<void> _submitStep4OwnerInfo() async {
+    if (_listingId == null) return;
+
+    final ownerName = ownerNameController.text.trim();
+    final ownerPhone = ownerPhoneController.text.trim();
+    final ownerAltPhone = ownerAltPhoneController.text.trim();
+    final ownerEmail = ownerEmailController.text.trim();
+
+    final data = <String, dynamic>{};
+    if (ownerName.isNotEmpty) data['owner_name'] = ownerName;
+    if (ownerPhone.isNotEmpty) data['owner_phone'] = ownerPhone;
+    if (ownerAltPhone.isNotEmpty) data['owner_alt_phone'] = ownerAltPhone;
+    if (ownerEmail.isNotEmpty) data['owner_email'] = ownerEmail;
+    data['preferred_contact'] = selectedPreferredContact.value;
+
+    showLoading();
+    final result = await _repo.updateOwnerInfo(_listingId!, data);
+    hideLoading();
+
+    switch (result) {
+      case Success():
+        _anyStepChanged = true;
+        currentStep.value = 4;
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
+
+  void skipOwnerInfoStep() => _submitStep4OwnerInfo();
 
   Future<void> _submitStep4() async {
     if (_listingId == null) return;
@@ -499,6 +603,28 @@ class CreateListingController extends BaseController {
     }
     // Existing photos for preview
     existingPhotos.assignAll(listing.photos);
+    // New Step 1 fields
+    if (listing.availableFrom != null) {
+      final dt = DateTime.tryParse(listing.availableFrom!);
+      if (dt != null) availableFrom.value = dt;
+    }
+    if (listing.floorNo != null) floorNoController.text = '${listing.floorNo}';
+    if (listing.facingId != null) selectedFacingId.value = listing.facingId;
+    // New Step 3 address fields
+    if (listing.road != null) roadController.text = listing.road!;
+    if (listing.houseName != null) houseNameController.text = listing.houseName!;
+    if (listing.block != null) blockController.text = listing.block!;
+    if (listing.section != null) sectionController.text = listing.section!;
+    // New Step 4 owner info fields
+    if (listing.ownerName != null) ownerNameController.text = listing.ownerName!;
+    if (listing.ownerPhone != null) ownerPhoneController.text = listing.ownerPhone!;
+    if (listing.ownerAltPhone != null) {
+      ownerAltPhoneController.text = listing.ownerAltPhone!;
+    }
+    if (listing.ownerEmail != null) ownerEmailController.text = listing.ownerEmail!;
+    if (listing.preferredContact != null) {
+      selectedPreferredContact.value = listing.preferredContact!;
+    }
 
     // Snapshot for dirty checking
     _initTitle = listing.title;
@@ -514,9 +640,16 @@ class CreateListingController extends BaseController {
     _initDistrictId = listing.districtId;
     _initUpazilaId = listing.upazilaId;
     _initUnionId = listing.unionId;
-    _initRoadHouse = listing.roadAndHouse ?? '';
     _initCoordX = listing.coordX;
     _initCoordY = listing.coordY;
+    // New snapshots
+    _initAvailableFrom = listing.availableFrom;
+    _initFloorNo = listing.floorNo;
+    _initFacingId = listing.facingId;
+    _initRoad = listing.road ?? '';
+    _initHouseName = listing.houseName ?? '';
+    _initBlock = listing.block ?? '';
+    _initSection = listing.section ?? '';
   }
 
   void addPhoto(File file) {
@@ -549,6 +682,7 @@ class CreateListingController extends BaseController {
       if (listing != null) _prefillFromListing(listing);
     }
     _fetchListingTypes();
+    _loadFacings();
   }
 
   Future<void> _fetchListingTypes() async {
@@ -573,12 +707,12 @@ class CreateListingController extends BaseController {
         listingTypes.assignAll(data);
         if (data.isNotEmpty) {
           final match = _editMode
-              ? data.where((t) => t.name == selectedType.value).firstOrNull
+              ? data.where((t) => t.slug == selectedType.value).firstOrNull
               : null;
           if (match != null) {
             selectedTypeId.value = match.id;
           } else if (!_editMode) {
-            selectedType.value = data.first.name;
+            selectedType.value = data.first.slug;
             selectedTypeId.value = data.first.id;
           }
         }
@@ -597,6 +731,21 @@ class CreateListingController extends BaseController {
         if (div != null) division.value = div.name;
         _loadGeoForEditMode();
       }
+    }
+  }
+
+  Future<void> _loadFacings() async {
+    // Prefer MetaService cache
+    final metaService = Get.find<MetaService>();
+    if (metaService.listingFacings.isNotEmpty) {
+      listingFacings.assignAll(metaService.listingFacings);
+      return;
+    }
+    facingsLoading.value = true;
+    final result = await _repo.fetchListingFacings();
+    facingsLoading.value = false;
+    if (result case Success(data: final data?)) {
+      listingFacings.assignAll(data);
     }
   }
 
@@ -650,7 +799,16 @@ class CreateListingController extends BaseController {
     bedsController.dispose();
     bathsController.dispose();
     sizeController.dispose();
+    floorNoController.dispose();
     roadAndHouse.dispose();
+    roadController.dispose();
+    houseNameController.dispose();
+    blockController.dispose();
+    sectionController.dispose();
+    ownerNameController.dispose();
+    ownerPhoneController.dispose();
+    ownerAltPhoneController.dispose();
+    ownerEmailController.dispose();
     super.onClose();
   }
 }

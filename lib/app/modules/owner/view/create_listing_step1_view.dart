@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
@@ -329,6 +331,109 @@ class _Step1Form extends StatelessWidget {
                       );
                     }).toList(),
                   )),
+          ),
+          // ── Optional new fields ────────────────────────────────────────
+          _FormGroup(
+            t: t,
+            label: 'Available From',
+            hint: 'Leave empty if available now',
+            child: Obx(() {
+              final selected = controller.availableFrom.value;
+              return GestureDetector(
+                onTap: () async {
+                  final now = DateTime.now();
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: selected ?? now,
+                    firstDate: now,
+                    lastDate: now.add(const Duration(days: 365 * 2)),
+                  );
+                  if (picked != null) {
+                    controller.availableFrom.value = picked;
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: t.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: t.borderSoft),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 16, color: t.inkSoft),
+                      const SizedBox(width: 8),
+                      Text(
+                        selected != null
+                            ? DateFormat('MMMM d, yyyy').format(selected)
+                            : 'Select date',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: selected != null ? t.ink : t.inkSoft,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (selected != null)
+                        GestureDetector(
+                          onTap: () => controller.availableFrom.value = null,
+                          child: Icon(Icons.close_rounded, size: 16, color: t.inkSoft),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+          _FormGroup(
+            t: t,
+            label: 'Floor Number',
+            child: TextField(
+              controller: controller.floorNoController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+              decoration: _inputDeco(t).copyWith(hintText: 'e.g. 3'),
+            ),
+          ),
+          _FormGroup(
+            t: t,
+            label: 'Flat Facing',
+            child: Obx(() {
+              final facings = controller.listingFacings;
+              final selectedId = controller.selectedFacingId.value;
+              return Container(
+                decoration: BoxDecoration(
+                  color: t.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: t.borderSoft),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: DropdownButton<int?>(
+                  value: selectedId,
+                  isExpanded: true,
+                  underline: const SizedBox.shrink(),
+                  hint: Text(
+                    'Select facing direction',
+                    style: AppTextStyles.bodyMedium.copyWith(color: t.inkSoft, fontSize: 15),
+                  ),
+                  style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
+                  items: [
+                    DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text(
+                        'Not specified',
+                        style: AppTextStyles.bodyMedium.copyWith(color: t.inkSoft, fontSize: 15),
+                      ),
+                    ),
+                    ...facings.map((f) => DropdownMenuItem<int?>(
+                          value: f.id,
+                          child: Text(f.label),
+                        )),
+                  ],
+                  onChanged: (val) => controller.selectedFacingId.value = val,
+                ),
+              );
+            }),
           ),
           const SizedBox(height: 20),
         ],

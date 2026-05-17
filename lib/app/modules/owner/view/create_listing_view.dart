@@ -7,11 +7,12 @@ import 'create_listing_step1_view.dart';
 import 'create_listing_step2_view.dart';
 import 'create_listing_step3_view.dart';
 import 'create_listing_step4_view.dart';
+import 'create_listing_step_owner_info_view.dart';
 
 class CreateListingView extends GetView<CreateListingController> {
   const CreateListingView({super.key});
 
-  static const _steps = ['Details', 'Photos', 'Location', 'Preview'];
+  static const _steps = ['Details', 'Photos', 'Location', 'Contact', 'Preview'];
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,7 @@ class CreateListingView extends GetView<CreateListingController> {
                     0 => const CreateListingStep1View(),
                     1 => const CreateListingStep2View(),
                     2 => const CreateListingStep3View(),
+                    3 => const CreateListingStepOwnerInfoView(),
                     _ => const CreateListingStep4View(),
                   }),
             ),

@@ -7,6 +7,8 @@ class ListingTypeModel {
   final int id;
   final String name;
   final String label;
+  @JsonKey(defaultValue: '')
+  final String slug;
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
   @JsonKey(name: 'updated_at')
@@ -16,6 +18,7 @@ class ListingTypeModel {
     required this.id,
     required this.name,
     required this.label,
+    this.slug = '',
     this.createdAt,
     this.updatedAt,
   });

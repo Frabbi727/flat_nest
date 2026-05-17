@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../../../core/network/api_config.dart';
+import 'listing_facing_model.dart';
 
 part 'listing_model.g.dart';
 
@@ -13,7 +14,7 @@ String _createdAtFromJson(dynamic v) => v as String? ?? '';
 
 // readValue helpers — receive the whole map so we can read sibling keys
 dynamic _typeReadValue(Map json, String key) =>
-    json['type'] ?? (json['listing_type'] as Map?)?['name'] ?? '';
+    json['type'] ?? (json['listing_type'] as Map?)?['slug'] ?? '';
 
 dynamic _statusReadValue(Map json, String key) => json['status'] ?? 'draft';
 
@@ -113,6 +114,28 @@ class ListingModel {
   final String? area;
   @JsonKey(name: 'road_and_house')
   final String? roadAndHouse;
+  @JsonKey(name: 'available_from')
+  final String? availableFrom;
+  @JsonKey(name: 'floor_no', fromJson: _toNullableInt)
+  final int? floorNo;
+  @JsonKey(name: 'facing_id', fromJson: _toNullableInt)
+  final int? facingId;
+  final ListingFacingModel? facing;
+  final String? road;
+  @JsonKey(name: 'house_name')
+  final String? houseName;
+  final String? block;
+  final String? section;
+  @JsonKey(name: 'owner_name')
+  final String? ownerName;
+  @JsonKey(name: 'owner_phone')
+  final String? ownerPhone;
+  @JsonKey(name: 'owner_alt_phone')
+  final String? ownerAltPhone;
+  @JsonKey(name: 'owner_email')
+  final String? ownerEmail;
+  @JsonKey(name: 'preferred_contact')
+  final String? preferredContact;
   @JsonKey(name: 'division_id', fromJson: _toNullableInt)
   final int? divisionId;
   @JsonKey(name: 'district_id', fromJson: _toNullableInt)
@@ -158,6 +181,19 @@ class ListingModel {
     required this.title,
     this.area,
     this.roadAndHouse,
+    this.availableFrom,
+    this.floorNo,
+    this.facingId,
+    this.facing,
+    this.road,
+    this.houseName,
+    this.block,
+    this.section,
+    this.ownerName,
+    this.ownerPhone,
+    this.ownerAltPhone,
+    this.ownerEmail,
+    this.preferredContact,
     this.divisionId,
     this.districtId,
     this.upazilaId,
@@ -191,6 +227,15 @@ class ListingModel {
   String get depositFormatted =>
       deposit != null ? '৳${_amountFmt.format(deposit!)}' : 'N/A';
 
+  String get availableFromFormatted {
+    if (availableFrom == null) return 'Available Now';
+    final dt = DateTime.tryParse(availableFrom!);
+    if (dt == null) return availableFrom!;
+    return DateFormat('MMM d, yyyy').format(dt);
+  }
+
+  bool get isAvailableNow => availableFrom == null;
+
   String? get thumbnailUrl => photos.isNotEmpty
       ? photos.reduce((a, b) => a.position < b.position ? a : b).url
       : null;
@@ -210,6 +255,19 @@ class OwnerListingModel extends ListingModel {
     required super.title,
     super.area,
     super.roadAndHouse,
+    super.availableFrom,
+    super.floorNo,
+    super.facingId,
+    super.facing,
+    super.road,
+    super.houseName,
+    super.block,
+    super.section,
+    super.ownerName,
+    super.ownerPhone,
+    super.ownerAltPhone,
+    super.ownerEmail,
+    super.preferredContact,
     super.divisionId,
     super.districtId,
     super.upazilaId,

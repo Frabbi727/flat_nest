@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
 import '../../listing/model/listing_model.dart';
 import '../repository/owner_repository.dart';
@@ -17,11 +18,23 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
   final activeTab = 0.obs;
   final myListings = <OwnerListingModel>[].obs;
 
+  // Pagination state
+  final _currentPage = 1.obs;
+  final _lastPage = 1.obs;
+  final isLoadingMore = false.obs;
+
+  bool get hasMorePages => _currentPage.value < _lastPage.value;
+
+  // Filter state
+  final filterStatus = RxnString();
+  final filterTypeId = RxnInt();
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     fetchMyListings();
+    Get.find<MetaService>().loadMeta();
     // Refresh when user switches to Dashboard (0) or Listings (1)
     ever(activeTab, (tab) {
       if (tab == 0 || tab == 1) fetchMyListings();
@@ -56,17 +69,48 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
 
   Future<void> fetchMyListings() async {
     showLoading();
-    final result = await _ownerRepository.getMyListings();
+    _currentPage.value = 1;
+    final result = await _ownerRepository.getMyListings(
+      status: filterStatus.value,
+      typeId: filterTypeId.value,
+      page: 1,
+    );
     hideLoading();
 
     switch (result) {
-      case Success(data: final data?):
-        myListings.value = data;
+      case Success(data: final page?):
+        myListings.value = page.listings;
+        _currentPage.value = page.currentPage;
+        _lastPage.value = page.lastPage;
       case Success():
         myListings.clear();
       case Error(message: final msg):
         showError(msg);
     }
+  }
+
+  Future<void> loadMoreListings() async {
+    if (isLoadingMore.value || !hasMorePages) return;
+    isLoadingMore.value = true;
+    final nextPage = _currentPage.value + 1;
+    final result = await _ownerRepository.getMyListings(
+      status: filterStatus.value,
+      typeId: filterTypeId.value,
+      page: nextPage,
+    );
+    isLoadingMore.value = false;
+
+    if (result case Success(data: final page?)) {
+      myListings.addAll(page.listings);
+      _currentPage.value = page.currentPage;
+      _lastPage.value = page.lastPage;
+    }
+  }
+
+  void applyOwnerFilters({String? status, int? typeId}) {
+    filterStatus.value = status;
+    filterTypeId.value = typeId;
+    fetchMyListings();
   }
 
   Future<void> goToCreateListing() async {

@@ -16,6 +16,7 @@ class ApiEndpoints {
   static String listingLocation(String id) => '/listings/$id/location';
   static String listingSubmit(String id) => '/listings/$id/submit';
   static String listingMarkRented(String id) => '/listings/$id/mark-rented';
+  static String listingOwnerInfo(String id) => '/listings/$id/owner-info';
 
   // ── Owner ─────────────────────────────────────────────────────────────────
   static const String ownerListings = '/owner/listings';
@@ -35,6 +36,8 @@ class ApiEndpoints {
 
   // ── Reference data ────────────────────────────────────────────────────────
   static const String listingTypes = '/listing-types';
+  static const String metaListingTypes = '/meta/listing-types';
+  static const String metaListingFacings = '/meta/listing-facings';
   static const String amenities = '/amenities';
   static const String geoDivisions = '/geo/divisions';
   static String geoDistricts(int divisionId) => '/geo/districts/$divisionId';

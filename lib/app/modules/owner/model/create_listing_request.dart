@@ -8,6 +8,9 @@ class CreateListingRequest {
   final int? size;
   final String? description;
   final List<int>? amenities;
+  final String? availableFrom;
+  final int? floorNo;
+  final int? facingId;
 
   const CreateListingRequest({
     required this.title,
@@ -19,6 +22,9 @@ class CreateListingRequest {
     this.size,
     this.description,
     this.amenities,
+    this.availableFrom,
+    this.floorNo,
+    this.facingId,
   });
 
   Map<String, dynamic> toJson() {
@@ -33,6 +39,9 @@ class CreateListingRequest {
     if (size != null) map['size'] = size;
     if (description != null) map['description'] = description;
     if (amenities != null) map['amenities'] = amenities;
+    if (availableFrom != null) map['available_from'] = availableFrom;
+    if (floorNo != null) map['floor_no'] = floorNo;
+    if (facingId != null) map['facing_id'] = facingId;
     return map;
   }
 }
