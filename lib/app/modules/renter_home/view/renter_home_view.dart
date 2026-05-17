@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/renter_home_controller.dart';
-import 'discovery_view.dart';
-import 'nearby_map_view.dart';
-import 'wishlist_view.dart';
-import 'messages_placeholder_view.dart';
-import 'profile_placeholder_view.dart';
+import 'discovery/discovery_view.dart';
+import 'map/nearby_map_view.dart';
+import 'wishlist/wishlist_view.dart';
+import 'messages/messages_placeholder_view.dart';
+import 'profile/profile_placeholder_view.dart';
 
 class RenterHomeView extends GetView<RenterHomeController> {
   const RenterHomeView({super.key});

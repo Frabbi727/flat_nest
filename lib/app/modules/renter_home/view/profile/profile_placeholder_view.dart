@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../theme/flat_nest_theme.dart';
-import '../../../core/service/auth_service.dart';
-import '../../../route/app_routes.dart';
+import '../../../../theme/flat_nest_theme.dart';
+import '../../../../core/service/auth_service.dart';
+import '../../../../route/app_routes.dart';
 
 class ProfilePlaceholderView extends StatelessWidget {
   const ProfilePlaceholderView({super.key});

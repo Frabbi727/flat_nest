@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../theme/flat_nest_theme.dart';
+import '../../../../theme/flat_nest_theme.dart';
 
 class MessagesPlaceholderView extends StatelessWidget {
   const MessagesPlaceholderView({super.key});

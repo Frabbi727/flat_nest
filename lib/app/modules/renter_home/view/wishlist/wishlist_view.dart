@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../theme/flat_nest_theme.dart';
-import '../controller/renter_home_controller.dart';
-import 'listing_card_widget.dart';
+import '../../../../theme/flat_nest_theme.dart';
+import '../../controller/renter_home_controller.dart';
+import '../listing/listing_card_widget.dart';
 
 class WishlistView extends GetView<RenterHomeController> {
   const WishlistView({super.key});

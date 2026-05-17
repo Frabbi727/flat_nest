@@ -6,9 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../theme/flat_nest_theme.dart';
-import '../../listing/model/listing_model.dart';
-import '../controller/renter_home_controller.dart';
+import '../../../../theme/flat_nest_theme.dart';
+import '../../../listing/model/listing_model.dart';
+import '../../controller/renter_home_controller.dart';
 
 class NearbyMapView extends StatefulWidget {
   const NearbyMapView({super.key});

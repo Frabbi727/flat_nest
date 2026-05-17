@@ -16,7 +16,7 @@ import '../modules/owner/view/owner_home_view.dart';
 import '../modules/register/binding/register_binding.dart';
 import '../modules/register/view/register_view.dart';
 import '../modules/renter_home/binding/renter_home_binding.dart';
-import '../modules/renter_home/view/listing_detail_view.dart';
+import '../modules/renter_home/view/listing/listing_detail_view.dart';
 import '../modules/renter_home/view/renter_home_view.dart';
 import '../modules/splash/binding/splash_binding.dart';
 import '../modules/splash/view/splash_view.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../theme/flat_nest_theme.dart';
-import '../../listing/model/listing_model.dart';
+import '../../../../theme/flat_nest_theme.dart';
+import '../../../listing/model/listing_model.dart';
 
 class ListingCardWidget extends StatelessWidget {
   final FlatNestTheme t;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../theme/flat_nest_theme.dart';
-import '../../../route/app_routes.dart';
-import '../../listing/model/listing_model.dart';
-import '../controller/renter_home_controller.dart';
+import '../../../../theme/flat_nest_theme.dart';
+import '../../../../route/app_routes.dart';
+import '../../../listing/model/listing_model.dart';
+import '../../controller/renter_home_controller.dart';
 
 class ListingDetailView extends StatefulWidget {
   const ListingDetailView({super.key});
