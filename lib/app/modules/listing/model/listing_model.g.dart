@@ -85,8 +85,8 @@ ListingModel _$ListingModelFromJson(Map<String, dynamic> json) => ListingModel(
       status: _statusReadValue(json, 'status') as String,
       statusLabel: _statusLabelReadValue(json, 'status_label') as String,
       views: _toInt(json['views']),
-      coordX: _toNullableDouble(json['coord_x']),
-      coordY: _toNullableDouble(json['coord_y']),
+      lat: _toNullableDouble(json['coord_x']),
+      lng: _toNullableDouble(json['coord_y']),
       amenities: (json['amenities'] as List<dynamic>?)
               ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -134,8 +134,8 @@ Map<String, dynamic> _$ListingModelToJson(ListingModel instance) =>
       'status': instance.status,
       'status_label': instance.statusLabel,
       'views': instance.views,
-      'coord_x': instance.coordX,
-      'coord_y': instance.coordY,
+      'coord_x': instance.lat,
+      'coord_y': instance.lng,
       'amenities': instance.amenities.map((e) => e.toJson()).toList(),
       'owner': instance.owner?.toJson(),
       'photos': instance.photos.map((e) => e.toJson()).toList(),
@@ -178,8 +178,8 @@ OwnerListingModel _$OwnerListingModelFromJson(Map<String, dynamic> json) =>
       status: _statusReadValue(json, 'status') as String,
       statusLabel: _statusLabelReadValue(json, 'status_label') as String,
       views: _toInt(json['views']),
-      coordX: _toNullableDouble(json['coord_x']),
-      coordY: _toNullableDouble(json['coord_y']),
+      lat: _toNullableDouble(json['coord_x']),
+      lng: _toNullableDouble(json['coord_y']),
       amenities: (json['amenities'] as List<dynamic>?)
               ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -229,8 +229,8 @@ Map<String, dynamic> _$OwnerListingModelToJson(OwnerListingModel instance) =>
       'status': instance.status,
       'status_label': instance.statusLabel,
       'views': instance.views,
-      'coord_x': instance.coordX,
-      'coord_y': instance.coordY,
+      'coord_x': instance.lat,
+      'coord_y': instance.lng,
       'amenities': instance.amenities.map((e) => e.toJson()).toList(),
       'owner': instance.owner?.toJson(),
       'photos': instance.photos.map((e) => e.toJson()).toList(),

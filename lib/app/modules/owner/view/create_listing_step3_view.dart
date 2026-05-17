@@ -564,8 +564,8 @@ class _MapPinCard extends GetView<CreateListingController> {
 
   Future<void> _openPicker() async {
     final result = await MapPickerView.open(
-      lat: controller.coordX.value,
-      lng: controller.coordY.value,
+      lat: controller.lat.value,
+      lng: controller.lng.value,
     );
     if (result != null) {
       controller.setCoordinates(result.lat, result.lng, address: result.address);
@@ -588,8 +588,8 @@ class _MapPinCard extends GetView<CreateListingController> {
         ),
         const SizedBox(height: 6),
         Obx(() {
-          final lat = controller.coordX.value;
-          final lng = controller.coordY.value;
+          final lat = controller.lat.value;
+          final lng = controller.lng.value;
           final hasPin = lat != null && lng != null;
 
           if (!hasPin) {

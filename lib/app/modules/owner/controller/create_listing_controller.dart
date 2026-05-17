@@ -44,8 +44,8 @@ class CreateListingController extends BaseController {
   int? _initDistrictId;
   int? _initUpazilaId;
   int? _initUnionId;
-  double? _initCoordX;
-  double? _initCoordY;
+  double? _initLat;
+  double? _initLng;
   // New step 1 snapshots
   String? _initAvailableFrom;
   int? _initFloorNo;
@@ -92,8 +92,8 @@ class CreateListingController extends BaseController {
         houseNameController.text.trim() == _initHouseName &&
         blockController.text.trim() == _initBlock &&
         sectionController.text.trim() == _initSection &&
-        coordX.value == _initCoordX &&
-        coordY.value == _initCoordY;
+        lat.value == _initLat &&
+        lng.value == _initLng;
   }
 
   // Step 1 — Details
@@ -134,8 +134,8 @@ class CreateListingController extends BaseController {
   final union = RxnString();
   final roadAndHouse = TextEditingController();
   final activeDropdown = RxnString();
-  final coordX = RxnDouble();
-  final coordY = RxnDouble();
+  final lat = RxnDouble();
+  final lng = RxnDouble();
   final pinnedAddress = RxnString();
   // Step 3 new address detail fields
   final roadController = TextEditingController();
@@ -143,9 +143,9 @@ class CreateListingController extends BaseController {
   final blockController = TextEditingController();
   final sectionController = TextEditingController();
 
-  void setCoordinates(double lat, double lng, {String? address}) {
-    coordX.value = lat;
-    coordY.value = lng;
+  void setCoordinates(double latVal, double lngVal, {String? address}) {
+    lat.value = latVal;
+    lng.value = lngVal;
     pinnedAddress.value = address;
     if (address != null && roadAndHouse.text.trim().isEmpty) {
       roadAndHouse.text = address;
@@ -153,8 +153,8 @@ class CreateListingController extends BaseController {
   }
 
   void clearCoordinates() {
-    coordX.value = null;
-    coordY.value = null;
+    lat.value = null;
+    lng.value = null;
     pinnedAddress.value = null;
   }
 
@@ -479,8 +479,8 @@ class CreateListingController extends BaseController {
         houseName: houseName.isEmpty ? null : houseName,
         block: block.isEmpty ? null : block,
         section: section.isEmpty ? null : section,
-        coordX: coordX.value,
-        coordY: coordY.value,
+        lat: lat.value,
+        lng: lng.value,
       ),
     );
     hideLoading();
@@ -597,9 +597,9 @@ class CreateListingController extends BaseController {
     _upazilaId = listing.upazilaId;
     _unionId = listing.unionId;
     // Coordinates from map pin
-    if (listing.coordX != null && listing.coordY != null) {
-      coordX.value = listing.coordX;
-      coordY.value = listing.coordY;
+    if (listing.lat != null && listing.lng != null) {
+      lat.value = listing.lat;
+      lng.value = listing.lng;
     }
     // Existing photos for preview
     existingPhotos.assignAll(listing.photos);
@@ -640,8 +640,8 @@ class CreateListingController extends BaseController {
     _initDistrictId = listing.districtId;
     _initUpazilaId = listing.upazilaId;
     _initUnionId = listing.unionId;
-    _initCoordX = listing.coordX;
-    _initCoordY = listing.coordY;
+    _initLat = listing.lat;
+    _initLng = listing.lng;
     // New snapshots
     _initAvailableFrom = listing.availableFrom;
     _initFloorNo = listing.floorNo;

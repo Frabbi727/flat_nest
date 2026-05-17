@@ -343,8 +343,8 @@ class _LocationCard extends GetView<CreateListingController> {
         c.union.value,
       ].whereType<String>().join(' › ');
       final roadHouse = c.roadAndHouse.text.trim();
-      final lat = c.coordX.value;
-      final lng = c.coordY.value;
+      final lat = c.lat.value;
+      final lng = c.lng.value;
       final hasPin = lat != null && lng != null;
 
       return Column(

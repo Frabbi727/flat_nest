@@ -8,8 +8,8 @@ class SaveLocationRequest {
   final String? houseName;
   final String? block;
   final String? section;
-  final double? coordX;
-  final double? coordY;
+  final double? lat;
+  final double? lng;
 
   const SaveLocationRequest({
     this.area,
@@ -21,8 +21,8 @@ class SaveLocationRequest {
     this.houseName,
     this.block,
     this.section,
-    this.coordX,
-    this.coordY,
+    this.lat,
+    this.lng,
   });
 
   Map<String, dynamic> toJson() {
@@ -36,8 +36,8 @@ class SaveLocationRequest {
     if (houseName != null && houseName!.isNotEmpty) map['house_name'] = houseName;
     if (block != null && block!.isNotEmpty) map['block'] = block;
     if (section != null && section!.isNotEmpty) map['section'] = section;
-    if (coordX != null) map['coord_x'] = coordX;
-    if (coordY != null) map['coord_y'] = coordY;
+    if (lat != null) map['coord_x'] = lat;
+    if (lng != null) map['coord_y'] = lng;
     return map;
   }
 }
