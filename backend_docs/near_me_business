@@ -1,0 +1,77 @@
+# Basic — 5km radius
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=5
+
+# By listing type + price cap
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&listing_type_id=1&price_max=30000
+
+# By rooms
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&beds=3&baths=2
+
+# By property size + floor
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=15&size_min=800&floor_max=5
+
+# By facing direction
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&facing_id=2
+
+# By availability window
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&available_from_start=2026-06-01&available_from_end=2026-09-01
+
+# Narrow to a district within the radius
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=20&district_id=4
+
+# Text search within radius
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&search=dhanmondi
+
+# By amenities (Wifi=1, Parking=3, Gas=5 — all must be present)
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10&amenities=1,3,5
+
+# Combined — the real-world use case
+GET /api/v1/listings/nearby?coord_x=90.3742&coord_y=23.7461&radius=10
+  &listing_type_id=1&price_max=40000&beds=3&baths=2&amenities=1,3
+```
+Let me first check the exact current state of both the main listing feed filters and the nearby filters side by side:
+
+Viewed ListingRepository.php:1-165
+Viewed ListingController.php:1-105
+
+I can see the exact gap — the main listing feed has `sort_by` but `nearby` is missing it. The nearby always hard-codes `distance_km ASC`. I'll add `sort_by` support as a **secondary sort** (distance stays primary, but you can choose a secondary sort like price). I'll also update the controller docblock. Everything isolated, nothing touched in existing methods:
+
+Edited ListingRepository.php
+
+Now add `sort_by` to the service filter passthrough and the controller `$request->only()`:
+
+Edited ListingService.php
+
+Let me fix the controller separately:
+
+Viewed ListingController.php:49-105
+Edited ListingController.php
+
+Now update the docs `near_me.md` to add `sort_by` to the parameters table:
+
+Edited near_me.md
+
+Final syntax check:
+
+Ran command: `php -l app/Repositories/ListingRepository.php && php -l app/Services/ListingService.php && php -l app/Http/Controllers/Api/V1/ListingController.php && echo "✅ All OK"`
+
+Done! ✅ The `/listings/nearby` endpoint now has **100% filter parity** with `/listings`. Here's the full comparison:
+
+| Filter | `/listings` | `/listings/nearby` |
+|---|---|---|
+| `search` | ✅ | ✅ |
+| `listing_type_id` | ✅ | ✅ |
+| `price_min` / `price_max` | ✅ | ✅ |
+| `beds` / `baths` | ✅ | ✅ |
+| `facing_id` | ✅ | ✅ |
+| `floor_min` / `floor_max` | ✅ | ✅ |
+| `size_min` / `size_max` | ✅ | ✅ |
+| `available_from_start/end` | ✅ | ✅ |
+| `division/district/upazila/union_id` | ✅ | ✅ |
+| `amenities` | ✅ | ✅ |
+| `sort_by` | ✅ | ✅ (secondary — distance always stays primary) |
+
+**Key behaviour for `sort_by` on nearby:**
+- Distance is **always** the first sort (closest first)
+- `sort_by=price_asc/price_desc/available_soon` adds a **secondary** sort on top
+- No existing `findActive()` or any other method was changed
