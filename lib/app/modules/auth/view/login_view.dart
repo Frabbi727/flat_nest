@@ -44,16 +44,10 @@ class LoginView extends GetView<AuthController> {
   }
 
   Widget _buildLogo(FlatNestTheme t) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: t.primary,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Center(
-        child: Icon(Icons.home_work_rounded, color: Colors.white, size: 32),
-      ),
+    return Image.asset(
+      'assets/images/flatnest_icon_v4.png',
+      width: 72,
+      height: 72,
     );
   }
 
