@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/flat_nest_theme.dart';
-import '../../../../route/app_routes.dart';
 import '../../../listing/model/listing_model.dart';
 
 class ListingDetailContent extends StatelessWidget {
@@ -518,72 +516,76 @@ class _MapCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final point = ll.LatLng(lat, lng);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: 210,
-        child: Stack(
-          children: [
-            FlutterMap(
-              options: MapOptions(
-                initialCenter: point,
-                initialZoom: 16,
-                interactionOptions:
-                    const InteractionOptions(flags: InteractiveFlag.none),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.flatnest.app',
-                  maxZoom: 19,
+    return GestureDetector(
+      onTap: _openDirections,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 210,
+          child: Stack(
+            children: [
+              FlutterMap(
+                options: MapOptions(
+                  initialCenter: point,
+                  initialZoom: 16,
+                  interactionOptions:
+                      const InteractionOptions(flags: InteractiveFlag.none),
                 ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: point,
-                      width: 50,
-                      height: 58,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: t.primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: t.primary.withValues(alpha: 0.45),
-                                  blurRadius: 14,
-                                  spreadRadius: 2,
-                                ),
-                              ],
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.flatnest.app',
+                    maxZoom: 19,
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: point,
+                        width: 50,
+                        height: 58,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: t.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: t.primary.withValues(alpha: 0.45),
+                                    blurRadius: 14,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.home_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.home_rounded,
-                              color: Colors.white,
-                              size: 22,
+                            CustomPaint(
+                              size: const Size(14, 9),
+                              painter: _PinTip(color: t.primary),
                             ),
-                          ),
-                          CustomPaint(
-                            size: const Size(14, 9),
-                            painter: _PinTip(color: t.primary),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Directions button overlay
-            Positioned(
-              bottom: 10,
-              right: 10,
-              child: GestureDetector(
-                onTap: _openDirections,
+                    ],
+                  ),
+                  const SimpleAttributionWidget(
+                    source: Text('© OpenStreetMap contributors'),
+                    alignment: Alignment.bottomLeft,
+                  ),
+                ],
+              ),
+              // Directions badge overlay
+              Positioned(
+                bottom: 10,
+                right: 10,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 13, vertical: 8),
@@ -605,7 +607,7 @@ class _MapCard extends StatelessWidget {
                           size: 15, color: t.primary),
                       const SizedBox(width: 5),
                       Text(
-                        'Directions',
+                        'Open in Google Maps',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -616,8 +618,8 @@ class _MapCard extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -659,9 +661,16 @@ class _OwnerCard extends StatelessWidget {
     required this.initials,
   });
 
+  Future<void> _call(String phone) async {
+    try {
+      await launchUrl(Uri.parse('tel:$phone'));
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final avatarUrl = listing.owner?.avatarUrl;
+    final hasContact = listing.ownerPhone != null || listing.ownerAltPhone != null;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -692,12 +701,11 @@ class _OwnerCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              // Avatar
               Container(
                 width: 50,
                 height: 50,
-                decoration:
-                    BoxDecoration(shape: BoxShape.circle, color: t.primarySoft),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle, color: t.primarySoft),
                 clipBehavior: Clip.antiAlias,
                 child: avatarUrl != null
                     ? Image.network(
@@ -709,63 +717,39 @@ class _OwnerCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: t.ink,
-                      ),
-                    ),
-                    if (listing.ownerPhone != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        listing.ownerPhone!,
-                        style: TextStyle(fontSize: 12, color: t.inkSoft),
-                      ),
-                    ],
-                    if (listing.ownerAltPhone != null)
-                      Text(
-                        listing.ownerAltPhone!,
-                        style: TextStyle(fontSize: 12, color: t.inkSoft),
-                      ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Get.toNamed(Routes.chatList),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: t.primarySoft,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.chat_bubble_outline_rounded,
-                          size: 14, color: t.primary),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Message',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: t.primaryInk,
-                        ),
-                      ),
-                    ],
+                child: Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: t.ink,
                   ),
                 ),
               ),
             ],
           ),
-          if (listing.preferredContact != null) ...[
+          // Tappable contact rows
+          if (hasContact) ...[
             const SizedBox(height: 12),
+            if (listing.ownerPhone != null)
+              _ContactRow(
+                t: t,
+                icon: Icons.call_outlined,
+                label: listing.ownerPhone!,
+                onTap: () => _call(listing.ownerPhone!),
+              ),
+            if (listing.ownerAltPhone != null) ...[
+              const SizedBox(height: 8),
+              _ContactRow(
+                t: t,
+                icon: Icons.call_outlined,
+                label: listing.ownerAltPhone!,
+                onTap: () => _call(listing.ownerAltPhone!),
+              ),
+            ],
+          ],
+          if (listing.preferredContact != null) ...[
+            const SizedBox(height: 10),
             _PreferredContactBadge(t: t, contact: listing.preferredContact!),
           ],
         ],
@@ -781,6 +765,51 @@ class _OwnerCard extends StatelessWidget {
           fontSize: 18,
           fontWeight: FontWeight.w700,
           color: t.primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactRow extends StatelessWidget {
+  final FlatNestTheme t;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ContactRow({
+    required this.t,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: t.bgAlt,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: t.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: t.primary,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 18, color: t.inkSoft),
+          ],
         ),
       ),
     );
