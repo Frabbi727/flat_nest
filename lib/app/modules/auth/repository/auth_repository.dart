@@ -16,7 +16,7 @@ class AuthRepository extends BaseRepository {
       );
       return parseResponse(response, AuthResponse.fromJson);
     } catch (e) {
-      return Error(parseError(e), statusCode: parseStatusCode(e));
+      return Error(parseError(e), statusCode: parseStatusCode(e), code: parseErrorCode(e));
     }
   }
 

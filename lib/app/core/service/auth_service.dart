@@ -63,8 +63,9 @@ class AuthService extends GetxService {
       );
 
       if (response.statusCode == 200) {
-        final newAccessToken = response.data['access_token'] as String;
-        final newRefreshToken = response.data['refresh_token'] as String? ?? _refreshToken.value!;
+        final data = response.data['data'] as Map<String, dynamic>;
+        final newAccessToken = data['access_token'] as String;
+        final newRefreshToken = _refreshToken.value!;
         await login(accessToken: newAccessToken, refreshToken: newRefreshToken);
         return true;
       }

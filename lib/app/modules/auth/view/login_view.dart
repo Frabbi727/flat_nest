@@ -26,11 +26,18 @@ class LoginView extends GetView<AuthController> {
               const SizedBox(height: 32),
               _buildEmailField(t),
               const SizedBox(height: 12),
-              _buildPasswordLabel(t),
-              const SizedBox(height: 6),
-              _buildPasswordField(t),
-              const SizedBox(height: 24),
-              _buildSignInButton(t),
+              Obx(() => controller.showGoogleHint.value
+                  ? const SizedBox.shrink()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildPasswordLabel(t),
+                        const SizedBox(height: 6),
+                        _buildPasswordField(t),
+                        const SizedBox(height: 24),
+                        _buildSignInButton(t),
+                      ],
+                    )),
               _buildDivider(t),
               _buildSocialButtons(t),
               const SizedBox(height: 40),
@@ -198,25 +205,28 @@ class LoginView extends GetView<AuthController> {
   }
 
   Widget _buildSocialButtons(FlatNestTheme t) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: controller.signInWithGoogle,
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          side: BorderSide(color: t.borderSoft),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Text(
-          'Google',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: t.ink,
-            fontWeight: FontWeight.w500,
-            fontSize: 13,
+    return Obx(() {
+      final hinted = controller.showGoogleHint.value;
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: controller.signInWithGoogle,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: BorderSide(color: hinted ? t.primary : t.borderSoft, width: hinted ? 2 : 1),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          child: Text(
+            hinted ? 'Continue with Google' : 'Google',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: hinted ? t.primary : t.ink,
+              fontWeight: hinted ? FontWeight.w600 : FontWeight.w500,
+              fontSize: 13,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildFooter(FlatNestTheme t) {

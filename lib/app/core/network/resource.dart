@@ -16,8 +16,9 @@ class Error<T> extends Resource<T> {
   final String message;
   final String? messageBn;
   final int? statusCode;
+  final String? code;
   final ErrorModel? errorModel;
   final dynamic exception;
 
-  const Error(this.message, {this.messageBn, this.statusCode, this.errorModel, this.exception});
+  const Error(this.message, {this.messageBn, this.statusCode, this.code, this.errorModel, this.exception});
 }

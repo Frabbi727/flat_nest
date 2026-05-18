@@ -25,9 +25,10 @@ class AuthController extends BaseController {
   final passwordController = TextEditingController();
 
   final showPassword = false.obs;
+  final showGoogleHint = false.obs;
   final _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '398880175861-f8uusfntm2jpm3ggpgfjoip4lpgmh7gd.apps.googleusercontent.com',
+    serverClientId: '342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com',
   );
 
   @override
@@ -56,6 +57,7 @@ class AuthController extends BaseController {
 
     switch (result) {
       case Success(data: final authResponse?):
+        showGoogleHint.value = false;
         await _authService.login(
           accessToken: authResponse.accessToken,
           refreshToken: authResponse.refreshToken,
@@ -64,7 +66,8 @@ class AuthController extends BaseController {
         _navigateAfterAuth(authResponse.user);
       case Success():
         showError(TranslationKeys.userDataNotFound.tr);
-      case Error(message: final msg):
+      case Error(message: final msg, code: final errorCode):
+        if (errorCode == 'USE_GOOGLE_SIGN_IN') showGoogleHint.value = true;
         showError(msg);
     }
   }

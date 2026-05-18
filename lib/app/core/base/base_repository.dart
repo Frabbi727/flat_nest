@@ -75,4 +75,12 @@ abstract class BaseRepository {
     if (e is DioException) return e.response?.statusCode ?? 500;
     return 500;
   }
+
+  String? parseErrorCode(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) return data['code'] as String?;
+    }
+    return null;
+  }
 }
