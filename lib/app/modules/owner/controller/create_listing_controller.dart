@@ -683,6 +683,11 @@ class CreateListingController extends BaseController {
     }
     _fetchListingTypes();
     _loadFacings();
+    ever(Get.find<MetaService>().listingFacings, (List<ListingFacingModel> facings) {
+      if (listingFacings.isEmpty && facings.isNotEmpty) {
+        listingFacings.assignAll(facings);
+      }
+    });
   }
 
   Future<void> _fetchListingTypes() async {
@@ -746,6 +751,7 @@ class CreateListingController extends BaseController {
     facingsLoading.value = false;
     if (result case Success(data: final data?)) {
       listingFacings.assignAll(data);
+      Get.find<MetaService>().listingFacings.assignAll(data);
     }
   }
 
