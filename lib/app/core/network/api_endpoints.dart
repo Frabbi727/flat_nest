@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String registerDetails = '/auth/register/details';
   static const String registerAvatar = '/auth/register/avatar';
   static const String refreshToken = '/auth/refresh';
+  static const String googleSignIn = '/auth/google';
   static const String logout = '/auth/logout';
 
   // ── Listings ──────────────────────────────────────────────────────────────

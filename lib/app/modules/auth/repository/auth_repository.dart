@@ -72,6 +72,18 @@ class AuthRepository extends BaseRepository {
     }
   }
 
+  Future<Resource<AuthResponse>> googleSignIn(String idToken) async {
+    try {
+      final response = await apiClient.post(
+        path: ApiEndpoints.googleSignIn,
+        data: {'id_token': idToken},
+      );
+      return parseResponse(response, AuthResponse.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
   Future<Resource<void>> logout() async {
     try {
       final response = await apiClient.post(path: ApiEndpoints.logout);

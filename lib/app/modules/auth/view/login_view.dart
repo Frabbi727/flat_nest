@@ -198,31 +198,22 @@ class LoginView extends GetView<AuthController> {
   }
 
   Widget _buildSocialButtons(FlatNestTheme t) {
-    return Row(
-      children: [
-        Expanded(child: _socialBtn('Google', t)),
-        const SizedBox(width: 12),
-        Expanded(child: _socialBtn('Apple', t)),
-        const SizedBox(width: 12),
-        Expanded(child: _socialBtn('Phone', t)),
-      ],
-    );
-  }
-
-  Widget _socialBtn(String label, FlatNestTheme t) {
-    return OutlinedButton(
-      onPressed: () {},
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        side: BorderSide(color: t.borderSoft),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: t.ink,
-          fontWeight: FontWeight.w500,
-          fontSize: 13,
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: controller.signInWithGoogle,
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: BorderSide(color: t.borderSoft),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Text(
+          'Google',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: t.ink,
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+          ),
         ),
       ),
     );
