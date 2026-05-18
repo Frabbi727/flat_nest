@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/base/base_controller.dart';
@@ -28,7 +29,7 @@ class AuthController extends BaseController {
   final showGoogleHint = false.obs;
   final _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com',
+    serverClientId: '638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com',
   );
 
   @override
@@ -109,8 +110,14 @@ class AuthController extends BaseController {
       }
     } catch (e) {
       hideLoading();
+      if (e is PlatformException) {
+        Get.log('Google sign-in PlatformException');
+        Get.log('  code: ${e.code}');
+        Get.log('  message: ${e.message}');
+        Get.log('  details: ${e.details}');
+      }
       Get.log('Google sign-in error: $e');
-      showError('Google sign-in failed: $e');
+      showError('Google sign-in failed. Please try again.');
     }
   }
 

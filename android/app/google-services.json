@@ -1,34 +1,49 @@
 {
   "project_info": {
-    "project_number": "342322851911",
-    "project_id": "flat-nest-725bf",
-    "storage_bucket": "flat-nest-725bf.firebasestorage.app"
+    "project_number": "638776596608",
+    "project_id": "flat-nest-47245",
+    "storage_bucket": "flat-nest-47245.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:342322851911:android:060afa113eef165982c162",
+        "mobilesdk_app_id": "1:638776596608:android:53818d35c7790e8fc72e65",
         "android_client_info": {
           "package_name": "com.example.falt_nest"
         }
       },
       "oauth_client": [
         {
-          "client_id": "342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com",
+          "client_id": "638776596608-i9n0tgte6mj83fh7114vmg0b4jiestvd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.falt_nest",
+            "certificate_hash": "84169bc0b013dd428b1eeac9d755e07498ebe741"
+          }
+        },
+        {
+          "client_id": "638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBHzQouGpY9BF7tvNzHDwR72noTZxDZ9Go"
+          "current_key": "AIzaSyDnV23D77LbkZmkbrYqbZ7EwqhJ1vhCQxc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com",
+              "client_id": "638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "638776596608-8derdel9gqpptdhbr80kf8jlfk1nadmm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.faltNestMobileApp"
+              }
             }
           ]
         }
