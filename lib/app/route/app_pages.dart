@@ -5,6 +5,8 @@ import '../modules/auth/view/login_view.dart';
 import '../modules/chat/binding/chat_binding.dart';
 import '../modules/chat/view/chat_detail_view.dart';
 import '../modules/chat/view/chat_list_view.dart';
+import '../modules/notification/binding/notification_binding.dart';
+import '../modules/notification/view/notification_view.dart';
 import '../modules/home/binding/home_binding.dart';
 import '../modules/home/view/home_view.dart';
 import '../modules/onboarding/binding/onboarding_binding.dart';
@@ -72,6 +74,12 @@ class AppPages {
       name: Routes.createListing,
       page: () => const CreateListingView(),
       binding: CreateListingBinding(),
+    ),
+    // Notifications
+    GetPage(
+      name: Routes.notifications,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
     ),
     // Chat
     GetPage(

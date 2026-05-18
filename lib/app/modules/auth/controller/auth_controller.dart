@@ -6,6 +6,7 @@ import '../../../core/base/base_controller.dart';
 import '../../../core/localization/translation_keys.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/notification_service.dart';
 import '../../../route/app_routes.dart';
 import '../model/user_model.dart';
 import '../repository/auth_repository.dart';
@@ -58,6 +59,7 @@ class AuthController extends BaseController {
           refreshToken: authResponse.refreshToken,
         );
         _authService.saveUser(authResponse.user);
+        Get.find<NotificationService>().registerTokenAfterLogin();
         _navigateAfterAuth(authResponse.user);
       case Success():
         showError(TranslationKeys.userDataNotFound.tr);
@@ -90,6 +92,7 @@ class AuthController extends BaseController {
             refreshToken: authResponse.refreshToken,
           );
           _authService.saveUser(authResponse.user);
+          Get.find<NotificationService>().registerTokenAfterLogin();
           _navigateAfterAuth(authResponse.user);
         case Success():
           showError(TranslationKeys.userDataNotFound.tr);

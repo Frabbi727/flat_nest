@@ -16,6 +16,7 @@ class AuthService extends GetxService {
   String? get token => _accessToken.value;
   String? get refreshToken => _refreshToken.value;
   bool get isAuthenticated => _accessToken.value != null;
+  RxnString get tokenNotifier => _accessToken;
   bool get isFirstTime => _isFirstTime.value;
   UserModel? get currentUser => _currentUser.value;
 

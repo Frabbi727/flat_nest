@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../../core/service/notification_service.dart';
+import '../../../../route/app_routes.dart';
 import '../../../../theme/flat_nest_theme.dart';
 
 class DiscoveryTopBar extends StatelessWidget {
@@ -15,6 +18,8 @@ class DiscoveryTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final notifService = Get.find<NotificationService>();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
       child: Row(
@@ -49,31 +54,50 @@ class DiscoveryTopBar extends StatelessWidget {
             ),
           ),
           // Notification bell
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: t.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: t.borderSoft),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(Icons.notifications_outlined, color: t.ink, size: 20),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: t.secondary,
-                    ),
-                  ),
-                ),
-              ],
+          GestureDetector(
+            onTap: () => Get.toNamed(Routes.notifications),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: t.borderSoft),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(Icons.notifications_outlined, color: t.ink, size: 20),
+                  Obx(() {
+                    final count = notifService.unreadCount.value;
+                    if (count == 0) return const SizedBox.shrink();
+                    return Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        width: count > 9 ? 14 : 8,
+                        height: count > 9 ? 14 : 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: t.secondary,
+                        ),
+                        child: count > 9
+                            ? Center(
+                                child: Text(
+                                  '9+',
+                                  style: const TextStyle(
+                                    fontSize: 7,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -87,7 +111,9 @@ class DiscoveryTopBar extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                'RK',
+                userName.length >= 2
+                    ? userName.substring(0, 2).toUpperCase()
+                    : userName.toUpperCase(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

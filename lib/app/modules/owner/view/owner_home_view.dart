@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../core/service/notification_service.dart';
+import '../../../route/app_routes.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/owner_controller.dart';
 import '../../listing/model/listing_model.dart';
@@ -259,6 +261,50 @@ class _Header extends GetView<OwnerController> {
                     ),
                   ],
                 ),
+              ),
+              // Notification bell
+              GestureDetector(
+                onTap: () => Get.toNamed(Routes.notifications),
+                child: Obx(() {
+                  final count = Get.find<NotificationService>().unreadCount.value;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.18),
+                        ),
+                        child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 20),
+                      ),
+                      if (count > 0)
+                        Positioned(
+                          top: -2,
+                          right: 8,
+                          child: Container(
+                            padding: count > 9
+                                ? const EdgeInsets.symmetric(horizontal: 3, vertical: 1)
+                                : null,
+                            width: count > 9 ? null : 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Center(
+                              child: Text(
+                                count > 9 ? '9+' : '$count',
+                                style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
               ),
               Container(
                 width: 42,

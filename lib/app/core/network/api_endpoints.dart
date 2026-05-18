@@ -33,8 +33,12 @@ class ApiEndpoints {
 
   // ── Notifications ─────────────────────────────────────────────────────────
   static const String notifications = '/notifications';
+  static const String notificationsUnreadCount = '/notifications/unread-count';
   static String notificationRead(String id) => '/notifications/$id/read';
   static const String notificationsReadAll = '/notifications/read-all';
+
+  // ── Device ────────────────────────────────────────────────────────────────
+  static const String deviceFcmToken = '/device/fcm-token';
 
   // ── Reference data ────────────────────────────────────────────────────────
   static const String listingTypes = '/listing-types';

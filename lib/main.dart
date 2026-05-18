@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'app/core/network/api_client.dart';
 import 'app/core/service/auth_service.dart';
 import 'app/core/service/meta_service.dart';
+import 'app/core/service/notification_service.dart';
 import 'app/core/service/theme_service.dart';
 import 'app/core/service/localization_service.dart';
 import 'app/core/localization/app_translations.dart';
@@ -41,6 +42,7 @@ Future<void> initServices() async {
   await Get.putAsync(() => ThemeService().init());
   await Get.putAsync(() => AuthService().init());
   await Get.putAsync(() => MetaService().init(), permanent: true);
+  await Get.putAsync(() => NotificationService().init(), permanent: true);
 
   Get.log('All services started!');
 }
