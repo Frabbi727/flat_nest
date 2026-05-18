@@ -1,5 +1,5 @@
-import 'package:falt_nest_mobile_app/app/core/network/api_endpoints.dart';
-import 'package:falt_nest_mobile_app/app/core/network/api_response.dart';
+import 'package:falt_nest/app/core/network/api_endpoints.dart';
+import 'package:falt_nest/app/core/network/api_response.dart';
 
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';

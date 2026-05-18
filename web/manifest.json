@@ -1,6 +1,6 @@
 {
-    "name": "falt_nest_mobile_app",
-    "short_name": "falt_nest_mobile_app",
+    "name": "falt_nest",
+    "short_name": "falt_nest",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

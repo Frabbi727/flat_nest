@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyDKLorXi3lDFLjobQIGwoNnHSSupXFQs-M</string>
+	<string>AIzaSyCQKBt8xxnorX-f_J8j7pvKPVQdl7kah4Q</string>
 	<key>GCM_SENDER_ID</key>
-	<string>398880175861</string>
+	<string>342322851911</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.faltNestMobileApp</string>
 	<key>PROJECT_ID</key>
-	<string>flat-nest-app</string>
+	<string>flat-nest-725bf</string>
 	<key>STORAGE_BUCKET</key>
-	<string>flat-nest-app.firebasestorage.app</string>
+	<string>flat-nest-725bf.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:398880175861:ios:fbcc6510e83c1d1a49b7bc</string>
+	<string>1:342322851911:ios:4f2d01f0d5e6b12982c162</string>
 </dict>
 </plist>

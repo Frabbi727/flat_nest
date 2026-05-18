@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="falt_nest_mobile_app"
+        android:label="falt_nest"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

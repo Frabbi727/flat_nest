@@ -50,20 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCB7MP3TBJPyrnusS8nfJNonomGDOFBzW8',
-    appId: '1:398880175861:android:cf55b3fa581f7e2049b7bc',
-    messagingSenderId: '398880175861',
-    projectId: 'flat-nest-app',
-    storageBucket: 'flat-nest-app.firebasestorage.app',
+    apiKey: 'AIzaSyBHzQouGpY9BF7tvNzHDwR72noTZxDZ9Go',
+    appId: '1:342322851911:android:060afa113eef165982c162',
+    messagingSenderId: '342322851911',
+    projectId: 'flat-nest-725bf',
+    storageBucket: 'flat-nest-725bf.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDKLorXi3lDFLjobQIGwoNnHSSupXFQs-M',
-    appId: '1:398880175861:ios:fbcc6510e83c1d1a49b7bc',
-    messagingSenderId: '398880175861',
-    projectId: 'flat-nest-app',
-    storageBucket: 'flat-nest-app.firebasestorage.app',
+    apiKey: 'AIzaSyCQKBt8xxnorX-f_J8j7pvKPVQdl7kah4Q',
+    appId: '1:342322851911:ios:4f2d01f0d5e6b12982c162',
+    messagingSenderId: '342322851911',
+    projectId: 'flat-nest-725bf',
+    storageBucket: 'flat-nest-725bf.firebasestorage.app',
     iosBundleId: 'com.example.faltNestMobileApp',
   );
-
 }

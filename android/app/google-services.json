@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "398880175861",
-    "project_id": "flat-nest-app",
-    "storage_bucket": "flat-nest-app.firebasestorage.app"
+    "project_number": "342322851911",
+    "project_id": "flat-nest-725bf",
+    "storage_bucket": "flat-nest-725bf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:398880175861:android:cf55b3fa581f7e2049b7bc",
+        "mobilesdk_app_id": "1:342322851911:android:060afa113eef165982c162",
         "android_client_info": {
-          "package_name": "com.example.falt_nest_mobile_app"
+          "package_name": "com.example.falt_nest"
         }
       },
       "oauth_client": [
         {
-          "client_id": "398880175861-f8uusfntm2jpm3ggpgfjoip4lpgmh7gd.apps.googleusercontent.com",
+          "client_id": "342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCB7MP3TBJPyrnusS8nfJNonomGDOFBzW8"
+          "current_key": "AIzaSyBHzQouGpY9BF7tvNzHDwR72noTZxDZ9Go"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "398880175861-f8uusfntm2jpm3ggpgfjoip4lpgmh7gd.apps.googleusercontent.com",
+              "client_id": "342322851911-da6rkdk2tdh6ltmem5fvij91i5ja5cq7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

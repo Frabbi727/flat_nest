@@ -1,4 +1,4 @@
-package com.example.falt_nest_mobile_app
+package com.example.falt_nest
 
 import io.flutter.embedding.android.FlutterActivity
 
