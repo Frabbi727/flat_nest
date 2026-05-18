@@ -588,6 +588,10 @@ class CreateListingController extends BaseController {
     if (listing.size != null) sizeController.text = '${listing.size}';
     if (listing.description != null) descController.text = listing.description!;
     selectedType.value = listing.type;
+    // Set type ID directly if available from API — avoids slug matching entirely
+    if (listing.listingTypeId != null) {
+      selectedTypeId.value = listing.listingTypeId;
+    }
     if (listing.area != null) union.value = listing.area;
     if (listing.roadAndHouse != null) roadAndHouse.text = listing.roadAndHouse!;
     selectedAmenities.assignAll(listing.amenities.map((a) => a.id));
@@ -679,7 +683,10 @@ class CreateListingController extends BaseController {
       final step = args['initialStep'] as int? ?? 0;
       currentStep.value = step;
       final listing = args['listing'] as OwnerListingModel?;
+      // Pre-fill from passed listing immediately so fields aren't empty
       if (listing != null) _prefillFromListing(listing);
+      // In edit mode, always fetch the full detail to get complete amenities
+      if (_editMode && _listingId != null) _fetchFullListingForEdit();
     }
     _fetchListingTypes();
     _loadFacings();
@@ -688,6 +695,13 @@ class CreateListingController extends BaseController {
         listingFacings.assignAll(facings);
       }
     });
+  }
+
+  Future<void> _fetchFullListingForEdit() async {
+    final result = await _repo.fetchListingDetail(_listingId!);
+    if (result case Success(data: final listing?)) {
+      _prefillFromListing(listing);
+    }
   }
 
   Future<void> _fetchListingTypes() async {
@@ -711,12 +725,23 @@ class CreateListingController extends BaseController {
       case Success(data: final data?):
         listingTypes.assignAll(data);
         if (data.isNotEmpty) {
-          final match = _editMode
-              ? data.where((t) => t.slug == selectedType.value).firstOrNull
-              : null;
-          if (match != null) {
-            selectedTypeId.value = match.id;
-          } else if (!_editMode) {
+          if (_editMode) {
+            // ID was set directly from API in _prefillFromListing — verify it
+            // exists in the loaded types and fall back to slug/name matching
+            final alreadyValid = selectedTypeId.value != null &&
+                data.any((t) => t.id == selectedTypeId.value);
+            if (!alreadyValid) {
+              final lower = selectedType.value.toLowerCase();
+              final match = data.where((t) =>
+                  t.slug.toLowerCase() == lower ||
+                  t.name.toLowerCase() == lower ||
+                  t.label.toLowerCase() == lower).firstOrNull;
+              if (match != null) {
+                selectedTypeId.value = match.id;
+                selectedType.value = match.slug;
+              }
+            }
+          } else {
             selectedType.value = data.first.slug;
             selectedTypeId.value = data.first.id;
           }

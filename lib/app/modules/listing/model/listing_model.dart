@@ -16,6 +16,9 @@ String _createdAtFromJson(dynamic v) => v as String? ?? '';
 dynamic _typeReadValue(Map json, String key) =>
     json['type'] ?? (json['listing_type'] as Map?)?['slug'] ?? '';
 
+dynamic _typeIdReadValue(Map json, String key) =>
+    (json['listing_type'] as Map?)?['id'] ?? json['listing_type_id'];
+
 dynamic _statusReadValue(Map json, String key) => json['status'] ?? 'draft';
 
 dynamic _statusLabelReadValue(Map json, String key) =>
@@ -144,6 +147,8 @@ class ListingModel {
   final int? upazilaId;
   @JsonKey(name: 'union_id', fromJson: _toNullableInt)
   final int? unionId;
+  @JsonKey(name: 'listing_type_id', readValue: _typeIdReadValue, fromJson: _toNullableInt)
+  final int? listingTypeId;
   // API may return 'type' as a plain string or as a nested listing_type object
   @JsonKey(readValue: _typeReadValue)
   final String type;
@@ -200,6 +205,7 @@ class ListingModel {
     this.districtId,
     this.upazilaId,
     this.unionId,
+    this.listingTypeId,
     required this.type,
     required this.price,
     this.deposit,
@@ -275,6 +281,7 @@ class OwnerListingModel extends ListingModel {
     super.districtId,
     super.upazilaId,
     super.unionId,
+    super.listingTypeId,
     required super.type,
     required super.price,
     super.deposit,

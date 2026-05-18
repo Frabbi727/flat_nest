@@ -81,6 +81,15 @@ class CreateListingRepository extends BaseRepository {
     }
   }
 
+  Future<Resource<OwnerListingModel>> fetchListingDetail(String id) async {
+    try {
+      final response = await apiClient.get(path: ApiEndpoints.listing(id));
+      return parseResponse(response, OwnerListingModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
   Future<Resource<Map<String, dynamic>>> createListing(
       CreateListingRequest request) async {
     try {
