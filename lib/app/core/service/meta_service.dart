@@ -13,14 +13,20 @@ class MetaService extends GetxService {
   final RxBool isLoaded = false.obs;
 
   Future<MetaService> init() async {
+    final apiClient = Get.find<ApiClient>();
+    await _fetchRoles(apiClient);
     return this;
+  }
+
+  Future<void> loadRoles() async {
+    if (roles.isNotEmpty) return;
+    await _fetchRoles(Get.find<ApiClient>());
   }
 
   Future<void> loadMeta() async {
     if (isLoaded.value) return;
     final apiClient = Get.find<ApiClient>();
     await Future.wait([
-      _fetchRoles(apiClient),
       _fetchListingTypes(apiClient),
       _fetchListingFacings(apiClient),
     ]);

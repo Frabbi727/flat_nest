@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../cache/cache_manager.dart';
 import '../network/api_config.dart';
 import '../../modules/auth/model/user_model.dart';
@@ -41,6 +42,20 @@ class AuthService extends GetxService {
   }
 
   Future<void> logout() async {
+    // Call backend logout (best-effort — don't block if it fails)
+    try {
+      final token = _accessToken.value;
+      if (token != null) {
+        await Dio().post(
+          '${ApiConfig.baseUrl}/auth/logout',
+          options: Options(headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'}),
+        );
+      }
+    } catch (_) {}
+
+    // Clear Google session so account picker shows next time
+    await GoogleSignIn().signOut();
+
     await _cacheManager.clearTokens();
     _accessToken.value = null;
     _refreshToken.value = null;

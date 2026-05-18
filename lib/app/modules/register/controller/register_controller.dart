@@ -49,6 +49,7 @@ class RegisterController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    _metaService.loadRoles();
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null && args['step'] != null) {
       currentStep.value = (args['step'] as int) - 1;
@@ -152,6 +153,8 @@ class RegisterController extends BaseController {
 
     switch (result) {
       case Success():
+        final updated = _authService.currentUser?.copyWith(role: selectedRole.value);
+        if (updated != null) _authService.saveUser(updated);
         currentStep.value = 2;
       case Error(message: final msg):
         showError(msg);
