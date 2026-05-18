@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../listing/model/listing_model.dart';
 
-class ListingDetailPhotoSection extends StatelessWidget {
+class ListingDetailPhotoSection extends StatefulWidget {
   final FlatNestTheme t;
   final ListingModel listing;
-  final int photoIndex;
-  final ValueChanged<int> onPhotoChange;
   final bool saved;
   final bool isLoading;
   final VoidCallback onToggleSave;
@@ -15,30 +13,56 @@ class ListingDetailPhotoSection extends StatelessWidget {
     super.key,
     required this.t,
     required this.listing,
-    required this.photoIndex,
-    required this.onPhotoChange,
     required this.saved,
     this.isLoading = false,
     required this.onToggleSave,
   });
 
   @override
+  State<ListingDetailPhotoSection> createState() =>
+      _ListingDetailPhotoSectionState();
+}
+
+class _ListingDetailPhotoSectionState
+    extends State<ListingDetailPhotoSection> {
+  late final PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final photos = listing.photos;
+    final t = widget.t;
+    final photos = widget.listing.photos;
+
     return SizedBox(
       height: 360,
       child: Stack(
         children: [
-          // Main photo
-          Positioned.fill(
-            child: photos.isNotEmpty
-                ? Image.network(
-                    photos[photoIndex].url,
+          // Swipeable photos
+          photos.isNotEmpty
+              ? PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (i) => setState(() => _currentIndex = i),
+                  itemCount: photos.length,
+                  itemBuilder: (_, i) => Image.network(
+                    photos[i].url,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _placeholder(),
-                  )
-                : _placeholder(),
-          ),
+                    width: double.infinity,
+                    errorBuilder: (_, __, ___) => _placeholder(t),
+                  ),
+                )
+              : _placeholder(t),
           // Gradient
           Positioned.fill(
             child: DecoratedBox(
@@ -49,14 +73,14 @@ class ListingDetailPhotoSection extends StatelessWidget {
                   colors: [
                     Colors.black.withValues(alpha: 0.1),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.2),
+                    Colors.black.withValues(alpha: 0.25),
                   ],
                   stops: const [0, 0.4, 1],
                 ),
               ),
             ),
           ),
-          // Top actions (share, heart)
+          // Top actions
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             right: 16,
@@ -65,7 +89,7 @@ class ListingDetailPhotoSection extends StatelessWidget {
                 _CircleBtn(icon: Icons.share_outlined, onTap: () {}),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: isLoading ? null : onToggleSave,
+                  onTap: widget.isLoading ? null : widget.onToggleSave,
                   child: Container(
                     width: 40,
                     height: 40,
@@ -73,7 +97,7 @@ class ListingDetailPhotoSection extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.white.withValues(alpha: 0.95),
                     ),
-                    child: isLoading
+                    child: widget.isLoading
                         ? Padding(
                             padding: const EdgeInsets.all(10),
                             child: CircularProgressIndicator(
@@ -82,8 +106,11 @@ class ListingDetailPhotoSection extends StatelessWidget {
                             ),
                           )
                         : Icon(
-                            saved ? Icons.favorite : Icons.favorite_border,
-                            color: saved ? t.secondary : t.inkSoft,
+                            widget.saved
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color:
+                                widget.saved ? t.secondary : t.inkSoft,
                             size: 18,
                           ),
                   ),
@@ -91,8 +118,8 @@ class ListingDetailPhotoSection extends StatelessWidget {
               ],
             ),
           ),
-          // Dot indicators + counter
-          if (photos.length > 1) ...[
+          // Dot indicators
+          if (photos.length > 1)
             Positioned(
               bottom: 16,
               left: 0,
@@ -100,24 +127,23 @@ class ListingDetailPhotoSection extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(photos.length, (i) {
-                  return GestureDetector(
-                    onTap: () => onPhotoChange(i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: i == photoIndex ? 22 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        color: i == photoIndex
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.5),
-                      ),
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: i == _currentIndex ? 22 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: i == _currentIndex
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                   );
                 }),
               ),
             ),
+          // Photo counter
+          if (photos.length > 1)
             Positioned(
               bottom: 12,
               right: 16,
@@ -129,7 +155,7 @@ class ListingDetailPhotoSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${photoIndex + 1}/${photos.length}',
+                  '${_currentIndex + 1}/${photos.length}',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -138,13 +164,12 @@ class ListingDetailPhotoSection extends StatelessWidget {
                 ),
               ),
             ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(FlatNestTheme t) {
     return Container(
       color: t.primarySoft,
       child: Center(

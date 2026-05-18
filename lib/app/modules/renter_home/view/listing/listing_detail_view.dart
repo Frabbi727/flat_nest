@@ -7,15 +7,8 @@ import 'listing_detail_content.dart';
 import 'listing_detail_photo_section.dart';
 import 'listing_detail_sticky_bar.dart';
 
-class ListingDetailView extends StatefulWidget {
+class ListingDetailView extends StatelessWidget {
   const ListingDetailView({super.key});
-
-  @override
-  State<ListingDetailView> createState() => _ListingDetailViewState();
-}
-
-class _ListingDetailViewState extends State<ListingDetailView> {
-  int _photoIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +36,6 @@ class _ListingDetailViewState extends State<ListingDetailView> {
                 child: Obx(() => ListingDetailPhotoSection(
                       t: t,
                       listing: listing,
-                      photoIndex: _photoIndex,
-                      onPhotoChange: (i) =>
-                          setState(() => _photoIndex = i),
                       saved: controller.isSaved(listing.id),
                       isLoading: controller.isToggling(listing.id),
                       onToggleSave: () => controller.toggleSave(listing),
