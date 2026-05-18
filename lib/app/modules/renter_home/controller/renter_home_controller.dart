@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/meta_service.dart';
@@ -31,6 +33,9 @@ class RenterHomeController extends BaseController {
 
   // Location
   final locationLabel = 'Fetching location...'.obs;
+  final isLocationRefreshing = false.obs;
+  double? _lat;
+  double? _lng;
 
   // Search
   final searchQuery = ''.obs;
@@ -102,7 +107,12 @@ class RenterHomeController extends BaseController {
 
   // ── Location ──────────────────────────────────────────────────────────────
 
-  Future<void> _fetchLocation() async {
+  Future<void> _fetchLocation() => refreshLocation();
+
+  Future<void> refreshLocation() async {
+    if (isLocationRefreshing.value) return;
+    isLocationRefreshing.value = true;
+    locationLabel.value = 'Updating location...';
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -111,22 +121,21 @@ class RenterHomeController extends BaseController {
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         locationLabel.value = 'Location unavailable';
-        fetchListings();
         return;
       }
-
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.low,
         ),
       ).timeout(const Duration(seconds: 10));
-
-      locationLabel.value = await _reverseGeocode(
-        position.latitude,
-        position.longitude,
-      );
+      _lat = position.latitude;
+      _lng = position.longitude;
+      locationLabel.value = await _reverseGeocode(_lat!, _lng!);
+      _sendLocationToBackend(_lat!, _lng!);
     } catch (_) {
       locationLabel.value = 'Location unavailable';
+    } finally {
+      isLocationRefreshing.value = false;
     }
     fetchListings();
   }
@@ -195,6 +204,15 @@ class RenterHomeController extends BaseController {
     }
 
     return 'Your location';
+  }
+
+  Future<void> _sendLocationToBackend(double lat, double lng) async {
+    try {
+      await Get.find<ApiClient>().patch(
+        path: ApiEndpoints.userLocation,
+        data: {'lat': lat, 'lng': lng},
+      );
+    } catch (_) {}
   }
 
   Future<void> _loadReferenceData() async {

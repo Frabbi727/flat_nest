@@ -26,6 +26,8 @@ class DiscoveryView extends GetView<RenterHomeController> {
               t: t,
               userName: controller.userName,
               locationLabel: controller.locationLabel.value,
+              onRefreshLocation: controller.refreshLocation,
+              isRefreshing: controller.isLocationRefreshing.value,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

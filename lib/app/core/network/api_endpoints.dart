@@ -39,6 +39,7 @@ class ApiEndpoints {
 
   // ── Device ────────────────────────────────────────────────────────────────
   static const String deviceFcmToken = '/device/fcm-token';
+  static const String userLocation = '/user/location';
 
   // ── Reference data ────────────────────────────────────────────────────────
   static const String listingTypes = '/listing-types';

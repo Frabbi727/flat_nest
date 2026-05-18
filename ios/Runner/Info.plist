@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FlatNest uses your location to help you pin the exact address of your listing on the map.</string>
+	<string>FlatNest uses your location to show listings near you and help pin addresses on the map.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>FlatNest uses your location to help you pin the exact address of your listing on the map.</string>
+	<string>FlatNest uses your location to show listings near you and help pin addresses on the map.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

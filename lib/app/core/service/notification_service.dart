@@ -11,6 +11,10 @@ import '../../route/app_routes.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {}
 
+// Must be top-level for flutter_local_notifications background tap handling (Android)
+@pragma('vm:entry-point')
+void firebaseLocalNotifBackgroundHandler(NotificationResponse details) {}
+
 class NotificationService extends GetxService {
   final unreadCount = 0.obs;
 
@@ -65,9 +69,9 @@ class NotificationService extends GetxService {
     await _localNotifs.initialize(
       const InitializationSettings(android: android, iOS: ios),
       onDidReceiveNotificationResponse: (details) {
-        // payload = kind field from the FCM message data
         _navigateByKind(details.payload);
       },
+      onDidReceiveBackgroundNotificationResponse: firebaseLocalNotifBackgroundHandler,
     );
 
     await _localNotifs

@@ -8,12 +8,16 @@ class DiscoveryTopBar extends StatelessWidget {
   final FlatNestTheme t;
   final String userName;
   final String locationLabel;
+  final VoidCallback? onRefreshLocation;
+  final bool isRefreshing;
 
   const DiscoveryTopBar({
     super.key,
     required this.t,
     required this.userName,
     required this.locationLabel,
+    this.onRefreshLocation,
+    this.isRefreshing = false,
   });
 
   @override
@@ -28,17 +32,34 @@ class DiscoveryTopBar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 18, color: t.inkSoft),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        locationLabel,
-                        style: TextStyle(fontSize: 12, color: t.inkSoft),
+                // Tappable location row
+                GestureDetector(
+                  onTap: onRefreshLocation,
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    children: [
+                      isRefreshing
+                          ? SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: t.inkSoft,
+                              ),
+                            )
+                          : Icon(Icons.location_on, size: 18, color: t.inkSoft),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          locationLabel,
+                          style: TextStyle(fontSize: 12, color: t.inkSoft),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Icon(Icons.refresh_rounded, size: 13, color: t.inkFaint),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
