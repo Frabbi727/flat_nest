@@ -21,12 +21,14 @@ class NotificationService extends GetxService {
   Future<NotificationService> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
 
-    // Request permission (iOS + Android 13+)
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    // Request permission (iOS + Android 13+); guard against duplicate calls on hot-restart
+    try {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (_) {}
 
     await _initLocalNotifications();
 
@@ -62,6 +64,10 @@ class NotificationService extends GetxService {
     const ios = DarwinInitializationSettings();
     await _localNotifs.initialize(
       const InitializationSettings(android: android, iOS: ios),
+      onDidReceiveNotificationResponse: (details) {
+        // payload = kind field from the FCM message data
+        _navigateByKind(details.payload);
+      },
     );
 
     await _localNotifs
@@ -96,6 +102,7 @@ class NotificationService extends GetxService {
         ),
         iOS: const DarwinNotificationDetails(),
       ),
+      payload: message.data['kind'] as String?,
     );
   }
 
@@ -107,7 +114,6 @@ class NotificationService extends GetxService {
   void _navigateByKind(String? kind) {
     switch (kind) {
       case 'listing_approved':
-        Get.offAllNamed(Routes.renterHome);
       case 'listing_submitted':
       case 'listing_rejected':
       case 'listing_review':

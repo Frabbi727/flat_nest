@@ -83,7 +83,6 @@ class NotificationController extends BaseController {
     Get.back(); // close notification screen first
     switch (n.kind) {
       case 'listing_approved':
-        Get.toNamed(Routes.renterHome);
       case 'listing_submitted':
       case 'listing_rejected':
       case 'listing_review':
