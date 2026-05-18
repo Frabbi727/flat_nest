@@ -6,6 +6,7 @@ import 'discovery_empty_state.dart';
 import 'discovery_top_bar.dart';
 import 'discovery_type_chip.dart';
 import '../listing/featured_card_widget.dart';
+import '../listing/listing_shimmer_card.dart';
 import 'filters_sheet.dart';
 import '../listing/listing_card_widget.dart';
 
@@ -65,7 +66,7 @@ class DiscoveryView extends GetView<RenterHomeController> {
             // Listings
             Expanded(
               child: controller.isLoading
-                  ? Center(child: CircularProgressIndicator(color: t.primary))
+                  ? _ShimmerList(t: t)
                   : controller.listings.isEmpty
                       ? DiscoveryEmptyState(t: t)
                       : RefreshIndicator(
@@ -123,6 +124,28 @@ class DiscoveryView extends GetView<RenterHomeController> {
       backgroundColor: Colors.transparent,
       useSafeArea: true,
       builder: (_) => FiltersSheet(t: t),
+    );
+  }
+}
+
+// ── Shimmer skeleton list ─────────────────────────────────────────────────────
+
+class _ShimmerList extends StatelessWidget {
+  final FlatNestTheme t;
+
+  const _ShimmerList({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      itemCount: 5,
+      itemBuilder: (_, i) => Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: i == 0
+            ? FeaturedShimmerCard(t: t)
+            : ListingShimmerCard(t: t),
+      ),
     );
   }
 }

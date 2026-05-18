@@ -79,13 +79,14 @@ class RenterHomeController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
     debounce(
       searchQuery,
       (_) => fetchListings(),
       time: const Duration(milliseconds: 500),
     );
     _loadReferenceData();
-    _fetchLocation(); // fetches location then calls fetchListings()
+    _fetchLocation();
     fetchWishlist();
     Get.find<MetaService>().loadMeta();
   }
