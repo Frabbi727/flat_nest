@@ -38,6 +38,7 @@ class ApiEndpoints {
 
   // ── Reference data ────────────────────────────────────────────────────────
   static const String listingTypes = '/listing-types';
+  static const String metaRoles = '/meta/roles';
   static const String metaListingTypes = '/meta/listing-types';
   static const String metaListingFacings = '/meta/listing-facings';
   static const String amenities = '/amenities';

@@ -18,7 +18,7 @@ class RegisterStep3View extends GetView<RegisterController> {
       step: 2,
       onBack: controller.goBack,
       title: 'Add a profile photo',
-      subtitle: 'Helps owners and renters recognize you. You can skip and add it later.',
+      subtitle: 'A profile photo is required to complete registration.',
       child: Obx(() {
         final path = controller.avatarPath.value;
         final isLoading = controller.isLoading;
@@ -77,12 +77,12 @@ class RegisterStep3View extends GetView<RegisterController> {
 
             // Finish button
             GestureDetector(
-              onTap: isLoading ? null : controller.finishRegistration,
+              onTap: (isLoading || path == null) ? null : controller.finishRegistration,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 height: 54,
                 decoration: BoxDecoration(
-                  color: t.primary,
+                  color: path != null ? t.primary : t.borderSoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -96,31 +96,13 @@ class RegisterStep3View extends GetView<RegisterController> {
                         ),
                       )
                     : Text(
-                        path != null ? 'Finish registration ✓' : 'Continue without photo',
-                        style: const TextStyle(
+                        'Finish registration ✓',
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: path != null ? Colors.white : t.inkSoft,
                         ),
                       ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Skip
-            GestureDetector(
-              onTap: isLoading ? null : controller.skipAvatar,
-              child: Container(
-                height: 44,
-                alignment: Alignment.center,
-                child: Text(
-                  'Skip for now',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: t.inkMid,
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: 28),

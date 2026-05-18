@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/model/role_model.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/register_controller.dart';
 import '../widget/reg_chrome.dart';
@@ -16,12 +17,11 @@ class RegisterStep2View extends GetView<RegisterController> {
       step: 1,
       onBack: controller.goBack,
       title: 'Your role',
-      subtitle: 'Pick how you\'ll use FlatNest — you can switch anytime.',
+      subtitle: 'Pick how you\'ll use FlatNest. This cannot be changed later.',
       child: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              // Role section
               Text(
                 "I'M HERE TO",
                 style: TextStyle(
@@ -32,28 +32,22 @@ class RegisterStep2View extends GetView<RegisterController> {
                 ),
               ),
               const SizedBox(height: 10),
-              _RoleCard(
-                t: t,
-                title: 'Find a flat',
-                description:
-                    'Browse listings, save favorites, and message owners directly.',
-                perks: const ['Renter', 'Free forever'],
-                icon: Icons.search,
-                selected: controller.selectedRole.value == 'renter',
-                onTap: () => controller.selectedRole.value = 'renter',
-              ),
-              const SizedBox(height: 12),
-              _RoleCard(
-                t: t,
-                title: 'List my flat',
-                description:
-                    'Post your property, manage inquiries, and rent it out faster.',
-                perks: const ['Owner', 'Verified listings'],
-                icon: Icons.home_work_outlined,
-                selected: controller.selectedRole.value == 'owner',
-                onTap: () => controller.selectedRole.value = 'owner',
-              ),
-              const SizedBox(height: 28),
+              ...controller.availableRoles.map((role) {
+                final config = _roleConfig(role);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _RoleCard(
+                    t: t,
+                    title: config.title,
+                    description: config.description,
+                    perks: config.perks,
+                    icon: config.icon,
+                    selected: controller.selectedRole.value == role.value,
+                    onTap: () => controller.selectedRole.value = role.value,
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
               _ContinueBtn(
                 t: t,
                 enabled: controller.selectedRole.value != null,
@@ -64,6 +58,40 @@ class RegisterStep2View extends GetView<RegisterController> {
             ],
           )),
     );
+  }
+}
+
+class _RoleConfig {
+  final String title;
+  final String description;
+  final List<String> perks;
+  final IconData icon;
+  const _RoleConfig({required this.title, required this.description, required this.perks, required this.icon});
+}
+
+_RoleConfig _roleConfig(RoleModel role) {
+  switch (role.value) {
+    case 'renter':
+      return const _RoleConfig(
+        title: 'Find a flat',
+        description: 'Browse listings, save favorites, and message owners directly.',
+        perks: ['Renter', 'Free forever'],
+        icon: Icons.search,
+      );
+    case 'owner':
+      return const _RoleConfig(
+        title: 'List my flat',
+        description: 'Post your property, manage inquiries, and rent it out faster.',
+        perks: ['Owner', 'Verified listings'],
+        icon: Icons.home_work_outlined,
+      );
+    default:
+      return _RoleConfig(
+        title: role.label,
+        description: '',
+        perks: [role.label],
+        icon: Icons.person_outline,
+      );
   }
 }
 

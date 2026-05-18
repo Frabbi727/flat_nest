@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/base/base_controller.dart';
+import '../../../core/model/role_model.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/meta_service.dart';
 import '../../../modules/auth/repository/auth_repository.dart';
 import '../../../route/app_routes.dart';
 
 class RegisterController extends BaseController {
   final AuthRepository _authRepository;
   final AuthService _authService = Get.find<AuthService>();
+  final MetaService _metaService = Get.find<MetaService>();
 
   RegisterController({required AuthRepository authRepository})
       : _authRepository = authRepository;
+
+  List<RoleModel> get availableRoles => _metaService.roles;
 
   // Step tracking
   final currentStep = 0.obs;
@@ -158,14 +163,11 @@ class RegisterController extends BaseController {
     if (xfile != null) avatarPath.value = xfile.path;
   }
 
-  // Step 3: Skip avatar → go to home without uploading
-  void skipAvatar() => _navigateToHome();
-
   // Step 3: Upload avatar then go to home
   void finishRegistration() async {
     final path = avatarPath.value;
     if (path == null) {
-      _navigateToHome();
+      showError('Please add a profile photo to continue');
       return;
     }
 
