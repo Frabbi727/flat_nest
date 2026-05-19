@@ -7,6 +7,7 @@ import 'app/core/network/api_client.dart';
 import 'app/core/service/auth_service.dart';
 import 'app/core/service/meta_service.dart';
 import 'app/core/service/notification_service.dart';
+import 'app/core/service/app_update_service.dart';
 import 'app/core/service/theme_service.dart';
 import 'app/core/service/localization_service.dart';
 import 'app/core/localization/app_translations.dart';
@@ -32,6 +33,11 @@ void main() async {
   await initServices();
 
   runApp(const MyApp());
+
+  // Check for app updates after the first frame is rendered
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    AppUpdateService.checkForUpdate();
+  });
 }
 
 Future<void> initServices() async {
