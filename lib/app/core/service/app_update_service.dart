@@ -22,25 +22,42 @@ class AppUpdateService {
           .limit(1)
           .get();
 
-      if (snapshot.docs.isEmpty) return;
+      debugPrint('[AppUpdate] docs found: ${snapshot.docs.length}');
 
-      final model = AppVersionModel.fromJson(snapshot.docs.first.data());
+      if (snapshot.docs.isEmpty) {
+        debugPrint('[AppUpdate] No version document found in Firestore.');
+        return;
+      }
+
+      final rawData = snapshot.docs.first.data();
+      debugPrint('[AppUpdate] Firestore raw data: $rawData');
+
+      final model = AppVersionModel.fromJson(rawData);
+      debugPrint('[AppUpdate] androidBuildNumber: ${model.androidBuildNumber}');
+      debugPrint('[AppUpdate] iosBuildNumber: ${model.iosBuildNumber}');
+      debugPrint('[AppUpdate] update_type: ${model.updateType}');
 
       final packageInfo = await PackageInfo.fromPlatform();
       final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
+      debugPrint('[AppUpdate] currentBuild: $currentBuild');
 
       final remoteBuild = Platform.isIOS
           ? (model.iosBuildNumber ?? 0)
           : (model.androidBuildNumber ?? 0);
+      debugPrint('[AppUpdate] remoteBuild: $remoteBuild');
 
       if (remoteBuild <= currentBuild) return;
 
+      // Default to SOFT_UPDATE when update_type is missing/empty
       final isHard = model.updateType == 'HARD_UPDATE';
-      final isSoft = model.updateType == 'SOFT_UPDATE';
-      if (!isHard && !isSoft) return;
+      final isNone = model.updateType == 'NONE';
+      if (isNone) return;
 
+      debugPrint('[AppUpdate] showing dialog — isHardUpdate: $isHard');
       _showUpdateDialog(isHardUpdate: isHard);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[AppUpdate] ERROR: $e');
+    }
   }
 
   static void _showUpdateDialog({required bool isHardUpdate}) {

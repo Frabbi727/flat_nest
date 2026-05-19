@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/service/app_update_service.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/meta_service.dart';
@@ -85,6 +86,7 @@ class RenterHomeController extends BaseController {
   void onInit() {
     super.onInit();
     showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
+    AppUpdateService.checkForUpdate();
     debounce(
       searchQuery,
       (_) => fetchListings(),

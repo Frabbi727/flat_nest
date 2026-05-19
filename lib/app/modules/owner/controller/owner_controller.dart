@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
+import '../../../core/service/app_update_service.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
@@ -35,6 +36,7 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     fetchMyListings();
     Get.find<MetaService>().loadMeta();
+    AppUpdateService.checkForUpdate();
     // Refresh when user switches to Dashboard (0) or Listings (1)
     ever(activeTab, (tab) {
       if (tab == 0 || tab == 1) fetchMyListings();
