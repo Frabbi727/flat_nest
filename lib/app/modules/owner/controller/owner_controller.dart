@@ -40,6 +40,7 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
     // Refresh when user switches to Dashboard (0) or Listings (1)
     ever(activeTab, (tab) {
       if (tab == 0 || tab == 1) fetchMyListings();
+      AppUpdateService.checkForUpdate();
     });
   }
 

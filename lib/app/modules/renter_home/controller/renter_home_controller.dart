@@ -87,6 +87,7 @@ class RenterHomeController extends BaseController {
     super.onInit();
     showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
     AppUpdateService.checkForUpdate();
+    ever(activeTab, (_) => AppUpdateService.checkForUpdate());
     debounce(
       searchQuery,
       (_) => fetchListings(),
