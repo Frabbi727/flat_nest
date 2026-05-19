@@ -7,9 +7,26 @@ part 'listing_model.g.dart';
 
 // ── Shared converters ─────────────────────────────────────────────────────────
 
-int _toInt(dynamic v) => (v as num?)?.toInt() ?? 0;
-int? _toNullableInt(dynamic v) => (v as num?)?.toInt();
-double? _toNullableDouble(dynamic v) => (v as num?)?.toDouble();
+int _toInt(dynamic v) {
+  if (v == null) return 0;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString()) ?? 0;
+}
+
+int? _toNullableInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
+double? _toNullableDouble(dynamic v) {
+  if (v == null) return null;
+  if (v is double) return v;
+  if (v is num) return v.toDouble();
+  return double.tryParse(v.toString());
+}
 String _createdAtFromJson(dynamic v) => v as String? ?? '';
 
 // readValue helpers — receive the whole map so we can read sibling keys
@@ -70,9 +87,9 @@ class ListingPhotoModel {
     final resolvedUrl =
         raw.startsWith('/') ? '${ApiConfig.storageBaseUrl}$raw' : raw;
     return ListingPhotoModel(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       url: resolvedUrl,
-      position: (json['position'] as num).toInt(),
+      position: _toInt(json['position']),
     );
   }
 

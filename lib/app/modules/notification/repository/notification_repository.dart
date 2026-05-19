@@ -3,6 +3,13 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/network/resource.dart';
 import '../model/notification_model.dart';
 
+int _parseInt(dynamic v) {
+  if (v == null) return 0;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString()) ?? 0;
+}
+
 class NotificationRepository extends BaseRepository {
   NotificationRepository({required super.apiClient});
 
@@ -21,9 +28,9 @@ class NotificationRepository extends BaseRepository {
         return Success(
           data: NotificationPageResult(
             items: items,
-            currentPage: (meta['current_page'] as num).toInt(),
-            lastPage: (meta['last_page'] as num).toInt(),
-            unreadCount: (meta['unread_count'] as num).toInt(),
+            currentPage: _parseInt(meta['current_page']),
+            lastPage: _parseInt(meta['last_page']),
+            unreadCount: _parseInt(meta['unread_count']),
           ),
           statusCode: response.statusCode ?? 200,
         );
@@ -42,7 +49,7 @@ class NotificationRepository extends BaseRepository {
       if (raw['success'] == true) {
         final data = raw['data'] as Map<String, dynamic>;
         return Success(
-          data: (data['unread_count'] as num).toInt(),
+          data: _parseInt(data['unread_count']),
           statusCode: 200,
         );
       }

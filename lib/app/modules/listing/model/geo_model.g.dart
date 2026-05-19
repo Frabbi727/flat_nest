@@ -6,8 +6,14 @@ part of 'geo_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+int _parseId(dynamic v) {
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString()) ?? 0;
+}
+
 GeoItemModel _$GeoItemModelFromJson(Map<String, dynamic> json) => GeoItemModel(
-      id: (json['id'] as num).toInt(),
+      id: _parseId(json['id']),
       name: json['name'] as String,
       bnName: json['bn_name'] as String?,
     );

@@ -6,9 +6,15 @@ part of 'listing_type_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+int _parseId(dynamic v) {
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString()) ?? 0;
+}
+
 ListingTypeModel _$ListingTypeModelFromJson(Map<String, dynamic> json) =>
     ListingTypeModel(
-      id: (json['id'] as num).toInt(),
+      id: _parseId(json['id']),
       name: json['name'] as String,
       label: json['label'] as String,
       slug: json['slug'] as String? ?? '',

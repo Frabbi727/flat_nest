@@ -151,7 +151,8 @@ class NotificationService extends GetxService {
       final raw = response.data as Map<String, dynamic>;
       if (raw['success'] == true) {
         final data = raw['data'] as Map<String, dynamic>;
-        unreadCount.value = (data['unread_count'] as num).toInt();
+        final count = data['unread_count'];
+        unreadCount.value = count is num ? count.toInt() : int.tryParse(count.toString()) ?? 0;
       }
     } catch (_) {}
   }

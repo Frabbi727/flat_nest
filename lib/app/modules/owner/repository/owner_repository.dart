@@ -7,6 +7,13 @@ import '../../listing/model/listing_model.dart';
 import '../model/edit_listing_request.dart';
 import '../model/owner_listings_page.dart';
 
+int? _parseInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
 class OwnerRepository extends BaseRepository {
   OwnerRepository({required super.apiClient});
 
@@ -41,10 +48,10 @@ class OwnerRepository extends BaseRepository {
       return Success(
         data: OwnerListingsPage(
           listings: apiResp.data ?? [],
-          currentPage: (meta['current_page'] as num?)?.toInt() ?? page,
-          lastPage: (meta['last_page'] as num?)?.toInt() ?? 1,
-          perPage: (meta['per_page'] as num?)?.toInt() ?? 15,
-          total: (meta['total'] as num?)?.toInt() ?? 0,
+          currentPage: _parseInt(meta['current_page']) ?? page,
+          lastPage: _parseInt(meta['last_page']) ?? 1,
+          perPage: _parseInt(meta['per_page']) ?? 15,
+          total: _parseInt(meta['total']) ?? 0,
         ),
         statusCode: response.statusCode ?? 200,
       );

@@ -7,7 +7,7 @@ part of 'listing_model.dart';
 // **************************************************************************
 
 AmenityModel _$AmenityModelFromJson(Map<String, dynamic> json) => AmenityModel(
-      id: (json['id'] as num).toInt(),
+      id: _toInt(json['id']),
       name: json['name'] as String,
       label: json['label'] as String,
       createdAt: json['created_at'] == null
