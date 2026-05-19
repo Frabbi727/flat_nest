@@ -17,14 +17,14 @@ class AppUpdateService {
 
   static Future<void> checkForUpdate() async {
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('app_config')
-          .doc('version')
+      final snapshot = await FirebaseFirestore.instance
+          .collection('flat_nest_app_version')
+          .limit(1)
           .get();
 
-      if (!doc.exists || doc.data() == null) return;
+      if (snapshot.docs.isEmpty) return;
 
-      final model = AppVersionModel.fromJson(doc.data()!);
+      final model = AppVersionModel.fromJson(snapshot.docs.first.data());
 
       final packageInfo = await PackageInfo.fromPlatform();
       final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
