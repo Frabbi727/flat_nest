@@ -19,6 +19,7 @@ class AuthService extends GetxService {
   RxnString get tokenNotifier => _accessToken;
   bool get isFirstTime => _isFirstTime.value;
   UserModel? get currentUser => _currentUser.value;
+  Rxn<UserModel> get currentUserRx => _currentUser;
 
   Future<AuthService> init() async {
     _accessToken.value = await _cacheManager.getAccessToken();
@@ -61,6 +62,36 @@ class AuthService extends GetxService {
     _accessToken.value = null;
     _refreshToken.value = null;
     _currentUser.value = null;
+  }
+
+  // Returns true=deleted, null=session expired (go to login), false=other error
+  Future<bool?> deleteAccount() async {
+    final token = _accessToken.value;
+    if (token == null) return null;
+    try {
+      await Dio().delete(
+        '${ApiConfig.baseUrl}/auth/account',
+        options: Options(headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'}),
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await GoogleSignIn().signOut();
+        await _cacheManager.clearTokens();
+        _accessToken.value = null;
+        _refreshToken.value = null;
+        _currentUser.value = null;
+        return null;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+    await GoogleSignIn().signOut();
+    await _cacheManager.clearTokens();
+    _accessToken.value = null;
+    _refreshToken.value = null;
+    _currentUser.value = null;
+    return true;
   }
 
   Future<void> completeOnboarding() async {

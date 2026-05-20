@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/base/base_controller.dart';
+import '../../../core/utils/image_compressor.dart';
 import '../../../core/model/role_model.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
@@ -162,8 +164,10 @@ class RegisterController extends BaseController {
   }
 
   Future<void> pickImage(ImageSource source) async {
-    final xfile = await _picker.pickImage(source: source, imageQuality: 85);
-    if (xfile != null) avatarPath.value = xfile.path;
+    final xfile = await _picker.pickImage(source: source);
+    if (xfile == null) return;
+    final compressed = await ImageCompressor.compress(File(xfile.path));
+    avatarPath.value = compressed.path;
   }
 
   // Step 3: Upload avatar then go to home
@@ -179,7 +183,11 @@ class RegisterController extends BaseController {
     hideLoading();
 
     switch (result) {
-      case Success():
+      case Success(data: final avatarUrl):
+        if (avatarUrl != null) {
+          final updated = _authService.currentUser?.copyWith(avatarUrl: avatarUrl);
+          if (updated != null) _authService.saveUser(updated);
+        }
         _navigateToHome();
       case Error(message: final msg):
         showError(msg);

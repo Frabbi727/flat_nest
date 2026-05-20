@@ -166,4 +166,6 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
     await _authService.logout();
     Get.offAllNamed(Routes.login);
   }
+
+  Future<bool?> deleteAccount() => _authService.deleteAccount();
 }

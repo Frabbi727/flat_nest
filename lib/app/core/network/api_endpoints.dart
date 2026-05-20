@@ -9,6 +9,7 @@ class ApiEndpoints {
   static const String refreshToken = '/auth/refresh';
   static const String googleSignIn = '/auth/google';
   static const String logout = '/auth/logout';
+  static const String deleteAccount = '/auth/account';
 
   // ── Listings ──────────────────────────────────────────────────────────────
   static const String listings = '/listings';

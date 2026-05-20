@@ -24,7 +24,6 @@ class DiscoveryView extends GetView<RenterHomeController> {
           children: [
             DiscoveryTopBar(
               t: t,
-              userName: controller.userName,
               locationLabel: controller.locationLabel.value,
               onRefreshLocation: controller.refreshLocation,
               isRefreshing: controller.isLocationRefreshing.value,

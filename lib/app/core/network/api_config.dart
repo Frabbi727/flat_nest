@@ -21,7 +21,18 @@ class ApiConfig {
   // Origin only (no /api/v1) — used to resolve relative storage URLs
   static String get storageBaseUrl {
     final uri = Uri.parse(baseUrl);
-    return '${uri.scheme}://${uri.host}:${uri.port}';
+    final isDefaultPort = (uri.scheme == 'https' && uri.port == 443) ||
+        (uri.scheme == 'http' && uri.port == 80);
+    return isDefaultPort
+        ? '${uri.scheme}://${uri.host}'
+        : '${uri.scheme}://${uri.host}:${uri.port}';
+  }
+
+  /// Resolves an avatar URL that may be absolute or relative.
+  static String resolveAvatarUrl(String url) {
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    final base = storageBaseUrl;
+    return url.startsWith('/') ? '$base$url' : '$base/$url';
   }
 
   static const Duration connectTimeout = Duration(seconds: 30);

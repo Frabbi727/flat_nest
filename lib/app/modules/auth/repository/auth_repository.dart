@@ -54,7 +54,8 @@ class AuthRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<void>> uploadAvatar(String filePath) async {
+  // Returns the avatar URL string from the response (or null if not provided).
+  Future<Resource<String?>> uploadAvatar(String filePath) async {
     try {
       final formData = FormData.fromMap({
         'avatar': await MultipartFile.fromFile(
@@ -66,7 +67,17 @@ class AuthRepository extends BaseRepository {
         path: ApiEndpoints.registerAvatar,
         data: formData,
       );
-      return parseVoidResponse(response);
+      final body = response.data as Map<String, dynamic>?;
+      final success = body?['success'] as bool? ?? false;
+      if (!success) {
+        return Error(body?['message'] as String? ?? 'Upload failed',
+            statusCode: response.statusCode ?? 500);
+      }
+      final data = body?['data'];
+      final avatarUrl = data is Map<String, dynamic>
+          ? data['avatar_url'] as String?
+          : null;
+      return Success(data: avatarUrl, statusCode: response.statusCode ?? 200);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
@@ -87,6 +98,15 @@ class AuthRepository extends BaseRepository {
   Future<Resource<void>> logout() async {
     try {
       final response = await apiClient.post(path: ApiEndpoints.logout);
+      return parseVoidResponse(response);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<void>> deleteAccount() async {
+    try {
+      final response = await apiClient.delete(path: ApiEndpoints.deleteAccount);
       return parseVoidResponse(response);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));

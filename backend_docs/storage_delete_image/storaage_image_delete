@@ -1,0 +1,72 @@
+ Here's the documentation for both:
+
+  ---
+  Delete Account
+
+  Endpoint
+  DELETE /api/v1/auth/account
+
+  Headers
+  Authorization: Bearer {access_token}
+  Content-Type: application/json
+
+  Request Body
+  None required.
+
+  Success Response 200
+  {
+    "message": "Account deleted"
+  }
+
+  Error Response 401 — token missing or expired
+  {
+    "message": "Unauthenticated."
+  }
+
+  Behavior
+  - Works for both owner and renter roles
+  - Permanently deletes: account, all listings, all listing photos, avatar, notifications, wishlist, chats, device sessions
+  - All storage files are wiped — this is irreversible
+
+  ---
+  Displaying Images
+
+  All images (listing photos and avatars) are stored as full URLs in the API response. You use them directly in an <img> tag or your framework's image
+  component.
+
+  Listing photo URLs come from:
+  GET /api/v1/listings/{id}
+  {
+    "photos": [
+      {
+        "id": "uuid",
+        "url": "https://flatnest.techrealify.com/storage/listings/{id}/filename.jpg",
+        "position": 0
+      }
+    ]
+  }
+
+  Avatar URL comes from:
+  GET /api/v1/auth/me  (or login/register response)
+  {
+    "user": {
+      "avatar_url": "https://flatnest.techrealify.com/storage/avatars/filename.jpg"
+    }
+  }
+
+  Usage examples:
+
+  React / React Native:
+  <Image source={{ uri: photo.url }} />
+
+  Image constraints (for frontend validation before upload):
+
+  ┌───────────────┬────────────────┬──────────┐
+  │     Field     │ Allowed types  │ Max size │
+  ├───────────────┼────────────────┼──────────┤
+  │ Listing photo │ jpg, jpeg, png │ 200 KB   │
+  ├───────────────┼────────────────┼──────────┤
+  │ Avatar        │ jpg, jpeg, png │ 200 KB   │
+  └───────────────┴────────────────┴──────────┘
+
+✻ Baked for 11s

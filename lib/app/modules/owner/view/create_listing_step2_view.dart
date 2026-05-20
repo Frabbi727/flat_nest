@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/utils/image_compressor.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/create_listing_controller.dart';
@@ -14,9 +15,10 @@ class CreateListingStep2View extends GetView<CreateListingController> {
     final remaining = 8 - controller.photos.length;
     if (remaining <= 0) return;
 
-    final picked = await picker.pickMultiImage(imageQuality: 80);
+    final picked = await picker.pickMultiImage();
     for (final xfile in picked.take(remaining)) {
-      controller.addPhoto(File(xfile.path));
+      final compressed = await ImageCompressor.compress(File(xfile.path));
+      controller.addPhoto(compressed);
     }
   }
 
