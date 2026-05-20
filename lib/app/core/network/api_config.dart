@@ -6,10 +6,10 @@ class ApiConfig {
   static String get baseUrl {
     switch (environment) {
       case ApiEnvironment.dev:
-      return 'https://flatnest.techrealify.com/api/v1'; // ulon basha
+      // return 'https://flatnest.techrealify.com/api/v1'; // ulon basha
      // return 'http://192.168.0.138:8000/api/v1'; // ulon basha
      // return 'http://10.44.66.202:8000/api/v1'; // Office
-       // return 'http://10.144.25.202:8000/api/v1'; // mobile hotspot
+        return 'http://10.150.84.202:8000/api/v1'; // mobile hotspot
        //  return 'http://92.168.0.108:8000/api/v1';
       case ApiEnvironment.staging:
         return 'http://10.144.25.202:8000/api/v1';

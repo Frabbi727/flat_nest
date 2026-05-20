@@ -24,7 +24,7 @@ class AuthController extends BaseController {
   final showGoogleHint = false.obs;
   final _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com',
+    serverClientId: '305560403551-pprdlkpkgolqhu6ho81bk5cb9sflcqbk.apps.googleusercontent.com',
   );
 
   @override

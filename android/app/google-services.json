@@ -1,45 +1,53 @@
 {
   "project_info": {
-    "project_number": "638776596608",
-    "project_id": "flat-nest-47245",
-    "storage_bucket": "flat-nest-47245.firebasestorage.app"
+    "project_number": "305560403551",
+    "project_id": "flat-nest-mobile-version",
+    "storage_bucket": "flat-nest-mobile-version.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:638776596608:android:53818d35c7790e8fc72e65",
+        "mobilesdk_app_id": "1:305560403551:android:4a33bc4374f88b459665ea",
         "android_client_info": {
-          "package_name": "com.example.falt_nest"
+          "package_name": "com.fzrabbironto.flatnest.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "638776596608-i9n0tgte6mj83fh7114vmg0b4jiestvd.apps.googleusercontent.com",
+          "client_id": "305560403551-9a9pict9a1pkeqdbitd6mnhcuo200kp2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.falt_nest",
+            "package_name": "com.fzrabbironto.flatnest.app",
+            "certificate_hash": "8252304cadae10a5b7e89df3d576b784c493a0bc"
+          }
+        },
+        {
+          "client_id": "305560403551-cgsedil2m0d75l02dpccg4dtgj99o87d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fzrabbironto.flatnest.app",
             "certificate_hash": "84169bc0b013dd428b1eeac9d755e07498ebe741"
           }
         },
         {
-          "client_id": "638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com",
+          "client_id": "305560403551-pprdlkpkgolqhu6ho81bk5cb9sflcqbk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDnV23D77LbkZmkbrYqbZ7EwqhJ1vhCQxc"
+          "current_key": "AIzaSyDOSAoUk8-lPgiQRSEljTUbsw_a4RtNS-I"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "638776596608-n6qd2nk8pu2jmoobko04kdoa18kr3564.apps.googleusercontent.com",
+              "client_id": "305560403551-pprdlkpkgolqhu6ho81bk5cb9sflcqbk.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "638776596608-8derdel9gqpptdhbr80kf8jlfk1nadmm.apps.googleusercontent.com",
+              "client_id": "305560403551-gurarj50nsuf7bv5s5fq6vlnb702crtr.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.faltNestMobileApp"

@@ -11,7 +11,7 @@ class AppUpdateService {
   AppUpdateService._();
 
   static const _playStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.example.falt_nest';
+      'https://play.google.com/store/apps/details?id=com.fzrabbironto.flatnest.app';
   static const _appStoreUrl =
       'https://apps.apple.com/app/id0000000000'; // replace with real App Store ID
 
