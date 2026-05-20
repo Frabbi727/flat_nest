@@ -14,7 +14,7 @@ class ApiConfig {
       case ApiEnvironment.staging:
         return 'http://10.144.25.202:8000/api/v1';
       case ApiEnvironment.prod:
-        return 'http://10.144.25.202:8000/api/v1';
+        return 'https://flatnest.techrealify.com/api/v1';
     }
   }
 
