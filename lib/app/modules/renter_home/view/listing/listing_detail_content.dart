@@ -48,7 +48,7 @@ class ListingDetailContent extends StatelessWidget {
           _TitleRow(t: t, listing: listing),
           const SizedBox(height: 20),
           _StatStrip(t: t, listing: listing),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _AvailabilityTags(t: t, listing: listing),
 
           // Description
@@ -276,31 +276,47 @@ class _AvailabilityTags extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 10,
+      runSpacing: 10,
       children: [
-        _DetailTag(
-          text: '📅 ${listing.availableFromFormatted}',
+        _TitledTag(
+          t: t,
+          icon: '📅',
+          label: 'Available From',
+          value: listing.availableFromFormatted,
           color: listing.isAvailableNow ? t.successSoft : t.bgAlt,
-          textColor: listing.isAvailableNow ? t.success : t.inkMid,
+          labelColor: listing.isAvailableNow ? t.success.withValues(alpha: 0.75) : t.inkSoft,
+          valueColor: listing.isAvailableNow ? t.success : t.inkMid,
         ),
         if (listing.floorNo != null)
-          _DetailTag(
-            text: '🏢 Floor ${listing.floorNo}',
+          _TitledTag(
+            t: t,
+            icon: '🏢',
+            label: 'Floor',
+            value: '${listing.floorNo}',
             color: t.bgAlt,
-            textColor: t.inkMid,
+            labelColor: t.inkSoft,
+            valueColor: t.inkMid,
           ),
         if (listing.facing != null)
-          _DetailTag(
-            text: '🧭 ${listing.facing!.label}',
+          _TitledTag(
+            t: t,
+            icon: '🧭',
+            label: 'Facing',
+            value: listing.facing!.label,
             color: t.bgAlt,
-            textColor: t.inkMid,
+            labelColor: t.inkSoft,
+            valueColor: t.inkMid,
           ),
         if (listing.distanceKm != null)
-          _DetailTag(
-            text: '📍 ${listing.distanceKm!.toStringAsFixed(1)} km away',
+          _TitledTag(
+            t: t,
+            icon: '📍',
+            label: 'Distance',
+            value: '${listing.distanceKm!.toStringAsFixed(1)} km away',
             color: t.primarySoft,
-            textColor: t.primaryInk,
+            labelColor: t.primaryInk.withValues(alpha: 0.65),
+            valueColor: t.primaryInk,
           ),
       ],
     );
@@ -818,36 +834,68 @@ class _ContactRow extends StatelessWidget {
 
 // ── Small reusable widgets ────────────────────────────────────────────────────
 
-class _DetailTag extends StatelessWidget {
-  final String text;
+class _TitledTag extends StatelessWidget {
+  final FlatNestTheme t;
+  final String icon;
+  final String label;
+  final String value;
   final Color color;
-  final Color textColor;
+  final Color labelColor;
+  final Color valueColor;
 
-  const _DetailTag({
-    required this.text,
+  const _TitledTag({
+    required this.t,
+    required this.icon,
+    required this.label,
+    required this.value,
     required this.color,
-    required this.textColor,
+    required this.labelColor,
+    required this.valueColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: textColor,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: labelColor,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+
 
 class _PreferredContactBadge extends StatelessWidget {
   final FlatNestTheme t;
