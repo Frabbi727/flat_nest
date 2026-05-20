@@ -125,6 +125,8 @@ class DiscoveryView extends GetView<RenterHomeController> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       useSafeArea: true,
+      enableDrag: true,
+      isDismissible: true,
       builder: (_) => FiltersSheet(t: t),
     );
   }

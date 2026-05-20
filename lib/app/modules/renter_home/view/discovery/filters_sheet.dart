@@ -81,33 +81,46 @@ class _FiltersSheetState extends State<FiltersSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Drag handle
           Container(
             margin: const EdgeInsets.only(top: 12),
             width: 36,
             height: 4,
             decoration: BoxDecoration(color: t.inkFaint, borderRadius: BorderRadius.circular(2)),
           ),
+
+          // ── Sticky header ────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 8, 0),
+            child: Row(
+              children: [
+                Text(
+                  'Filters',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.3),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: _resetAll,
+                  child: Text('Reset all', style: TextStyle(color: t.inkSoft, fontSize: 13, fontWeight: FontWeight.w500)),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(Icons.close_rounded, color: t.inkMid, size: 22),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: t.borderSoft),
+
+          // ── Scrollable content ───────────────────────────────────────────
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Filters',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.3),
-                      ),
-                      TextButton(
-                        onPressed: _resetAll,
-                        child: Text('Reset all', style: TextStyle(color: t.primary, fontWeight: FontWeight.w600)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
 
                   // ── SORT BY ──────────────────────────────────────────────
                   _sectionLabel('SORT BY'),
@@ -372,40 +385,31 @@ class _FiltersSheetState extends State<FiltersSheet> {
                       }).toList(),
                     );
                   }),
-                  const SizedBox(height: 28),
-
-                  // ── Buttons ───────────────────────────────────────────────
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: t.border),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Text('Cancel', style: TextStyle(color: t.ink, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          onPressed: _applyAndClose,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: t.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text('Show results', style: TextStyle(fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 8),
                 ],
+              ),
+            ),
+          ),
+
+          // ── Sticky action button ─────────────────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: t.surface,
+              border: Border(top: BorderSide(color: t.borderSoft)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _applyAndClose,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: t.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Show Results', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               ),
             ),
           ),
