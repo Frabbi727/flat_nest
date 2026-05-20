@@ -548,7 +548,7 @@ class _FiltersSheetState extends State<FiltersSheet> {
   }
 }
 
-class _GeoDropdown extends StatelessWidget {
+class _GeoDropdown extends StatefulWidget {
   final FlatNestTheme t;
   final String label;
   final GeoItemModel? value;
@@ -568,46 +568,241 @@ class _GeoDropdown extends StatelessWidget {
   });
 
   @override
+  State<_GeoDropdown> createState() => _GeoDropdownState();
+}
+
+class _GeoDropdownState extends State<_GeoDropdown> {
+  bool _isOpen = false;
+  final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+  String _query = '';
+
+  FlatNestTheme get t => widget.t;
+
+  @override
+  void didUpdateWidget(_GeoDropdown old) {
+    super.didUpdateWidget(old);
+    if (_isOpen && !old.isLoading && widget.isLoading) {
+      _close();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _open() {
+    if (!widget.enabled || widget.isLoading) return;
+    setState(() { _isOpen = true; _query = ''; _searchController.clear(); });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _searchFocus.requestFocus());
+  }
+
+  void _close() {
+    setState(() { _isOpen = false; _query = ''; _searchController.clear(); });
+  }
+
+  void _pick(GeoItemModel? item) {
+    _close();
+    widget.onChanged?.call(item);
+  }
+
+  List<GeoItemModel> get _filtered {
+    if (_query.isEmpty) return widget.items;
+    final q = _query.toLowerCase();
+    return widget.items.where((i) => i.name.toLowerCase().contains(q)).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDisabled = !enabled;
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: isDisabled ? t.bg : t.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDisabled ? t.borderSoft : t.border),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: isLoading
-          ? Row(
-              children: [
-                Expanded(child: Text('Loading...', style: TextStyle(fontSize: 14, color: t.inkFaint))),
-                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: t.primary)),
-              ],
-            )
-          : DropdownButtonHideUnderline(
-              child: DropdownButton<GeoItemModel>(
-                value: value,
-                hint: Text(
-                  isDisabled ? label : 'Select $label',
-                  style: TextStyle(fontSize: 14, color: isDisabled ? t.inkFaint.withValues(alpha: 0.5) : t.inkFaint),
+    final isDisabled = !widget.enabled;
+    final filtered = _filtered;
+
+    return Opacity(
+      opacity: isDisabled ? 0.5 : 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Trigger / search row
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            height: 48,
+            decoration: BoxDecoration(
+              color: isDisabled ? t.bg : t.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isOpen ? t.primary : (isDisabled ? t.borderSoft : t.border),
+                width: _isOpen ? 1.5 : 1,
+              ),
+              boxShadow: _isOpen
+                  ? [BoxShadow(color: t.primary.withValues(alpha: 0.12), blurRadius: 0, spreadRadius: 4)]
+                  : null,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: widget.isLoading
+                ? Row(children: [
+                    Expanded(child: Text('Loading...', style: TextStyle(fontSize: 14, color: t.inkFaint))),
+                    SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: t.primary)),
+                  ])
+                : _isOpen
+                    ? Row(children: [
+                        Icon(Icons.search_rounded, size: 18, color: t.inkSoft),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocus,
+                            onChanged: (v) => setState(() => _query = v),
+                            style: TextStyle(fontSize: 14, color: t.ink),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Search ${widget.label.toLowerCase()}…',
+                              hintStyle: TextStyle(fontSize: 14, color: t.inkFaint),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: _query.isNotEmpty
+                              ? () { _searchController.clear(); setState(() => _query = ''); }
+                              : _close,
+                          child: Icon(
+                            _query.isNotEmpty ? Icons.close_rounded : Icons.keyboard_arrow_up_rounded,
+                            size: 20,
+                            color: t.inkSoft,
+                          ),
+                        ),
+                      ])
+                    : GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: isDisabled ? null : _open,
+                        child: Row(children: [
+                          Expanded(
+                            child: Text(
+                              widget.value?.name ?? (isDisabled ? widget.label : 'Select ${widget.label}'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: widget.value != null ? t.ink : (isDisabled ? t.inkFaint.withValues(alpha: 0.5) : t.inkFaint),
+                                fontWeight: widget.value != null ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.keyboard_arrow_down_rounded, color: isDisabled ? t.inkFaint : t.inkMid, size: 20),
+                        ]),
+                      ),
+          ),
+
+          // Dropdown list
+          if (_isOpen)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: t.borderSoft),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  children: [
+                    // "Any" option to clear selection
+                    _DropdownItem(
+                      t: t,
+                      label: 'Any ${widget.label}',
+                      selected: widget.value == null,
+                      query: '',
+                      onTap: () => _pick(null),
+                    ),
+                    if (filtered.isEmpty && _query.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Center(
+                          child: Text(
+                            'No results for "$_query"',
+                            style: TextStyle(fontSize: 13, color: t.inkSoft),
+                          ),
+                        ),
+                      )
+                    else
+                      ...filtered.map((item) => _DropdownItem(
+                            t: t,
+                            label: item.name,
+                            selected: widget.value?.id == item.id,
+                            query: _query,
+                            onTap: () => _pick(item),
+                          )),
+                  ],
                 ),
-                isExpanded: true,
-                icon: Icon(Icons.keyboard_arrow_down_rounded, color: isDisabled ? t.inkFaint : t.inkMid, size: 20),
-                style: TextStyle(fontSize: 14, color: t.ink),
-                dropdownColor: t.surface,
-                onChanged: (enabled && items.isNotEmpty) ? onChanged : null,
-                items: [
-                  DropdownMenuItem<GeoItemModel>(
-                    value: null,
-                    child: Text('Any $label', style: TextStyle(color: t.inkMid)),
-                  ),
-                  ...items.map(
-                    (item) => DropdownMenuItem<GeoItemModel>(value: item, child: Text(item.name)),
-                  ),
-                ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DropdownItem extends StatelessWidget {
+  final FlatNestTheme t;
+  final String label;
+  final bool selected;
+  final String query;
+  final VoidCallback onTap;
+
+  const _DropdownItem({
+    required this.t,
+    required this.label,
+    required this.selected,
+    required this.query,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: selected ? t.primarySoft : t.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(children: [
+          Expanded(child: _buildLabel()),
+          if (selected) Icon(Icons.check_rounded, color: t.primary, size: 16),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildLabel() {
+    if (query.isEmpty) {
+      return Text(
+        label,
+        style: TextStyle(fontSize: 14, color: selected ? t.primaryInk : t.ink, fontWeight: selected ? FontWeight.w600 : FontWeight.w500),
+      );
+    }
+    final q = query.toLowerCase();
+    final lower = label.toLowerCase();
+    final spans = <TextSpan>[];
+    int start = 0;
+    while (start < label.length) {
+      final idx = lower.indexOf(q, start);
+      if (idx == -1) { spans.add(TextSpan(text: label.substring(start))); break; }
+      if (idx > start) spans.add(TextSpan(text: label.substring(start, idx)));
+      spans.add(TextSpan(
+        text: label.substring(idx, idx + q.length),
+        style: TextStyle(fontWeight: FontWeight.w700, color: selected ? t.primaryInk : t.primary, backgroundColor: t.primary.withValues(alpha: 0.1)),
+      ));
+      start = idx + q.length;
+    }
+    return Text.rich(
+      TextSpan(
+        style: TextStyle(fontSize: 14, color: selected ? t.primaryInk : t.ink, fontWeight: selected ? FontWeight.w600 : FontWeight.w500),
+        children: spans,
+      ),
     );
   }
 }
