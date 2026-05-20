@@ -66,8 +66,9 @@ class CreateListingStepOwnerInfoView extends GetView<CreateListingController> {
             child: TextField(
               controller: controller.ownerPhoneController,
               keyboardType: TextInputType.phone,
+              maxLength: 20,
               style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
-              decoration: _inputDeco(t).copyWith(hintText: '01XXXXXXXXX'),
+              decoration: _inputDeco(t).copyWith(hintText: '01XXXXXXXXX', counterText: ''),
             ),
           ),
           _FormGroup(
@@ -76,8 +77,9 @@ class CreateListingStepOwnerInfoView extends GetView<CreateListingController> {
             child: TextField(
               controller: controller.ownerAltPhoneController,
               keyboardType: TextInputType.phone,
+              maxLength: 20,
               style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
-              decoration: _inputDeco(t).copyWith(hintText: 'Optional second number'),
+              decoration: _inputDeco(t).copyWith(hintText: 'Optional second number', counterText: ''),
             ),
           ),
           _FormGroup(

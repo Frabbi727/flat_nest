@@ -159,7 +159,7 @@ class _Step1Form extends StatelessWidget {
           _FormGroup(
             t: t,
             label: 'Listing title',
-            child: _Input(t: t, controller: controller.titleController, hint: 'e.g. Sunlit 2BR in Banani'),
+            child: _Input(t: t, controller: controller.titleController, hint: 'e.g. Sunlit 2BR in Banani', maxLength: 255),
           ),
           _FormGroup(
             t: t,
@@ -239,7 +239,7 @@ class _Step1Form extends StatelessWidget {
                 child: _FormGroup(
                   t: t,
                   label: 'Monthly rent',
-                  child: _Input(t: t, controller: controller.priceController, hint: '28,000', prefix: '৳', suffix: '/mo', keyboardType: TextInputType.number),
+                  child: _Input(t: t, controller: controller.priceController, hint: '28000', prefix: '৳', suffix: '/mo', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
                 ),
               ),
               const SizedBox(width: 12),
@@ -247,7 +247,7 @@ class _Step1Form extends StatelessWidget {
                 child: _FormGroup(
                   t: t,
                   label: 'Deposit',
-                  child: _Input(t: t, controller: controller.depositController, hint: '56,000', prefix: '৳', keyboardType: TextInputType.number),
+                  child: _Input(t: t, controller: controller.depositController, hint: '56000', prefix: '৳', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
                 ),
               ),
             ],
@@ -258,7 +258,7 @@ class _Step1Form extends StatelessWidget {
                 child: _FormGroup(
                   t: t,
                   label: 'Bedrooms',
-                  child: _Input(t: t, controller: controller.bedsController, keyboardType: TextInputType.number),
+                  child: _Input(t: t, controller: controller.bedsController, keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
                 ),
               ),
               const SizedBox(width: 12),
@@ -266,7 +266,7 @@ class _Step1Form extends StatelessWidget {
                 child: _FormGroup(
                   t: t,
                   label: 'Baths',
-                  child: _Input(t: t, controller: controller.bathsController, keyboardType: TextInputType.number),
+                  child: _Input(t: t, controller: controller.bathsController, keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
                 ),
               ),
               const SizedBox(width: 12),
@@ -274,7 +274,7 @@ class _Step1Form extends StatelessWidget {
                 child: _FormGroup(
                   t: t,
                   label: 'Size',
-                  child: _Input(t: t, controller: controller.sizeController, hint: '1100', suffix: 'ft²', keyboardType: TextInputType.number),
+                  child: _Input(t: t, controller: controller.sizeController, hint: '1100', suffix: 'ft²', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
                 ),
               ),
             ],
@@ -502,6 +502,8 @@ class _Input extends StatelessWidget {
   final String? prefix;
   final String? suffix;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
 
   const _Input({
     required this.t,
@@ -510,6 +512,8 @@ class _Input extends StatelessWidget {
     this.prefix,
     this.suffix,
     this.keyboardType = TextInputType.text,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   @override
@@ -524,6 +528,7 @@ class _Input extends StatelessWidget {
       prefixStyle: AppTextStyles.bodyMedium.copyWith(color: t.inkMid, fontSize: 15),
       suffixText: suffix,
       suffixStyle: AppTextStyles.caption.copyWith(color: t.inkMid, fontSize: 13),
+      counterText: maxLength != null ? '' : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: t.borderSoft),
@@ -540,6 +545,8 @@ class _Input extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      maxLength: maxLength,
       style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
       decoration: deco,
     );

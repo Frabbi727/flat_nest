@@ -337,6 +337,18 @@ class CreateListingController extends BaseController {
       return;
     }
 
+    final title = titleController.text.trim();
+    if (title.length > 255) {
+      showError('Title must be 255 characters or fewer');
+      return;
+    }
+
+    final floorNoRaw = int.tryParse(floorNoController.text);
+    if (floorNoRaw != null && floorNoRaw > 100) {
+      showError('Floor number must be between 0 and 100');
+      return;
+    }
+
     final price = int.tryParse(priceController.text.replaceAll(',', '')) ?? 0;
     final deposit = int.tryParse(depositController.text.replaceAll(',', ''));
     final size = int.tryParse(sizeController.text);
@@ -501,6 +513,11 @@ class CreateListingController extends BaseController {
     final ownerPhone = ownerPhoneController.text.trim();
     final ownerAltPhone = ownerAltPhoneController.text.trim();
     final ownerEmail = ownerEmailController.text.trim();
+
+    if (ownerEmail.isNotEmpty && !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(ownerEmail)) {
+      showError('Please enter a valid email address');
+      return;
+    }
 
     final data = <String, dynamic>{};
     if (ownerName.isNotEmpty) data['owner_name'] = ownerName;

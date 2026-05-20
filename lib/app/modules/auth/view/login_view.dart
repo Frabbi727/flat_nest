@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/localization/translation_keys.dart';
+import '../../../core/network/api_config.dart';
+import '../../../shared/web_view_screen.dart';
 import '../../../theme/app_text_styles.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/auth_controller.dart';
@@ -42,6 +44,8 @@ class LoginView extends GetView<AuthController> {
               _buildSocialButtons(t),
               const SizedBox(height: 40),
               _buildFooter(t),
+              const SizedBox(height: 16),
+              _buildLegalLinks(t, context),
               const SizedBox(height: 24),
             ],
           ),
@@ -250,6 +254,32 @@ class LoginView extends GetView<AuthController> {
               fontSize: 13,
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLegalLinks(FlatNestTheme t, BuildContext context) {
+    final base = ApiConfig.storageBaseUrl;
+    final linkStyle = AppTextStyles.caption.copyWith(
+      color: t.primary,
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      decoration: TextDecoration.underline,
+      decorationColor: t.primary,
+    );
+    final sepStyle = AppTextStyles.caption.copyWith(color: t.inkSoft, fontSize: 11);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () => WebViewScreen.open(context, title: 'Privacy Policy', url: '$base/privacy-policy'),
+          child: Text('Privacy Policy', style: linkStyle),
+        ),
+        Text('  ·  ', style: sepStyle),
+        GestureDetector(
+          onTap: () => WebViewScreen.open(context, title: 'Terms & Conditions', url: '$base/terms-and-conditions'),
+          child: Text('Terms & Conditions', style: linkStyle),
         ),
       ],
     );
