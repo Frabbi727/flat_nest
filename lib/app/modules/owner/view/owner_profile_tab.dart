@@ -42,7 +42,7 @@ class _ProfileTab extends GetView<OwnerController> {
             _OwnerMenuItem(t: t, icon: Icons.person_outline, label: 'Edit profile'),
             _OwnerMenuItem(t: t, icon: Icons.notifications_outlined, label: 'Notifications'),
             _OwnerMenuItem(t: t, icon: Icons.lock_outline, label: 'Privacy & Security'),
-            _OwnerMenuItem(t: t, icon: Icons.help_outline, label: 'Help & Support'),
+            _OwnerMenuItem(t: t, icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showHelpSheet(context, t)),
             const SizedBox(height: 12),
             _OwnerMenuItem(t: t, icon: Icons.logout, label: 'Logout', danger: true, onTap: controller.logout),
             Divider(height: 28, color: t.borderSoft),
@@ -56,6 +56,17 @@ class _ProfileTab extends GetView<OwnerController> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showHelpSheet(BuildContext context, FlatNestTheme t) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: t.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _HelpSheet(t: t),
     );
   }
 
@@ -93,6 +104,77 @@ class _ProfileTab extends GetView<OwnerController> {
       Get.snackbar('Error', 'Failed to delete account. Please try again.',
           snackPosition: SnackPosition.BOTTOM);
     }
+  }
+}
+
+// ── Help sheet ────────────────────────────────────────────────────────────────
+
+class _HelpSheet extends StatelessWidget {
+  final FlatNestTheme t;
+  const _HelpSheet({required this.t});
+
+  static const _email = 'flatnesthelp@gmail.com';
+
+  Future<void> _launchEmail() async {
+    final uri = Uri(scheme: 'mailto', path: _email);
+    try {
+      await launchUrl(uri);
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(color: t.inkFaint, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(children: [
+              Icon(Icons.help_outline_rounded, color: t.primary, size: 22),
+              const SizedBox(width: 10),
+              Text('Help & Support', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: t.ink)),
+            ]),
+            const SizedBox(height: 8),
+            Text(
+              'Have a question or need help? Send us an email and we\'ll get back to you.',
+              style: TextStyle(fontSize: 13, color: t.inkMid, height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: _launchEmail,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: t.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: t.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(children: [
+                  Icon(Icons.email_outlined, size: 18, color: t.primary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _email,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: t.primary),
+                    ),
+                  ),
+                  Icon(Icons.open_in_new_rounded, size: 16, color: t.primary.withValues(alpha: 0.6)),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
