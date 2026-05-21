@@ -216,17 +216,32 @@ class LoginView extends GetView<AuthController> {
         child: OutlinedButton(
           onPressed: controller.signInWithGoogle,
           style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            side: BorderSide(color: hinted ? t.primary : t.borderSoft, width: hinted ? 2 : 1),
+            side: BorderSide(
+              color: hinted ? t.primary : Colors.grey.shade300,
+              width: hinted ? 2 : 1,
+            ),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: Text(
-            hinted ? 'Continue with Google' : 'Google',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: hinted ? t.primary : t.ink,
-              fontWeight: hinted ? FontWeight.w600 : FontWeight.w500,
-              fontSize: 13,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/img.png',
+                width: 20,
+                height: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                hinted ? 'Continue with Google' : 'Sign in with Google',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: hinted ? t.primary : t.ink,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ],
           ),
         ),
       );
