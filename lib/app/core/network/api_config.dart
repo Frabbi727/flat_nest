@@ -18,6 +18,7 @@ class ApiConfig {
     }
   }
 
+
   // Origin only (no /api/v1) — used to resolve relative storage URLs
   static String get storageBaseUrl {
     final uri = Uri.parse(baseUrl);
