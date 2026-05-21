@@ -44,6 +44,8 @@ class _ProfileTab extends GetView<OwnerController> {
             _OwnerMenuItem(t: t, icon: Icons.lock_outline, label: 'Privacy & Security'),
             _OwnerMenuItem(t: t, icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showHelpSheet(context, t)),
             const SizedBox(height: 12),
+            _AppVersionText(t: t),
+            const SizedBox(height: 12),
             _OwnerMenuItem(t: t, icon: Icons.logout, label: 'Logout', danger: true, onTap: controller.logout),
             Divider(height: 28, color: t.borderSoft),
             _OwnerMenuItem(
@@ -217,6 +219,28 @@ class _OwnerMenuItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AppVersionText extends StatelessWidget {
+  final FlatNestTheme t;
+  const _AppVersionText({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (_, snap) {
+        final version = snap.data != null
+            ? 'Version ${snap.data!.version} (${snap.data!.buildNumber})'
+            : '';
+        return Text(
+          version,
+          style: TextStyle(fontSize: 12, color: t.inkSoft),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 }

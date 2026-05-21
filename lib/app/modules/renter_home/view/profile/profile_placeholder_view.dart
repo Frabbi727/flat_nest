@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../../core/service/auth_service.dart';
@@ -58,6 +59,8 @@ class ProfilePlaceholderView extends StatelessWidget {
               _MenuItem(t: t, icon: Icons.notifications_outlined, label: 'Notifications'),
               _MenuItem(t: t, icon: Icons.lock_outline, label: 'Privacy & Security'),
               _MenuItem(t: t, icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showHelpSheet(context, t)),
+              const SizedBox(height: 12),
+              _AppVersionText(t: t),
               const SizedBox(height: 12),
               _MenuItem(
                 t: t,
@@ -311,6 +314,28 @@ class _MenuItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AppVersionText extends StatelessWidget {
+  final FlatNestTheme t;
+  const _AppVersionText({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (_, snap) {
+        final version = snap.data != null
+            ? 'Version ${snap.data!.version} (${snap.data!.buildNumber})'
+            : '';
+        return Text(
+          version,
+          style: TextStyle(fontSize: 12, color: t.inkSoft),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 }
