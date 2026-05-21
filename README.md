@@ -66,3 +66,5 @@ We use separate entry points to handle environment-specific configurations (like
 - `lib/app/modules`: Feature-based modules (Auth, Splash, Home, etc.).
 - `lib/app/theme`: Centralized design system (Colors, Styles, Themes).
 - `lib/app/route`: Centralized routing management.
+
+flutter run --release -t lib/main_prod.dart

@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCB7MP3TBJPyrnusS8nfJNonomGDOFBzW8',
-    appId: '1:398880175861:android:cf55b3fa581f7e2049b7bc',
-    messagingSenderId: '398880175861',
-    projectId: 'flat-nest-app',
-    storageBucket: 'flat-nest-app.firebasestorage.app',
+    apiKey: 'AIzaSyDOSAoUk8-lPgiQRSEljTUbsw_a4RtNS-I',
+    appId: '1:305560403551:android:4a33bc4374f88b459665ea',
+    messagingSenderId: '305560403551',
+    projectId: 'flat-nest-mobile-version',
+    storageBucket: 'flat-nest-mobile-version.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
