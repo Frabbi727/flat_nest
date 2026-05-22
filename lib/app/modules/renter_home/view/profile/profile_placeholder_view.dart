@@ -67,10 +67,7 @@ class ProfilePlaceholderView extends StatelessWidget {
                 icon: Icons.logout,
                 label: 'Logout',
                 danger: true,
-                onTap: () async {
-                  await auth.logout();
-                  Get.offAllNamed(Routes.login);
-                },
+                onTap: () => _showLogoutConfirmation(context, t, auth),
               ),
               Divider(height: 28, color: t.borderSoft),
               _MenuItem(
@@ -96,6 +93,37 @@ class ProfilePlaceholderView extends StatelessWidget {
       ),
       builder: (_) => _HelpSheet(t: t),
     );
+  }
+
+  Future<void> _showLogoutConfirmation(
+      BuildContext context, FlatNestTheme t, AuthService auth) async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        backgroundColor: t.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Logout?',
+          style: TextStyle(color: t.ink, fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+        content: Text(
+          'Are you sure you want to log out of your account?',
+          style: TextStyle(color: t.inkMid, fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Cancel', style: TextStyle(color: t.inkSoft)),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Logout', style: TextStyle(color: t.error, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await auth.logout();
+    Get.offAllNamed(Routes.login);
   }
 
   Future<void> _showDeleteConfirmation(
