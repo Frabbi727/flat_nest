@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -132,12 +133,24 @@ class NotificationService extends GetxService {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null) return;
+
+      final deviceInfo = DeviceInfoPlugin();
+      String deviceModel;
+      if (Platform.isIOS) {
+        final ios = await deviceInfo.iosInfo;
+        deviceModel = ios.utsname.machine;
+      } else {
+        final android = await deviceInfo.androidInfo;
+        deviceModel = '${android.manufacturer} ${android.model}';
+      }
+
       final apiClient = Get.find<ApiClient>();
       await apiClient.post(
         path: ApiEndpoints.deviceFcmToken,
         data: {
           'fcm_token': token,
           'device_type': Platform.isIOS ? 'ios' : 'android',
+          'device_model': deviceModel,
         },
       );
     } catch (_) {}
