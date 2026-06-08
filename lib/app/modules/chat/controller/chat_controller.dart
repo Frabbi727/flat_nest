@@ -100,8 +100,8 @@ class ChatController extends BaseController {
     showLoading();
     final result = await _chatRepository.acceptChatRequest(selectedChat.value!.id);
     hideLoading();
-    if (result case Success()) {
-      _updateLocalStatus(ChatStatus.accepted);
+    if (result case Success(data: final status?)) {
+      _updateLocalStatus(status);
     } else if (result case Error(message: final msg)) {
       showError(msg);
     }
@@ -112,8 +112,8 @@ class ChatController extends BaseController {
     showLoading();
     final result = await _chatRepository.rejectChatRequest(selectedChat.value!.id);
     hideLoading();
-    if (result case Success()) {
-      _updateLocalStatus(ChatStatus.rejected);
+    if (result case Success(data: final status?)) {
+      _updateLocalStatus(status);
     } else if (result case Error(message: final msg)) {
       showError(msg);
     }
@@ -121,15 +121,7 @@ class ChatController extends BaseController {
 
   void _updateLocalStatus(ChatStatus newStatus) {
     if (selectedChat.value == null) return;
-    final updated = ChatModel(
-      id: selectedChat.value!.id,
-      listing: selectedChat.value!.listing,
-      otherUser: selectedChat.value!.otherUser,
-      lastMessage: selectedChat.value!.lastMessage,
-      unreadCount: selectedChat.value!.unreadCount,
-      status: newStatus,
-      updatedAt: selectedChat.value!.updatedAt,
-    );
+    final updated = selectedChat.value!.copyWith(status: newStatus);
     selectedChat.value = updated;
     // Update in the list as well
     final index = chats.indexWhere((c) => c.id == updated.id);

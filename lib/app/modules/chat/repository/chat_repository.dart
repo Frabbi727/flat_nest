@@ -40,7 +40,8 @@ class ChatRepository extends BaseRepository {
         response.data as Map<String, dynamic>,
         (j) {
           final map = j as Map<String, dynamic>;
-          final statusStr = map['status'] as String?;
+          final chatData = map['chat'] as Map<String, dynamic>?;
+          final statusStr = chatData?['status'] as String?;
           final msgsRaw = map['messages'] as List? ?? [];
           return (
             status: ChatModel.statusFromJson(statusStr),
@@ -69,19 +70,39 @@ class ChatRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<bool>> acceptChatRequest(String chatId) async {
+  Future<Resource<ChatStatus>> acceptChatRequest(String chatId) async {
     try {
       final response = await apiClient.post(path: ApiEndpoints.chatAccept(chatId));
-      return Success(data: true, statusCode: response.statusCode ?? 200);
+      final body = ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (j) {
+          final map = j as Map<String, dynamic>;
+          return ChatModel.statusFromJson(map['status'] as String?);
+        },
+      );
+      if (body.success && body.data != null) {
+        return Success(data: body.data!, statusCode: response.statusCode ?? 200);
+      }
+      return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  Future<Resource<bool>> rejectChatRequest(String chatId) async {
+  Future<Resource<ChatStatus>> rejectChatRequest(String chatId) async {
     try {
       final response = await apiClient.post(path: ApiEndpoints.chatReject(chatId));
-      return Success(data: true, statusCode: response.statusCode ?? 200);
+      final body = ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (j) {
+          final map = j as Map<String, dynamic>;
+          return ChatModel.statusFromJson(map['status'] as String?);
+        },
+      );
+      if (body.success && body.data != null) {
+        return Success(data: body.data!, statusCode: response.statusCode ?? 200);
+      }
+      return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

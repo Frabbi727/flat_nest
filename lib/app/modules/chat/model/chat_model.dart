@@ -112,6 +112,26 @@ class ChatModel {
   factory ChatModel.fromJson(Map<String, dynamic> json) => _$ChatModelFromJson(json);
   Map<String, dynamic> toJson() => _$ChatModelToJson(this);
 
+  ChatModel copyWith({
+    String? id,
+    ChatListingModel? listing,
+    ChatUserModel? otherUser,
+    ChatMessageModel? lastMessage,
+    int? unreadCount,
+    ChatStatus? status,
+    String? updatedAt,
+  }) {
+    return ChatModel(
+      id: id ?? this.id,
+      listing: listing ?? this.listing,
+      otherUser: otherUser ?? this.otherUser,
+      lastMessage: lastMessage ?? this.lastMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      status: status ?? this.status,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   static ChatStatus statusFromJson(String? value) {
     switch (value?.toLowerCase()) {
       case 'accepted':

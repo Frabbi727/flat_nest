@@ -150,8 +150,20 @@ class ChatRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (chat.unreadCount > 0) ...[
-                        const SizedBox(width: 8),
+                      const SizedBox(width: 8),
+                      if (chat.status == ChatStatus.pending)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: t.primarySoft,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Pending',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: t.primary),
+                          ),
+                        )
+                      else if (chat.unreadCount > 0)
                         Container(
                           width: 20,
                           height: 20,
@@ -163,7 +175,6 @@ class ChatRow extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ],
