@@ -34,6 +34,13 @@ class ListingDetailStickyBar extends StatelessWidget {
 
     final chatController = Get.find<ChatController>();
     
+    // Check for existing chat first
+    final existingChat = chatController.findExistingChat(listing.id);
+    if (existingChat != null) {
+      chatController.openChat(existingChat);
+      return;
+    }
+
     // Show dialog to enter initial message
     final textController = TextEditingController();
     

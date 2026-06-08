@@ -144,4 +144,8 @@ class ChatController extends BaseController {
   }
 
   int get totalUnread => chats.fold(0, (sum, c) => sum + c.unreadCount);
+
+  ChatModel? findExistingChat(String listingId) {
+    return chats.firstWhereOrNull((c) => c.listing.id == listingId);
+  }
 }
