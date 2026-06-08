@@ -109,7 +109,13 @@ class ChatModel {
     required this.updatedAt,
   });
 
-  factory ChatModel.fromJson(Map<String, dynamic> json) => _$ChatModelFromJson(json);
+  factory ChatModel.fromJson(Map<String, dynamic> json) {
+    // Basic null check for critical nested objects to avoid "type 'Null' is not a subtype of type 'Map<String, dynamic>'"
+    if (json['listing'] == null || json['other_user'] == null) {
+      throw const FormatException('Missing required chat data');
+    }
+    return _$ChatModelFromJson(json);
+  }
   Map<String, dynamic> toJson() => _$ChatModelToJson(this);
 
   ChatModel copyWith({

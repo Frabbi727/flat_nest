@@ -18,7 +18,7 @@ class ChatController extends BaseController {
   final chats = <ChatModel>[].obs;
   final messages = <ChatMessageModel>[].obs;
   final selectedChat = Rxn<ChatModel>();
-  final messageController = TextEditingController();
+  late final TextEditingController messageController;
   final isSendingMessage = false.obs;
 
   String get myUserId => _authService.currentUser?.id ?? '';
@@ -26,6 +26,7 @@ class ChatController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    messageController = TextEditingController();
     fetchChats();
     _initRealtime();
   }

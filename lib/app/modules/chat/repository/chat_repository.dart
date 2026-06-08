@@ -11,7 +11,28 @@ class ChatRepository extends BaseRepository {
   Future<Resource<List<ChatModel>>> getChats() async {
     try {
       final response = await apiClient.get(path: ApiEndpoints.chats);
-      return parseListResponse(response, ChatModel.fromJson);
+      
+      final body = ApiResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (j) {
+          final list = j as List? ?? [];
+          return list
+              .map((e) {
+                try {
+                  return ChatModel.fromJson(e as Map<String, dynamic>);
+                } catch (e) {
+                  return null;
+                }
+              })
+              .whereType<ChatModel>()
+              .toList();
+        },
+      );
+
+      if (body.success) {
+        return Success(data: body.data ?? [], statusCode: response.statusCode ?? 200);
+      }
+      return Error(body.errorMessage, statusCode: response.statusCode ?? 500);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
