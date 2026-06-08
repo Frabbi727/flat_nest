@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
     final themeService = Get.find<ThemeService>();
     final localizationService = Get.find<LocalizationService>();
 
+
     return GetMaterialApp(
       title: 'Falt Nest',
       debugShowCheckedModeBanner: false,
