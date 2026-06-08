@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "305560403551-9a9pict9a1pkeqdbitd6mnhcuo200kp2.apps.googleusercontent.com",
+          "client_id": "305560403551-300ia3gtp81dvo4lcc92cdukngiesmdm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.fzrabbironto.flatnest.app",
-            "certificate_hash": "8252304cadae10a5b7e89df3d576b784c493a0bc"
+            "certificate_hash": "7ec82da5cf54cc2be7ea3229577997d7428dec33"
           }
         },
         {
@@ -27,6 +27,14 @@
           "android_info": {
             "package_name": "com.fzrabbironto.flatnest.app",
             "certificate_hash": "84169bc0b013dd428b1eeac9d755e07498ebe741"
+          }
+        },
+        {
+          "client_id": "305560403551-i16v8qvu1g55thgk9cunus76ofcu6pkc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fzrabbironto.flatnest.app",
+            "certificate_hash": "9cd00d0ee10af60682d924273659513c49f7f019"
           }
         },
         {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../../core/service/auth_service.dart';
@@ -59,15 +60,14 @@ class ProfilePlaceholderView extends StatelessWidget {
               _MenuItem(t: t, icon: Icons.lock_outline, label: 'Privacy & Security'),
               _MenuItem(t: t, icon: Icons.help_outline, label: 'Help & Support', onTap: () => _showHelpSheet(context, t)),
               const SizedBox(height: 12),
+              _AppVersionText(t: t),
+              const SizedBox(height: 12),
               _MenuItem(
                 t: t,
                 icon: Icons.logout,
                 label: 'Logout',
                 danger: true,
-                onTap: () async {
-                  await auth.logout();
-                  Get.offAllNamed(Routes.login);
-                },
+                onTap: () => _showLogoutConfirmation(context, t, auth),
               ),
               Divider(height: 28, color: t.borderSoft),
               _MenuItem(
@@ -93,6 +93,37 @@ class ProfilePlaceholderView extends StatelessWidget {
       ),
       builder: (_) => _HelpSheet(t: t),
     );
+  }
+
+  Future<void> _showLogoutConfirmation(
+      BuildContext context, FlatNestTheme t, AuthService auth) async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        backgroundColor: t.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Logout?',
+          style: TextStyle(color: t.ink, fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+        content: Text(
+          'Are you sure you want to log out of your account?',
+          style: TextStyle(color: t.inkMid, fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Cancel', style: TextStyle(color: t.inkSoft)),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Logout', style: TextStyle(color: t.error, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await auth.logout();
+    Get.offAllNamed(Routes.login);
   }
 
   Future<void> _showDeleteConfirmation(
@@ -311,6 +342,28 @@ class _MenuItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AppVersionText extends StatelessWidget {
+  final FlatNestTheme t;
+  const _AppVersionText({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (_, snap) {
+        final version = snap.data != null
+            ? 'Version ${snap.data!.version} (${snap.data!.buildNumber})'
+            : '';
+        return Text(
+          version,
+          style: TextStyle(fontSize: 12, color: t.inkSoft),
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 }
