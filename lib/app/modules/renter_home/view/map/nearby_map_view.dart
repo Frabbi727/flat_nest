@@ -833,7 +833,11 @@ class _ListingPreviewSheet extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: onViewDetails,
+                  onPressed: () => Get.find<RenterHomeController>().ensureAuthenticated(
+                    onViewDetails,
+                    title: 'Unlock full details',
+                    message: 'Log in to see full details, amenities, and contact the owner.',
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: t.primary,
                     foregroundColor: Colors.white,

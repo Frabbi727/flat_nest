@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controller/renter_home_controller.dart';
 import '../../../../core/service/notification_service.dart';
 import '../../../../route/app_routes.dart';
 import '../../../../theme/flat_nest_theme.dart';
@@ -72,7 +73,11 @@ class DiscoveryTopBar extends StatelessWidget {
           const SizedBox(width: 10),
           // Notification bell
           GestureDetector(
-            onTap: () => Get.toNamed(Routes.notifications),
+            onTap: () => Get.find<RenterHomeController>().ensureAuthenticated(
+              () => Get.toNamed(Routes.notifications),
+              title: 'Notifications',
+              message: 'Log in to see your notifications and stay updated.',
+            ),
             child: Container(
               width: 42,
               height: 42,

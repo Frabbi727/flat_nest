@@ -32,7 +32,11 @@ class DiscoveryView extends GetView<RenterHomeController> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _SearchBar(
                 t: t,
-                onFilterTap: () => _openFilters(context, t),
+                onFilterTap: () => controller.ensureAuthenticated(
+                  () => _openFilters(context, t),
+                  title: 'Filter listings',
+                  message: 'Log in to use advanced filters and find your perfect home.',
+                ),
               ),
             ),
             // Active filter strip

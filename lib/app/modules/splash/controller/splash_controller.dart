@@ -24,7 +24,7 @@ class SplashController extends GetxController {
         Get.offAllNamed(Routes.renterHome);
       }
     } else {
-      Get.offAllNamed(Routes.login);
+      Get.offAllNamed(Routes.renterHome);
     }
   }
 }

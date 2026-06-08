@@ -10,6 +10,7 @@ import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
+import '../../../shared/widgets/guest_auth_sheet.dart';
 import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
@@ -106,7 +107,20 @@ class RenterHomeController extends BaseController {
   }
 
   String get userName =>
-      (_authService.currentUser?.name ?? 'there').split(' ').first;
+      (_authService.currentUser?.name ?? 'Guest');
+
+  bool get isGuest => !_authService.isAuthenticated;
+
+  void ensureAuthenticated(VoidCallback onAuthenticated, {String? title, String? message}) {
+    if (_authService.isAuthenticated) {
+      onAuthenticated();
+    } else {
+      GuestAuthSheet.show(
+        title: title ?? 'Login Required',
+        message: message ?? 'Please log in to continue with this action.',
+      );
+    }
+  }
 
   // ── Location ──────────────────────────────────────────────────────────────
 
@@ -272,6 +286,7 @@ class RenterHomeController extends BaseController {
   }
 
   Future<void> fetchWishlist() async {
+    if (isGuest) return;
     final result = await _listingRepository.getWishlist();
     if (result case Success(data: final items?)) {
       _wishlistItems.value = items;
@@ -463,51 +478,53 @@ class RenterHomeController extends BaseController {
   // ── Wishlist ──────────────────────────────────────────────────────────────
 
   void toggleSave(ListingModel listing) async {
-    if (_togglingIds.contains(listing.id)) return;
-    final wasSaved = savedIds.contains(listing.id);
+    ensureAuthenticated(() async {
+      if (_togglingIds.contains(listing.id)) return;
+      final wasSaved = savedIds.contains(listing.id);
 
-    // Optimistic update — instant visual feedback
-    _togglingIds.add(listing.id);
-    if (wasSaved) {
-      savedIds.remove(listing.id);
-      _wishlistItems.removeWhere((l) => l.id == listing.id);
-    } else {
-      savedIds.add(listing.id);
-      if (!_wishlistItems.any((l) => l.id == listing.id)) {
-        _wishlistItems.add(listing);
+      // Optimistic update — instant visual feedback
+      _togglingIds.add(listing.id);
+      if (wasSaved) {
+        savedIds.remove(listing.id);
+        _wishlistItems.removeWhere((l) => l.id == listing.id);
+      } else {
+        savedIds.add(listing.id);
+        if (!_wishlistItems.any((l) => l.id == listing.id)) {
+          _wishlistItems.add(listing);
+        }
       }
-    }
 
-    final result = await _listingRepository.toggleWishlist(listing.id);
-    _togglingIds.remove(listing.id);
+      final result = await _listingRepository.toggleWishlist(listing.id);
+      _togglingIds.remove(listing.id);
 
-    switch (result) {
-      case Success(data: final isSaved?):
-        // Sync with server truth
-        if (isSaved && !savedIds.contains(listing.id)) {
-          savedIds.add(listing.id);
-          if (!_wishlistItems.any((l) => l.id == listing.id)) {
-            _wishlistItems.add(listing);
+      switch (result) {
+        case Success(data: final isSaved?):
+          // Sync with server truth
+          if (isSaved && !savedIds.contains(listing.id)) {
+            savedIds.add(listing.id);
+            if (!_wishlistItems.any((l) => l.id == listing.id)) {
+              _wishlistItems.add(listing);
+            }
+          } else if (!isSaved && savedIds.contains(listing.id)) {
+            savedIds.remove(listing.id);
+            _wishlistItems.removeWhere((l) => l.id == listing.id);
           }
-        } else if (!isSaved && savedIds.contains(listing.id)) {
-          savedIds.remove(listing.id);
-          _wishlistItems.removeWhere((l) => l.id == listing.id);
-        }
-      case Error(message: final msg):
-        // Revert optimistic update
-        if (wasSaved) {
-          savedIds.add(listing.id);
-          if (!_wishlistItems.any((l) => l.id == listing.id)) {
-            _wishlistItems.add(listing);
+        case Error(message: final msg):
+          // Revert optimistic update
+          if (wasSaved) {
+            savedIds.add(listing.id);
+            if (!_wishlistItems.any((l) => l.id == listing.id)) {
+              _wishlistItems.add(listing);
+            }
+          } else {
+            savedIds.remove(listing.id);
+            _wishlistItems.removeWhere((l) => l.id == listing.id);
           }
-        } else {
-          savedIds.remove(listing.id);
-          _wishlistItems.removeWhere((l) => l.id == listing.id);
-        }
-        showError(msg);
-      default:
-        break;
-    }
+          showError(msg);
+        default:
+          break;
+      }
+    }, title: 'Save your favorites', message: 'Log in to save this flat to your wishlist and view it later.');
   }
 
   bool isSaved(String listingId) => savedIds.contains(listingId);
@@ -517,7 +534,9 @@ class RenterHomeController extends BaseController {
   List<ListingModel> get wishlistListings => _wishlistItems;
 
   void openListing(ListingModel listing) {
-    Get.toNamed(Routes.listingDetail, arguments: listing);
+    ensureAuthenticated(() {
+      Get.toNamed(Routes.listingDetail, arguments: listing);
+    }, title: 'Unlock full details', message: 'Log in to see full details, amenities, and contact the owner.');
   }
 
   Future<void> logout() async {

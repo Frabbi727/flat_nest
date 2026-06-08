@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../../shared/widgets/guest_auth_sheet.dart';
 import '../../../../theme/flat_nest_theme.dart';
+import '../../controller/renter_home_controller.dart';
 
-class MessagesPlaceholderView extends StatelessWidget {
+class MessagesPlaceholderView extends GetView<RenterHomeController> {
   const MessagesPlaceholderView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).extension<FlatNestTheme>()!;
+    
     return Scaffold(
       backgroundColor: t.bg,
       body: Center(

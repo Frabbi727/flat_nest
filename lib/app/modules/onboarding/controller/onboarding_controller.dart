@@ -35,7 +35,7 @@ class OnboardingController extends GetxController {
 
   void skip() async {
     await _authService.completeOnboarding();
-    Get.offAllNamed(Routes.login);
+    Get.offAllNamed(Routes.renterHome);
   }
 
   void next() async {
@@ -43,7 +43,7 @@ class OnboardingController extends GetxController {
       currentPage.value++;
     } else {
       await _authService.completeOnboarding();
-      Get.offAllNamed(Routes.login);
+      Get.offAllNamed(Routes.renterHome);
     }
   }
 }

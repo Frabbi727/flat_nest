@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../shared/widgets/guest_auth_sheet.dart';
 import '../../../../theme/flat_nest_theme.dart';
+import '../../controller/renter_home_controller.dart';
 import '../../../../core/service/auth_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../route/app_routes.dart';
 
-class ProfilePlaceholderView extends StatelessWidget {
+class ProfilePlaceholderView extends GetView<RenterHomeController> {
   const ProfilePlaceholderView({super.key});
 
   @override
