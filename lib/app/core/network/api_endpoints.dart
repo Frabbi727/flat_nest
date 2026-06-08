@@ -31,6 +31,8 @@ class ApiEndpoints {
   // ── Chat ──────────────────────────────────────────────────────────────────
   static const String chats = '/chats';
   static String chatMessages(String id) => '/chats/$id/messages';
+  static String chatAccept(String id) => '/chats/$id/accept';
+  static String chatReject(String id) => '/chats/$id/reject';
 
   // ── Notifications ─────────────────────────────────────────────────────────
   static const String notifications = '/notifications';

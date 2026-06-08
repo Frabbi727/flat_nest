@@ -62,11 +62,14 @@ class ChatListView extends GetView<ChatController> {
                           padding: const EdgeInsets.only(top: 8, bottom: 80),
                           itemCount: controller.chats.length,
                           separatorBuilder: (_, __) => Divider(color: t.borderSoft, height: 1),
-                          itemBuilder: (_, i) => _ChatRow(
-                            t: t,
-                            chat: controller.chats[i],
-                            onTap: () => controller.openChat(controller.chats[i]),
-                          ),
+                          itemBuilder: (_, i) {
+                            final chat = controller.chats[i];
+                            return ChatRow(
+                              t: t,
+                              chat: chat,
+                              onTap: () => controller.openChat(chat),
+                            );
+                          },
                         )),
             ),
           ],
@@ -77,12 +80,12 @@ class ChatListView extends GetView<ChatController> {
   }
 }
 
-class _ChatRow extends StatelessWidget {
+class ChatRow extends StatelessWidget {
   final FlatNestTheme t;
   final ChatModel chat;
   final VoidCallback onTap;
 
-  const _ChatRow({required this.t, required this.chat, required this.onTap});
+  const ChatRow({super.key, required this.t, required this.chat, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

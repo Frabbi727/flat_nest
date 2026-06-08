@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../chat/controller/chat_controller.dart';
+import '../../../chat/repository/chat_repository.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../listing/model/listing_model.dart';
 import '../../controller/renter_home_controller.dart';
@@ -25,6 +28,10 @@ class ListingDetailView extends StatelessWidget {
     }
 
     final controller = Get.find<RenterHomeController>();
+    // Ensure ChatController is available for the StickyBar actions
+    if (!Get.isRegistered<ChatController>()) {
+      Get.lazyPut(() => ChatController(chatRepository: ChatRepository(apiClient: Get.find<ApiClient>())));
+    }
 
     return Scaffold(
       backgroundColor: t.bg,

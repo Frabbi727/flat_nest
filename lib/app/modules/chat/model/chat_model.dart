@@ -1,15 +1,41 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'chat_model.g.dart';
+
+enum ChatStatus {
+  @JsonValue('pending')
+  pending,
+  @JsonValue('accepted')
+  accepted,
+  @JsonValue('rejected')
+  rejected,
+  @JsonValue('unknown')
+  unknown;
+
+  String get label {
+    switch (this) {
+      case ChatStatus.accepted:
+        return 'Accepted';
+      case ChatStatus.rejected:
+        return 'Rejected';
+      case ChatStatus.pending:
+      case ChatStatus.unknown:
+        return 'Pending';
+    }
+  }
+}
+
+@JsonSerializable()
 class ChatUserModel {
   final String id;
   final String name;
+  @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
 
   const ChatUserModel({required this.id, required this.name, this.avatarUrl});
 
-  factory ChatUserModel.fromJson(Map<String, dynamic> json) => ChatUserModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        avatarUrl: json['avatar_url'] as String?,
-      );
+  factory ChatUserModel.fromJson(Map<String, dynamic> json) => _$ChatUserModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ChatUserModelToJson(this);
 
   String get initials {
     final parts = name.trim().split(' ');
@@ -18,6 +44,7 @@ class ChatUserModel {
   }
 }
 
+@JsonSerializable()
 class ChatListingModel {
   final String id;
   final String title;
@@ -25,20 +52,22 @@ class ChatListingModel {
 
   const ChatListingModel({required this.id, required this.title, this.area});
 
-  factory ChatListingModel.fromJson(Map<String, dynamic> json) => ChatListingModel(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        area: json['area'] as String?,
-      );
+  factory ChatListingModel.fromJson(Map<String, dynamic> json) => _$ChatListingModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ChatListingModelToJson(this);
 }
 
+@JsonSerializable()
 class ChatMessageModel {
   final String id;
+  @JsonKey(name: 'chat_id')
   final String chatId;
+  @JsonKey(name: 'sender_id')
   final String senderId;
   final ChatUserModel? sender;
   final String text;
+  @JsonKey(name: 'is_read', defaultValue: false)
   final bool isRead;
+  @JsonKey(name: 'created_at')
   final String createdAt;
 
   const ChatMessageModel({
@@ -51,25 +80,23 @@ class ChatMessageModel {
     required this.createdAt,
   });
 
-  factory ChatMessageModel.fromJson(Map<String, dynamic> json) => ChatMessageModel(
-        id: json['id'] as String,
-        chatId: json['chat_id'] as String,
-        senderId: json['sender_id'] as String,
-        sender: json['sender'] != null
-            ? ChatUserModel.fromJson(json['sender'] as Map<String, dynamic>)
-            : null,
-        text: json['text'] as String,
-        isRead: json['is_read'] as bool? ?? false,
-        createdAt: json['created_at'] as String,
-      );
+  factory ChatMessageModel.fromJson(Map<String, dynamic> json) => _$ChatMessageModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ChatMessageModelToJson(this);
 }
 
+@JsonSerializable()
 class ChatModel {
   final String id;
   final ChatListingModel listing;
+  @JsonKey(name: 'other_user')
   final ChatUserModel otherUser;
+  @JsonKey(name: 'last_message')
   final ChatMessageModel? lastMessage;
+  @JsonKey(name: 'unread_count', defaultValue: 0)
   final int unreadCount;
+  @JsonKey(name: 'status', fromJson: statusFromJson)
+  final ChatStatus status;
+  @JsonKey(name: 'updated_at')
   final String updatedAt;
 
   const ChatModel({
@@ -78,17 +105,23 @@ class ChatModel {
     required this.otherUser,
     this.lastMessage,
     required this.unreadCount,
+    required this.status,
     required this.updatedAt,
   });
 
-  factory ChatModel.fromJson(Map<String, dynamic> json) => ChatModel(
-        id: json['id'] as String,
-        listing: ChatListingModel.fromJson(json['listing'] as Map<String, dynamic>),
-        otherUser: ChatUserModel.fromJson(json['other_user'] as Map<String, dynamic>),
-        lastMessage: json['last_message'] != null
-            ? ChatMessageModel.fromJson(json['last_message'] as Map<String, dynamic>)
-            : null,
-        unreadCount: json['unread_count'] as int? ?? 0,
-        updatedAt: json['updated_at'] as String,
-      );
+  factory ChatModel.fromJson(Map<String, dynamic> json) => _$ChatModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ChatModelToJson(this);
+
+  static ChatStatus statusFromJson(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'accepted':
+        return ChatStatus.accepted;
+      case 'rejected':
+        return ChatStatus.rejected;
+      case 'pending':
+        return ChatStatus.pending;
+      default:
+        return ChatStatus.pending; // Default to pending if null or unknown
+    }
+  }
 }
