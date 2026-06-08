@@ -5,7 +5,7 @@ import '../controller/renter_home_controller.dart';
 import 'discovery/discovery_view.dart';
 import 'map/nearby_map_view.dart';
 import 'wishlist/wishlist_view.dart';
-import 'messages/messages_placeholder_view.dart';
+import '../../chat/view/chat_list_view.dart';
 import 'profile/profile_placeholder_view.dart';
 
 class RenterHomeView extends GetView<RenterHomeController> {
@@ -27,7 +27,7 @@ class RenterHomeView extends GetView<RenterHomeController> {
               DiscoveryView(),
               NearbyMapView(),
               WishlistView(),
-              MessagesPlaceholderView(),
+              ChatListView(showBackButton: false),
               ProfilePlaceholderView(),
             ],
           ),

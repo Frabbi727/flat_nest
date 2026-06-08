@@ -15,6 +15,7 @@ import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
 import '../repository/listing_repository.dart';
+import '../../chat/controller/chat_controller.dart';
 
 class RenterHomeController extends BaseController {
   final ListingRepository _listingRepository;
@@ -88,7 +89,12 @@ class RenterHomeController extends BaseController {
     super.onInit();
     showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
     AppUpdateService.checkForUpdate();
-    ever(activeTab, (_) => AppUpdateService.checkForUpdate());
+    ever(activeTab, (tab) {
+      if (tab == 3) {
+        Get.find<ChatController>().fetchChats();
+      }
+      AppUpdateService.checkForUpdate();
+    });
     debounce(
       searchQuery,
       (_) => fetchListings(),

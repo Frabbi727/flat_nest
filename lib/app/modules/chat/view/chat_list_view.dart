@@ -5,7 +5,8 @@ import '../controller/chat_controller.dart';
 import '../model/chat_model.dart';
 
 class ChatListView extends GetView<ChatController> {
-  const ChatListView({super.key});
+  final bool showBackButton;
+  const ChatListView({super.key, this.showBackButton = true});
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +23,22 @@ class ChatListView extends GetView<ChatController> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Get.back(),
-                    child: Icon(Icons.arrow_back_ios_new, color: t.ink, size: 18),
+                  if (showBackButton) ...[
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Icon(Icons.arrow_back_ios_new, color: t.ink, size: 18),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  Text(
+                    'Messages',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: t.ink,
+                      letterSpacing: -0.4,
+                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Text('Messages', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.3)),
                 ],
               ),
             ),
