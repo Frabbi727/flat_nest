@@ -230,6 +230,7 @@ class RenterHomeController extends BaseController {
   }
 
   Future<void> _sendLocationToBackend(double lat, double lng) async {
+    if (isGuest) return; // Don't try to sync location for guests
     try {
       await Get.find<ApiClient>().patch(
         path: ApiEndpoints.userLocation,

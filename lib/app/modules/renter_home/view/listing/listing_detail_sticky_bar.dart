@@ -25,7 +25,7 @@ class ListingDetailStickyBar extends StatelessWidget {
   }
 
   void _onMessageTap() {
-    // Check if ChatController is registered, if not, it means we are in a state 
+    // Check if ChatController is registered, if not, it means we are in a state
     // where bindings weren't loaded (like guest browsing or direct link).
     if (!Get.isRegistered<ChatController>()) {
       Get.snackbar('Error', 'Chat system is initializing. Please try again in a moment.');
@@ -33,7 +33,7 @@ class ListingDetailStickyBar extends StatelessWidget {
     }
 
     final chatController = Get.find<ChatController>();
-    
+
     // Check for existing chat first
     final existingChat = chatController.findExistingChat(listing.id);
     if (existingChat != null) {
@@ -43,7 +43,7 @@ class ListingDetailStickyBar extends StatelessWidget {
 
     // Show dialog to enter initial message
     final textController = TextEditingController();
-    
+
     Get.dialog(
       AlertDialog(
         backgroundColor: t.surface,
@@ -87,11 +87,11 @@ class ListingDetailStickyBar extends StatelessWidget {
               final msg = textController.text.trim();
               if (msg.isEmpty) return;
               Get.back(); // close dialog
-              
+
               Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
               final result = await chatController.startChat(listingId: listing.id, initialMessage: msg);
               Get.back(); // close loading
-              
+
               if (result != null) {
                 // Success - startChat should navigate or update UI
                 Get.toNamed(Routes.chatList);
