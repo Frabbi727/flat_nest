@@ -29,7 +29,23 @@ class ChatController extends BaseController {
   void onInit() {
     super.onInit();
     messageController = TextEditingController();
-    fetchChats();
+
+    // Only fetch if already logged in
+    if (_authService.isAuthenticated) {
+      fetchChats();
+    }
+
+    // Automatically handle login/logout state changes
+    ever(_authService.tokenNotifier, (token) {
+      if (token != null) {
+        fetchChats();
+      } else {
+        chats.clear();
+        selectedChat.value = null;
+        messages.clear();
+      }
+    });
+
     _initRealtime();
   }
 
@@ -37,6 +53,8 @@ class ChatController extends BaseController {
     // Placeholder for WebSocket/Pusher initialization
     // For now, we sync with NotificationService to refresh when a push arrives
     ever(_notificationService.unreadCount, (_) {
+      if (!_authService.isAuthenticated) return;
+
       if (Get.currentRoute == '/chat/detail' && selectedChat.value != null) {
         fetchMessages(selectedChat.value!.id);
       }

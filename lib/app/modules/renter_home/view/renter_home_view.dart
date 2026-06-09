@@ -78,19 +78,23 @@ class _BottomNav extends GetView<RenterHomeController> {
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    if (i > 1) {
+                    if (i > 0) {
                       controller.ensureAuthenticated(
                         () => controller.activeTab.value = i,
-                        title: i == 2
-                            ? 'Save your favorites'
-                            : i == 3
-                                ? 'Message owners'
-                                : 'Your Profile',
-                        message: i == 2
-                            ? 'Log in to save flats to your wishlist and view them here anytime.'
-                            : i == 3
-                                ? 'Log in to message owners, ask questions, and book your new home.'
-                                : 'Log in to manage your profile, view your activity, and access your settings.',
+                        title: i == 1
+                            ? 'Explore Nearby'
+                            : i == 2
+                                ? 'Save your favorites'
+                                : i == 3
+                                    ? 'Message owners'
+                                    : 'Your Profile',
+                        message: i == 1
+                            ? 'Log in to see available flats on the map and find homes near you.'
+                            : i == 2
+                                ? 'Log in to save flats to your wishlist and view them here anytime.'
+                                : i == 3
+                                    ? 'Log in to message owners, ask questions, and book your new home.'
+                                    : 'Log in to manage your profile, view your activity, and access your settings.',
                       );
                     } else {
                       controller.activeTab.value = i;
