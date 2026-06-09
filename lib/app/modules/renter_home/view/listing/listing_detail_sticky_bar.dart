@@ -5,6 +5,7 @@ import '../../../chat/controller/chat_controller.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../../route/app_routes.dart';
 import '../../../listing/model/listing_model.dart';
+import '../../controller/renter_home_controller.dart';
 
 class ListingDetailStickyBar extends StatelessWidget {
   final FlatNestTheme t;
@@ -93,8 +94,13 @@ class ListingDetailStickyBar extends StatelessWidget {
               Get.back(); // close loading
 
               if (result != null) {
-                // Success - startChat should navigate or update UI
-                Get.toNamed(Routes.chatList);
+                // Success - navigate back to home and switch to message tab
+                if (Get.isRegistered<RenterHomeController>()) {
+                  Get.until((route) => Get.currentRoute == Routes.renterHome || route.isFirst);
+                  Get.find<RenterHomeController>().activeTab.value = 3;
+                } else {
+                  Get.offAllNamed(Routes.renterHome, arguments: {'tab': 3});
+                }
               }
             },
             style: ElevatedButton.styleFrom(

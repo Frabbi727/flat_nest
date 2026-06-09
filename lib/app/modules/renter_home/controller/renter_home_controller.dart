@@ -87,6 +87,12 @@ class RenterHomeController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+
+    // Handle initial tab if provided in arguments
+    if (Get.arguments is Map && Get.arguments['tab'] is int) {
+      activeTab.value = Get.arguments['tab'];
+    }
+
     showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
     AppUpdateService.checkForUpdate();
     ever(activeTab, (tab) {

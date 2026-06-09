@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FlatNest — Splash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --fn-pin: #EE6A63;
+    --fn-bg-top: #DEEAE7;
+    --fn-bg-bot: #CEDFE1;
+    --fn-ink: #3C4A51;
+    --fn-sub: #93A4A7;
+    --fn-trail: #9DB3B1;
+    --spd: 1;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(1100px 720px at 50% -8%, #EFF3F2, transparent 62%),
+      #EAEDEE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Stage around the phone ---- */
+  .fn-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    padding: 40px 20px;
+  }
+  .fn-replay {
+    border: 1px solid #D7DEDD;
+    background: #fff;
+    color: #5B6B6B;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(15,30,30,0.05);
+    transition: color 120ms, border-color 120ms, transform 80ms;
+  }
+  .fn-replay:hover { color: var(--fn-pin); border-color: var(--fn-pin); }
+  .fn-replay:active { transform: translateY(1px); }
+
+  /* ---- Splash screen surface ---- */
+  .fn-screen {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: linear-gradient(176deg, var(--fn-bg-top) 0%, var(--fn-bg-top) 30%, var(--fn-bg-bot) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---- Sky / clouds ---- */
+  .fn-sky { position: absolute; inset: 0; pointer-events: none; }
+  .fn-cloud {
+    position: absolute;
+    opacity: 1; /* visible base */
+    animation: fnDrift calc(13000ms * var(--spd)) ease-in-out infinite;
+  }
+  .fn-screen.fn-play .fn-cloud {
+    animation:
+      fnCloudIn calc(900ms * var(--spd)) ease both,
+      fnDrift calc(13000ms * var(--spd)) ease-in-out infinite;
+  }
+  .fn-cloud-1 { top: 16%; left: 6%;  animation-delay: calc(120ms * var(--spd)), calc(900ms * var(--spd)); }
+  .fn-cloud-2 { top: 33%; right: 4%; animation-delay: calc(280ms * var(--spd)), calc(1400ms * var(--spd)); }
+  .fn-cloud-3 { top: 9%;  right: 26%;
+    animation-delay: calc(440ms * var(--spd)), calc(700ms * var(--spd)); }
+
+  /* ---- Dotted drop trail ---- */
+  .fn-trail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 4px;
+    transform: rotate(4deg);
+  }
+  .fn-dot-trail {
+    width: 5px; height: 5px; border-radius: 99px;
+    background: var(--fn-trail);
+    opacity: 0.9; /* visible base */
+    transform: scale(1);
+  }
+  .fn-screen.fn-play .fn-dot-trail {
+    animation: fnTrailDot calc(360ms * var(--spd)) cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  /* ---- Pin stage ---- */
+  .fn-pinstage {
+    position: relative;
+    width: 130px; height: 150px;
+    display: flex; align-items: flex-start; justify-content: center;
+  }
+  .fn-pin {
+    position: relative;
+    z-index: 3;
+    opacity: 1;            /* visible base — pin never disappears, even if animation never runs */
+    transform: translateY(0);
+    transform-origin: 50% 92%;
+  }
+  .fn-screen.fn-play .fn-pin {
+    animation: fnDrop calc(1050ms * var(--spd)) cubic-bezier(0.45, 0, 0.25, 1) calc(360ms * var(--spd)) both;
+  }
+  .fn-pin svg { display: block; filter: drop-shadow(0 10px 14px rgba(170,55,50,0.18)); }
+
+  /* expanding ring on landing */
+  .fn-ripple {
+    position: absolute;
+    top: 18px; left: 50%;
+    width: 96px; height: 96px;
+    margin-left: -48px;
+    border-radius: 99px;
+    border: 2px solid var(--fn-pin);
+    opacity: 0;
+    transform: scale(0.3);
+    z-index: 1;
+  }
+  .fn-screen.fn-play .fn-ripple {
+    animation: fnRipple calc(900ms * var(--spd)) cubic-bezier(0.22,0.8,0.3,1) calc(1180ms * var(--spd)) forwards;
+  }
+
+  /* ground shadow */
+  .fn-shadow {
+    width: 138px; height: 26px;
+    margin-top: 30px;
+    border-radius: 99px;
+    background: radial-gradient(closest-side, rgba(238,106,99,0.30), rgba(238,106,99,0.05) 78%, transparent);
+    opacity: 1; /* visible base */
+    transform: scaleX(1);
+  }
+  .fn-screen.fn-play .fn-shadow {
+    animation: fnShadow calc(720ms * var(--spd)) cubic-bezier(0.22,0.8,0.3,1) calc(1140ms * var(--spd)) both;
+  }
+
+  /* ---- Type ---- */
+  .fn-text { display: flex; flex-direction: column; align-items: center; margin-top: 40px; }
+  .fn-word {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--fn-ink);
+    margin: 0;
+    opacity: 1; /* visible base */
+    transform: translateY(0);
+  }
+  .fn-screen.fn-play .fn-word {
+    animation: fnRise calc(680ms * var(--spd)) cubic-bezier(0.22,0.8,0.3,1) calc(1320ms * var(--spd)) both;
+  }
+  .fn-word .b { font-weight: 600; }
+  .fn-word .r { font-weight: 600; }
+  .fn-tag {
+    font-family: 'Quicksand', sans-serif;
+    margin: 16px 0 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    white-space: nowrap;
+    text-transform: uppercase;
+    color: var(--fn-sub);
+    padding-left: 0.26em;
+    opacity: 1; /* visible base */
+    transform: translateY(0);
+  }
+  .fn-screen.fn-play .fn-tag {
+    animation: fnRise calc(620ms * var(--spd)) ease calc(1520ms * var(--spd)) both;
+  }
+
+  /* ---- loader dots (optional) ---- */
+  .fn-loader {
+    position: absolute;
+    bottom: 70px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 7px;
+    opacity: 1; /* visible base */
+  }
+  .fn-screen.fn-play .fn-loader {
+    animation: fnRise calc(600ms * var(--spd)) ease calc(1700ms * var(--spd)) both;
+  }
+  .fn-loader span {
+    width: 7px; height: 7px; border-radius: 99px;
+    background: var(--fn-pin); opacity: 0.4;
+    animation: fnBlink 1200ms ease-in-out infinite;
+  }
+  .fn-loader span:nth-child(2) { animation-delay: 180ms; }
+  .fn-loader span:nth-child(3) { animation-delay: 360ms; }
+
+  /* ---- Keyframes ---- */
+  @keyframes fnCloudIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fnDrift {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(14px); }
+  }
+  @keyframes fnTrailDot { from { opacity: 0; transform: scale(0); } to { opacity: 0.9; transform: scale(1); } }
+  @keyframes fnDrop {
+    0%   { opacity: 0; transform: translateY(-440px) scaleY(1); }
+    8%   { opacity: 1; }
+    72%  { transform: translateY(0) scaleY(1); }
+    82%  { transform: translateY(0) scaleY(0.86) scaleX(1.08); }
+    91%  { transform: translateY(-12px) scaleY(1.04) scaleX(0.98); }
+    100% { transform: translateY(0) scaleY(1); }
+  }
+  @keyframes fnRipple {
+    0%   { opacity: 0.55; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(2.1); }
+  }
+  @keyframes fnShadow {
+    0%   { opacity: 0; transform: scaleX(0.35); }
+    60%  { opacity: 1; transform: scaleX(1.08); }
+    100% { opacity: 1; transform: scaleX(1); }
+  }
+  @keyframes fnRise { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fnBlink {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Base styles are the visible end-state; never engage the play animations. */
+    .fn-screen.fn-play .fn-cloud, .fn-screen.fn-play .fn-dot-trail,
+    .fn-screen.fn-play .fn-pin, .fn-screen.fn-play .fn-shadow,
+    .fn-screen.fn-play .fn-word, .fn-screen.fn-play .fn-tag,
+    .fn-screen.fn-play .fn-loader, .fn-loader span {
+      animation: none !important;
+    }
+    .fn-ripple { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="splash.jsx"></script>
+</body>
+</html>

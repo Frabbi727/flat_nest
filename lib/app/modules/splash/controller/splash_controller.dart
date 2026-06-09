@@ -12,7 +12,8 @@ class SplashController extends GetxController {
   }
 
   void _checkNavigation() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // Show splash for 3 seconds
+    await Future.delayed(const Duration(seconds: 3));
 
     if (_authService.isFirstTime) {
       Get.offAllNamed(Routes.onboarding);
