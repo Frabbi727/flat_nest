@@ -3,6 +3,7 @@ import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/notification_service.dart';
 import '../../../route/app_routes.dart';
+import '../../chat/controller/chat_controller.dart';
 import '../model/notification_model.dart';
 import '../repository/notification_repository.dart';
 
@@ -87,6 +88,22 @@ class NotificationController extends BaseController {
       case 'listing_rejected':
       case 'listing_review':
         Get.toNamed(Routes.ownerHome);
+        break;
+      case 'new_chat_request':
+      case 'chat_message':
+        final chatId = n.referenceId;
+        if (chatId != null && Get.isRegistered<ChatController>()) {
+          final chatController = Get.find<ChatController>();
+          final chat = chatController.chats.firstWhereOrNull((c) => c.id == chatId);
+          if (chat != null) {
+            chatController.openChat(chat);
+          } else {
+            Get.toNamed(Routes.chatList);
+          }
+        } else {
+          Get.toNamed(Routes.chatList);
+        }
+        break;
     }
   }
 

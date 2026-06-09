@@ -7,6 +7,7 @@ import '../network/api_client.dart';
 import '../network/api_endpoints.dart';
 import '../service/auth_service.dart';
 import '../../route/app_routes.dart';
+import '../../modules/chat/controller/chat_controller.dart';
 
 // Must be top-level for Firebase background processing
 @pragma('vm:entry-point')
@@ -70,6 +71,8 @@ class NotificationService extends GetxService {
     await _localNotifs.initialize(
       const InitializationSettings(android: android, iOS: ios),
       onDidReceiveNotificationResponse: (details) {
+        // We don't have the full data map here easily from payload string, 
+        // but kind is stored in payload. For now keep it simple.
         _navigateByKind(details.payload);
       },
       onDidReceiveBackgroundNotificationResponse: firebaseLocalNotifBackgroundHandler,
@@ -113,16 +116,39 @@ class NotificationService extends GetxService {
 
   void _onTap(RemoteMessage message) {
     final kind = message.data['kind'] as String?;
-    _navigateByKind(kind);
+    _navigateByKind(kind, message.data);
   }
 
-  void _navigateByKind(String? kind) {
+  void _navigateByKind(String? kind, [Map<String, dynamic>? data]) {
     switch (kind) {
       case 'listing_approved':
       case 'listing_submitted':
       case 'listing_rejected':
       case 'listing_review':
         Get.offAllNamed(Routes.ownerHome);
+        break;
+      case 'new_chat_request':
+      case 'chat_message':
+        final chatId = data?['chat_id'] as String?;
+        if (chatId != null) {
+          // If already in chat controller, try to open it
+          if (Get.isRegistered<ChatController>()) {
+            final chatController = Get.find<ChatController>();
+            // If the chat list is already loaded, find and open it
+            final chat = chatController.chats.firstWhereOrNull((c) => c.id == chatId);
+            if (chat != null) {
+              chatController.openChat(chat);
+            } else {
+              // Otherwise go to chat list
+              Get.toNamed(Routes.chatList);
+            }
+          } else {
+            Get.toNamed(Routes.chatList);
+          }
+        } else {
+          Get.toNamed(Routes.chatList);
+        }
+        break;
     }
   }
 

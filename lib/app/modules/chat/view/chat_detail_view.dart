@@ -60,15 +60,26 @@ class ChatDetailView extends GetView<ChatController> {
             Divider(color: t.borderSoft, height: 1),
             // Messages
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.messages.length,
-                itemBuilder: (_, i) {
-                  final msg = controller.messages[i];
-                  final isMe = msg.senderId == controller.myUserId;
-                  return _MessageBubble(t: t, text: msg.text, isMe: isMe, time: _formatTime(msg.createdAt));
-                },
-              ),
+              child: controller.isMessagesLoading.value && controller.messages.isEmpty
+                  ? Center(child: CircularProgressIndicator(color: t.primary))
+                  : controller.messages.isEmpty
+                      ? _EmptyChat(t: t)
+                      : ListView.builder(
+                          controller: controller.scrollController,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                          itemCount: controller.messages.length,
+                          itemBuilder: (_, i) {
+                            final msg = controller.messages[i];
+                            final isMe = msg.senderId == controller.myUserId;
+                            return _MessageBubble(
+                              t: t,
+                              text: msg.text,
+                              isMe: isMe,
+                              time: _formatTime(msg.createdAt),
+                              avatarUrl: isMe ? null : chat.otherUser.avatarUrl,
+                            );
+                          },
+                        ),
             ),
             // Status bar / Input bar
             _buildBottomBar(context, t, chat),
@@ -274,8 +285,15 @@ class _MessageBubble extends StatelessWidget {
   final String text;
   final bool isMe;
   final String time;
+  final String? avatarUrl;
 
-  const _MessageBubble({required this.t, required this.text, required this.isMe, required this.time});
+  const _MessageBubble({
+    required this.t,
+    required this.text,
+    required this.isMe,
+    required this.time,
+    this.avatarUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -287,39 +305,79 @@ class _MessageBubble extends StatelessWidget {
         children: [
           if (!isMe) ...[
             Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: t.primarySoft),
-              child: Center(child: Icon(Icons.person, size: 16, color: t.primary)),
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: t.primarySoft,
+                image: avatarUrl != null ? DecorationImage(image: NetworkImage(avatarUrl!), fit: BoxFit.cover) : null,
+              ),
+              child: avatarUrl == null ? Center(child: Icon(Icons.person, size: 16, color: t.primary)) : null,
             ),
             const SizedBox(width: 8),
           ],
-          Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isMe ? t.primary : t.surface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
-                    bottomLeft: Radius.circular(isMe ? 16 : 4),
-                    bottomRight: Radius.circular(isMe ? 4 : 16),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Container(
+                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isMe ? t.primary : t.surface,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isMe ? 16 : 4),
+                      bottomRight: Radius.circular(isMe ? 4 : 16),
+                    ),
+                    border: isMe ? null : Border.all(color: t.borderSoft),
                   ),
-                  border: isMe ? null : Border.all(color: t.borderSoft),
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isMe ? Colors.white : t.ink,
+                      height: 1.4,
+                    ),
+                  ),
                 ),
-                child: Text(
-                  text,
-                  style: TextStyle(fontSize: 14, color: isMe ? Colors.white : t.ink, height: 1.4),
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: TextStyle(fontSize: 10, color: t.inkFaint),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(time, style: TextStyle(fontSize: 10, color: t.inkSoft)),
-            ],
+              ],
+            ),
           ),
           if (isMe) const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyChat extends StatelessWidget {
+  final FlatNestTheme t;
+  const _EmptyChat({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.chat_bubble_outline, size: 48, color: t.inkFaint),
+          const SizedBox(height: 16),
+          Text(
+            'No messages yet',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: t.inkMid),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Say hello and start the conversation!',
+            style: TextStyle(fontSize: 13, color: t.inkSoft),
+          ),
         ],
       ),
     );

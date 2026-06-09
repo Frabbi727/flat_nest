@@ -19,7 +19,9 @@ class ChatController extends BaseController {
   final messages = <ChatMessageModel>[].obs;
   final selectedChat = Rxn<ChatModel>();
   late final TextEditingController messageController;
+  final scrollController = ScrollController();
   final isSendingMessage = false.obs;
+  final isMessagesLoading = false.obs;
 
   String get myUserId => _authService.currentUser?.id ?? '';
 
@@ -45,6 +47,7 @@ class ChatController extends BaseController {
   @override
   void onClose() {
     messageController.dispose();
+    scrollController.dispose();
     super.onClose();
   }
 
@@ -65,8 +68,16 @@ class ChatController extends BaseController {
 
   Future<void> openChat(ChatModel chat) async {
     selectedChat.value = chat;
+    _markLocalAsRead(chat.id);
     Get.toNamed('/chat/detail');
     await fetchMessages(chat.id);
+  }
+
+  void _markLocalAsRead(String chatId) {
+    final index = chats.indexWhere((c) => c.id == chatId);
+    if (index != -1) {
+      chats[index] = chats[index].copyWith(unreadCount: 0);
+    }
   }
 
   Future<Map<String, dynamic>?> startChat({
@@ -89,11 +100,26 @@ class ChatController extends BaseController {
   }
 
   Future<void> fetchMessages(String chatId) async {
+    isMessagesLoading.value = true;
     final result = await _chatRepository.getMessages(chatId);
+    isMessagesLoading.value = false;
     if (result case Success(data: final data?)) {
       messages.value = data.messages;
       _updateLocalStatus(data.status);
+      scrollToBottom();
     }
+  }
+
+  void scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   Future<void> acceptRequest() async {
@@ -140,6 +166,7 @@ class ChatController extends BaseController {
 
     if (result case Success(data: final msg?)) {
       messages.add(msg);
+      scrollToBottom();
     }
   }
 
