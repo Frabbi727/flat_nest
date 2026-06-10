@@ -97,6 +97,11 @@ class RenterHomeController extends BaseController {
     showLoading(); // show shimmer immediately — _fetchLocation → fetchListings will call hideLoading
     AppUpdateService.checkForUpdate();
     ever(activeTab, (tab) {
+      if (tab == 0) {
+        Get.find<BannerService>().fetchActiveBanner().then((_) {
+          Get.find<BannerService>().showBannerDialog();
+        });
+      }
       if (tab == 3) {
         Get.find<ChatController>().fetchChats();
       }
@@ -272,7 +277,8 @@ class RenterHomeController extends BaseController {
 
   Future<void> fetchListings() async {
     showLoading();
-    Get.find<BannerService>().fetchActiveBanner();
+    await Get.find<BannerService>().fetchActiveBanner();
+    Get.find<BannerService>().showBannerDialog();
     final query = searchQuery.value.trim();
     final result = await _listingRepository.getListings(
       listingTypeId: selectedTypeId.value,

@@ -79,7 +79,8 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
 
   Future<void> fetchMyListings() async {
     showLoading();
-    Get.find<BannerService>().fetchActiveBanner();
+    await Get.find<BannerService>().fetchActiveBanner();
+    Get.find<BannerService>().showBannerDialog();
     _currentPage.value = 1;
     final result = await _ownerRepository.getMyListings(
       status: filterStatus.value,

@@ -15,8 +15,8 @@ class BannerService extends GetxService {
   final RxBool isLoading = false.obs;
   final RxBool isDismissed = false.obs;
   
-  // Track if we've shown the banner in the current session to avoid annoying popups
-  bool _shownInThisSession = false;
+  // Track the ID of the banner we've already shown in this session
+  int? _lastShownBannerIdInSession;
 
   Future<BannerService> init() async {
     await fetchActiveBanner();
@@ -59,10 +59,12 @@ class BannerService extends GetxService {
   }
 
   Future<void> showBannerDialog() async {
-    Get.log('BannerService: showBannerDialog attempt. shouldShowBanner: $shouldShowBanner, shownInSession: $_shownInThisSession');
-    if (!shouldShowBanner || _shownInThisSession) return;
+    final currentId = activeBanner.value?.id;
+    Get.log('BannerService: showBannerDialog attempt. shouldShowBanner: $shouldShowBanner, currentId: $currentId, lastShownInSession: $_lastShownBannerIdInSession');
+    
+    if (!shouldShowBanner || _lastShownBannerIdInSession == currentId) return;
 
-    _shownInThisSession = true;
+    _lastShownBannerIdInSession = currentId;
     Get.log('BannerService: Triggering Get.dialog');
     
     await Get.dialog(
