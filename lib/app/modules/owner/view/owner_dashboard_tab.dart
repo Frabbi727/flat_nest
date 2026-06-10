@@ -18,76 +18,80 @@ class _DashboardTab extends GetView<OwnerController> {
         _KPI(label: 'Listings', value: '${controller.myListings.length}', delta: 'posted', kind: 'neutral'),
       ];
 
-      return CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: _Header(t: t)),
-          const SliverToBoxAdapter(child: BannerInlineWidget()),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.35,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => _KPICard(t: t, kpi: kpis[i]),
-                childCount: kpis.length,
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            sliver: SliverToBoxAdapter(
-              child: ElevatedButton.icon(
-                onPressed: controller.goToCreateListing,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Post a new flat'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: t.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      return RefreshIndicator(
+        onRefresh: controller.fetchMyListings,
+        color: t.primary,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _Header(t: t)),
+            const SliverToBoxAdapter(child: BannerInlineWidget()),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.35,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => _KPICard(t: t, kpi: kpis[i]),
+                  childCount: kpis.length,
                 ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            sliver: SliverToBoxAdapter(
-              child: _ContactRequestsCard(t: t),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Your listings', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.2)),
-                  GestureDetector(
-                    onTap: () => controller.activeTab.value = 1,
-                    child: Text('Manage', style: TextStyle(fontSize: 13, color: t.primary, fontWeight: FontWeight.w600)),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: ElevatedButton.icon(
+                  onPressed: controller.goToCreateListing,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Post a new flat'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: t.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                ],
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _ListingRow(t: t, listing: controller.myListings[i]),
                 ),
-                childCount: controller.myListings.length,
               ),
             ),
-          ),
-        ],
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: _ContactRequestsCard(t: t),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Your listings', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: t.ink, letterSpacing: -0.2)),
+                    GestureDetector(
+                      onTap: () => controller.activeTab.value = 1,
+                      child: Text('Manage', style: TextStyle(fontSize: 13, color: t.primary, fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ListingRow(t: t, listing: controller.myListings[i]),
+                  ),
+                  childCount: controller.myListings.length,
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     });
   }

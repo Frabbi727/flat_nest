@@ -149,16 +149,16 @@ class BannerDialog extends StatelessWidget {
 
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 28),
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
           color: t.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 40,
+              offset: const Offset(0, 20),
             ),
           ],
         ),
@@ -166,70 +166,83 @@ class BannerDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Header / Image Section
             Stack(
               children: [
                 BannerCarousel(
                   images: images,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: () => Get.back(),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        shape: BoxShape.circle,
+                // Gradient overlay for better text contrast if needed (optional)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.2),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.3],
                       ),
-                      child: const Icon(Icons.close, size: 18, color: Colors.white),
+                    ),
+                  ),
+                ),
+                // Elegant Close Button
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: GestureDetector(
+                    onTap: () => bannerService.dismissBanner(),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
+
+            // Content Section
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
               child: Column(
                 children: [
                   Text(
                     banner.title,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: t.ink, height: 1.3),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: t.ink,
+                      height: 1.2,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                   if (banner.description != null && banner.description!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       banner.description!,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: t.inkMid, height: 1.5),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: t.inkMid,
+                        height: 1.6,
+                        letterSpacing: 0.1,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => bannerService.dismissBanner(),
-                          child: Text("Don't show again", style: TextStyle(color: t.inkSoft, fontSize: 13, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => Get.back(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: t.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text("Awesome", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),

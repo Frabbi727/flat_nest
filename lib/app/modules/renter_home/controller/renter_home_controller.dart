@@ -272,6 +272,7 @@ class RenterHomeController extends BaseController {
 
   Future<void> fetchListings() async {
     showLoading();
+    Get.find<BannerService>().fetchActiveBanner();
     final query = searchQuery.value.trim();
     final result = await _listingRepository.getListings(
       listingTypeId: selectedTypeId.value,
