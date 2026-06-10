@@ -8,6 +8,7 @@ import '../../../core/network/api_endpoints.dart';
 import '../../../core/service/app_update_service.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/banner_service.dart';
 import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
 import '../../../shared/widgets/guest_auth_sheet.dart';
@@ -110,6 +111,12 @@ class RenterHomeController extends BaseController {
     _fetchLocation();
     fetchWishlist();
     Get.find<MetaService>().loadMeta();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    Get.find<BannerService>().showBannerDialog();
   }
 
   @override

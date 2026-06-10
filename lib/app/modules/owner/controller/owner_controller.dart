@@ -4,6 +4,7 @@ import '../../../core/base/base_controller.dart';
 import '../../../core/network/resource.dart';
 import '../../../core/service/app_update_service.dart';
 import '../../../core/service/auth_service.dart';
+import '../../../core/service/banner_service.dart';
 import '../../../core/service/meta_service.dart';
 import '../../../route/app_routes.dart';
 import '../../listing/model/listing_model.dart';
@@ -42,6 +43,12 @@ class OwnerController extends BaseController with WidgetsBindingObserver {
       if (tab == 0 || tab == 1) fetchMyListings();
       AppUpdateService.checkForUpdate();
     });
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    Get.find<BannerService>().showBannerDialog();
   }
 
   @override

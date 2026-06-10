@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'firebase_options.dart';
 import 'app/core/network/api_client.dart';
+import 'app/core/cache/cache_manager.dart';
 import 'app/core/service/auth_service.dart';
+import 'app/core/service/banner_service.dart';
 import 'app/core/service/meta_service.dart';
 import 'app/core/service/notification_service.dart';
 import 'app/core/service/theme_service.dart';
@@ -37,12 +39,14 @@ void main() async {
 Future<void> initServices() async {
   Get.log('Starting services...');
 
+  Get.put(CacheManager(), permanent: true);
   Get.put(ApiClient(), permanent: true);
   await Get.putAsync(() => LocalizationService().init());
   await Get.putAsync(() => ThemeService().init());
   await Get.putAsync(() => AuthService().init());
   await Get.putAsync(() => MetaService().init(), permanent: true);
   await Get.putAsync(() => NotificationService().init(), permanent: true);
+  await Get.putAsync(() => BannerService().init(), permanent: true);
 
   Get.log('All services started!');
 }

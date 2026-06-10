@@ -58,4 +58,7 @@ class ApiEndpoints {
   static String geoDistricts(int divisionId) => '/geo/districts/$divisionId';
   static String geoUpazilas(int districtId) => '/geo/upazilas/$districtId';
   static String geoUnions(int upazilaId) => '/geo/unions/$upazilaId';
+
+  // ── Banners ───────────────────────────────────────────────────────────────
+  static const String activeBanner = '/banners/active';
 }

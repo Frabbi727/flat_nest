@@ -7,7 +7,7 @@ import '../network/api_config.dart';
 import '../../modules/auth/model/user_model.dart';
 
 class AuthService extends GetxService {
-  final CacheManager _cacheManager = CacheManager();
+  final CacheManager _cacheManager = Get.find<CacheManager>();
   final RxnString _accessToken = RxnString();
   final RxnString _refreshToken = RxnString();
   final RxBool _isFirstTime = true.obs;

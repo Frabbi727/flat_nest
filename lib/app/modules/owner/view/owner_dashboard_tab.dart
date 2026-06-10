@@ -21,6 +21,7 @@ class _DashboardTab extends GetView<OwnerController> {
       return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: _Header(t: t)),
+          const SliverToBoxAdapter(child: BannerInlineWidget()),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             sliver: SliverGrid(

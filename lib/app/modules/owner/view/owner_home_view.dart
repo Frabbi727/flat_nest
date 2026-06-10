@@ -7,6 +7,7 @@ import '../../chat/controller/chat_controller.dart';
 import '../../chat/view/chat_list_view.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/notification_service.dart';
+import '../../../shared/widgets/banner_widget.dart';
 import '../../../route/app_routes.dart';
 import '../../../theme/flat_nest_theme.dart';
 import '../controller/owner_controller.dart';

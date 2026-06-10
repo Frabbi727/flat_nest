@@ -8,6 +8,7 @@ class CacheManager {
   static const String _isLoggedInKey = 'is_logged_in';
   static const String _isFirstTimeKey = 'is_first_time';
   static const String _userDataKey = 'user_data';
+  static const String _lastDismissedBannerIdKey = 'last_dismissed_banner_id';
 
   Future<void> saveTokens({required String accessToken, required String refreshToken}) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
@@ -49,6 +50,15 @@ class CacheManager {
 
   Future<String?> getUserData() async {
     return await _storage.read(key: _userDataKey);
+  }
+
+  Future<void> saveLastDismissedBannerId(int id) async {
+    await _storage.write(key: _lastDismissedBannerIdKey, value: id.toString());
+  }
+
+  Future<int?> getLastDismissedBannerId() async {
+    final value = await _storage.read(key: _lastDismissedBannerIdKey);
+    return value != null ? int.tryParse(value) : null;
   }
 
   Future<void> clearAll() async {

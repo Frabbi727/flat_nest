@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../controller/renter_home_controller.dart';
+import '../../../../shared/widgets/banner_widget.dart';
 import 'discovery_empty_state.dart';
 import 'discovery_top_bar.dart';
 import 'discovery_type_chip.dart';
