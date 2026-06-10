@@ -11,12 +11,15 @@ import '../modules/home/binding/home_binding.dart';
 import '../modules/home/view/home_view.dart';
 import '../modules/onboarding/binding/onboarding_binding.dart';
 import '../modules/onboarding/view/onboarding_view.dart';
+import '../modules/owner/binding/access_requests_binding.dart';
 import '../modules/owner/binding/create_listing_binding.dart';
 import '../modules/owner/binding/owner_binding.dart';
 import '../modules/owner/view/create_listing_view.dart';
+import '../modules/owner/view/owner_access_requests_view.dart';
 import '../modules/owner/view/owner_home_view.dart';
 import '../modules/register/binding/register_binding.dart';
 import '../modules/register/view/register_view.dart';
+import '../modules/renter_home/binding/listing_detail_binding.dart';
 import '../modules/renter_home/binding/renter_home_binding.dart';
 import '../modules/renter_home/view/listing/listing_detail_view.dart';
 import '../modules/renter_home/view/renter_home_view.dart';
@@ -62,13 +65,18 @@ class AppPages {
     GetPage(
       name: Routes.listingDetail,
       page: () => const ListingDetailView(),
-      binding: RenterHomeBinding(),
+      binding: ListingDetailBinding(),
     ),
     // Owner
     GetPage(
       name: Routes.ownerHome,
       page: () => const OwnerHomeView(),
       binding: OwnerBinding(),
+    ),
+    GetPage(
+      name: Routes.ownerAccessRequests,
+      page: () => const OwnerAccessRequestsView(),
+      binding: OwnerAccessRequestsBinding(),
     ),
     GetPage(
       name: Routes.createListing,

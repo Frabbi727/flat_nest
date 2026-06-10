@@ -7,16 +7,16 @@ part of 'listing_model.dart';
 // **************************************************************************
 
 AmenityModel _$AmenityModelFromJson(Map<String, dynamic> json) => AmenityModel(
-      id: _toInt(json['id']),
-      name: json['name'] as String,
-      label: json['label'] as String,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
-    );
+  id: (json['id'] as num).toInt(),
+  name: json['name'] as String,
+  label: json['label'] as String,
+  createdAt: json['created_at'] == null
+      ? null
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
+      ? null
+      : DateTime.parse(json['updated_at'] as String),
+);
 
 Map<String, dynamic> _$AmenityModelToJson(AmenityModel instance) =>
     <String, dynamic>{
@@ -26,6 +26,13 @@ Map<String, dynamic> _$AmenityModelToJson(AmenityModel instance) =>
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };
+
+ListingPhotoModel _$ListingPhotoModelFromJson(Map<String, dynamic> json) =>
+    ListingPhotoModel(
+      id: json['id'] as String,
+      url: json['url'] as String,
+      position: (json['position'] as num).toInt(),
+    );
 
 Map<String, dynamic> _$ListingPhotoModelToJson(ListingPhotoModel instance) =>
     <String, dynamic>{
@@ -51,57 +58,59 @@ Map<String, dynamic> _$ListingOwnerModelToJson(ListingOwnerModel instance) =>
     };
 
 ListingModel _$ListingModelFromJson(Map<String, dynamic> json) => ListingModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      area: json['area'] as String?,
-      roadAndHouse: json['road_and_house'] as String?,
-      availableFrom: json['available_from'] as String?,
-      floorNo: _toNullableInt(json['floor_no']),
-      facingId: _toNullableInt(json['facing_id']),
-      facing: json['facing'] == null
-          ? null
-          : ListingFacingModel.fromJson(
-              json['facing'] as Map<String, dynamic>),
-      road: json['road'] as String?,
-      houseName: json['house_name'] as String?,
-      block: json['block'] as String?,
-      section: json['section'] as String?,
-      ownerName: json['owner_name'] as String?,
-      ownerPhone: json['owner_phone'] as String?,
-      ownerAltPhone: json['owner_alt_phone'] as String?,
-      ownerEmail: json['owner_email'] as String?,
-      preferredContact: json['preferred_contact'] as String?,
-      divisionId: _toNullableInt(json['division_id']),
-      districtId: _toNullableInt(json['district_id']),
-      upazilaId: _toNullableInt(json['upazila_id']),
-      unionId: _toNullableInt(json['union_id']),
-      listingTypeId: _toNullableInt(_typeIdReadValue(json, 'listing_type_id')),
-      type: _typeReadValue(json, 'type') as String,
-      price: _toInt(json['price']),
-      deposit: _toNullableInt(json['deposit']),
-      beds: _toNullableInt(json['beds']),
-      baths: _toNullableInt(json['baths']),
-      size: _toNullableInt(json['size']),
-      description: json['description'] as String?,
-      status: _statusReadValue(json, 'status') as String,
-      statusLabel: _statusLabelReadValue(json, 'status_label') as String,
-      views: _toInt(json['views']),
-      lat: _toNullableDouble(json['coord_y']),
-      lng: _toNullableDouble(json['coord_x']),
-      distanceKm: _toNullableDouble(json['distance_km']),
-      amenities: (json['amenities'] as List<dynamic>?)
-              ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      owner: json['owner'] == null
-          ? null
-          : ListingOwnerModel.fromJson(json['owner'] as Map<String, dynamic>),
-      photos: (json['photos'] as List<dynamic>?)
-              ?.map((e) => ListingPhotoModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      createdAt: _createdAtFromJson(json['created_at']),
-    );
+  id: json['id'] as String,
+  title: json['title'] as String,
+  area: json['area'] as String?,
+  roadAndHouse: json['road_and_house'] as String?,
+  availableFrom: json['available_from'] as String?,
+  floorNo: _toNullableInt(json['floor_no']),
+  facingId: _toNullableInt(json['facing_id']),
+  facing: json['facing'] == null
+      ? null
+      : ListingFacingModel.fromJson(json['facing'] as Map<String, dynamic>),
+  road: json['road'] as String?,
+  houseName: json['house_name'] as String?,
+  block: json['block'] as String?,
+  section: json['section'] as String?,
+  ownerName: json['owner_name'] as String?,
+  ownerPhone: json['owner_phone'] as String?,
+  ownerAltPhone: json['owner_alt_phone'] as String?,
+  ownerEmail: json['owner_email'] as String?,
+  preferredContact: json['preferred_contact'] as String?,
+  divisionId: _toNullableInt(json['division_id']),
+  districtId: _toNullableInt(json['district_id']),
+  upazilaId: _toNullableInt(json['upazila_id']),
+  unionId: _toNullableInt(json['union_id']),
+  listingTypeId: _toNullableInt(_typeIdReadValue(json, 'listing_type_id')),
+  type: _typeReadValue(json, 'type') as String,
+  price: _toInt(json['price']),
+  deposit: _toNullableInt(json['deposit']),
+  beds: _toNullableInt(json['beds']),
+  baths: _toNullableInt(json['baths']),
+  size: _toNullableInt(json['size']),
+  description: json['description'] as String?,
+  status: _statusReadValue(json, 'status') as String,
+  statusLabel: _statusLabelReadValue(json, 'status_label') as String,
+  views: json['views'] == null ? 0 : _toInt(json['views']),
+  lat: _toNullableDouble(json['coord_y']),
+  lng: _toNullableDouble(json['coord_x']),
+  distanceKm: _toNullableDouble(json['distance_km']),
+  amenities:
+      (json['amenities'] as List<dynamic>?)
+          ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+  owner: json['owner'] == null
+      ? null
+      : ListingOwnerModel.fromJson(json['owner'] as Map<String, dynamic>),
+  photos:
+      (json['photos'] as List<dynamic>?)
+          ?.map((e) => ListingPhotoModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+  createdAt: _createdAtFromJson(json['created_at']),
+  accessRequestStatus: json['access_request_status'] as String?,
+);
 
 Map<String, dynamic> _$ListingModelToJson(ListingModel instance) =>
     <String, dynamic>{
@@ -144,6 +153,7 @@ Map<String, dynamic> _$ListingModelToJson(ListingModel instance) =>
       'owner': instance.owner?.toJson(),
       'photos': instance.photos.map((e) => e.toJson()).toList(),
       'created_at': instance.createdAt,
+      'access_request_status': instance.accessRequestStatus,
     };
 
 OwnerListingModel _$OwnerListingModelFromJson(Map<String, dynamic> json) =>
@@ -157,8 +167,7 @@ OwnerListingModel _$OwnerListingModelFromJson(Map<String, dynamic> json) =>
       facingId: _toNullableInt(json['facing_id']),
       facing: json['facing'] == null
           ? null
-          : ListingFacingModel.fromJson(
-              json['facing'] as Map<String, dynamic>),
+          : ListingFacingModel.fromJson(json['facing'] as Map<String, dynamic>),
       road: json['road'] as String?,
       houseName: json['house_name'] as String?,
       block: json['block'] as String?,
@@ -182,23 +191,28 @@ OwnerListingModel _$OwnerListingModelFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       status: _statusReadValue(json, 'status') as String,
       statusLabel: _statusLabelReadValue(json, 'status_label') as String,
-      views: _toInt(json['views']),
+      views: json['views'] == null ? 0 : _toInt(json['views']),
       lat: _toNullableDouble(json['coord_y']),
       lng: _toNullableDouble(json['coord_x']),
       distanceKm: _toNullableDouble(json['distance_km']),
-      amenities: (json['amenities'] as List<dynamic>?)
+      amenities:
+          (json['amenities'] as List<dynamic>?)
               ?.map((e) => AmenityModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       owner: json['owner'] == null
           ? null
           : ListingOwnerModel.fromJson(json['owner'] as Map<String, dynamic>),
-      photos: (json['photos'] as List<dynamic>?)
-              ?.map((e) => ListingPhotoModel.fromJson(e as Map<String, dynamic>))
+      photos:
+          (json['photos'] as List<dynamic>?)
+              ?.map(
+                (e) => ListingPhotoModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       createdAt: _createdAtFromJson(json['created_at']),
-      inquiries: _toInt(json['inquiries']),
+      accessRequestStatus: json['access_request_status'] as String?,
+      inquiries: json['inquiries'] == null ? 0 : _toInt(json['inquiries']),
       rejectionReason: json['rejection_reason'] as String?,
     );
 
@@ -243,6 +257,7 @@ Map<String, dynamic> _$OwnerListingModelToJson(OwnerListingModel instance) =>
       'owner': instance.owner?.toJson(),
       'photos': instance.photos.map((e) => e.toJson()).toList(),
       'created_at': instance.createdAt,
+      'access_request_status': instance.accessRequestStatus,
       'inquiries': instance.inquiries,
       'rejection_reason': instance.rejectionReason,
     };

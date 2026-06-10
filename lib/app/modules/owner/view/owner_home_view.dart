@@ -4,7 +4,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../chat/controller/chat_controller.dart';
-import '../../chat/model/chat_model.dart';
 import '../../chat/view/chat_list_view.dart';
 import '../../../core/service/auth_service.dart';
 import '../../../core/service/notification_service.dart';

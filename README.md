@@ -71,3 +71,6 @@ We use separate entry points to handle environment-specific configurations (like
 
 keytool -list -v -keystore upload-keystore.jks -alias upload
 flatnest10203050
+
+
+dart run build_runner build --delete-conflicting-outputs --force-jit

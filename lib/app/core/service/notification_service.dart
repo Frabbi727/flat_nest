@@ -69,7 +69,7 @@ class NotificationService extends GetxService {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
     await _localNotifs.initialize(
-      const InitializationSettings(android: android, iOS: ios),
+      settings: const InitializationSettings(android: android, iOS: ios),
       onDidReceiveNotificationResponse: (details) {
         // We don't have the full data map here easily from payload string, 
         // but kind is stored in payload. For now keep it simple.
@@ -97,10 +97,10 @@ class NotificationService extends GetxService {
     unreadCount.value++;
 
     _localNotifs.show(
-      message.hashCode,
-      n.title ?? '',
-      n.body ?? '',
-      NotificationDetails(
+      id: message.hashCode,
+      title: n.title ?? '',
+      body: n.body ?? '',
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
@@ -147,6 +147,16 @@ class NotificationService extends GetxService {
           }
         } else {
           Get.toNamed(Routes.chatList);
+        }
+        break;
+      case 'contact_info_requested':
+        Get.toNamed(Routes.ownerAccessRequests);
+        break;
+      case 'contact_info_granted':
+      case 'contact_info_denied':
+        final listingId = data?['reference_id'] as String?;
+        if (listingId != null) {
+          Get.toNamed(Routes.listingDetail, arguments: listingId);
         }
         break;
     }

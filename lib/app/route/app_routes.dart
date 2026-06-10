@@ -12,6 +12,7 @@ abstract class Routes {
   // Owner
   static const ownerHome = '/owner/home';
   static const createListing = '/owner/create-listing';
+  static const ownerAccessRequests = '/owner/access-requests';
 
   // Chat
   static const chatList = '/chat';

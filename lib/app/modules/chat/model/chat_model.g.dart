@@ -59,27 +59,26 @@ Map<String, dynamic> _$ChatMessageModelToJson(ChatMessageModel instance) =>
     };
 
 ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
-      id: json['id'] as String,
-      listing: ChatListingModel.fromJson(json['listing'] as Map<String, dynamic>),
-      otherUser: ChatUserModel.fromJson(json['other_user'] as Map<String, dynamic>),
-      lastMessage: json['last_message'] == null
-          ? null
-          : ChatMessageModel.fromJson(
-              json['last_message'] as Map<String, dynamic>),
-      unreadCount: (json['unread_count'] as num?)?.toInt() ?? 0,
-      status: ChatModel.statusFromJson(json['status'] as String?),
-      updatedAt: json['updated_at'] as String,
-    );
+  id: json['id'] as String,
+  listing: ChatListingModel.fromJson(json['listing'] as Map<String, dynamic>),
+  otherUser: ChatUserModel.fromJson(json['other_user'] as Map<String, dynamic>),
+  lastMessage: json['last_message'] == null
+      ? null
+      : ChatMessageModel.fromJson(json['last_message'] as Map<String, dynamic>),
+  unreadCount: (json['unread_count'] as num?)?.toInt() ?? 0,
+  status: ChatModel.statusFromJson(json['status'] as String?),
+  updatedAt: json['updated_at'] as String,
+);
 
 Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
-      'id': instance.id,
-      'listing': instance.listing,
-      'other_user': instance.otherUser,
-      'last_message': instance.lastMessage,
-      'unread_count': instance.unreadCount,
-      'status': _$ChatStatusEnumMap[instance.status]!,
-      'updated_at': instance.updatedAt,
-    };
+  'id': instance.id,
+  'listing': instance.listing,
+  'other_user': instance.otherUser,
+  'last_message': instance.lastMessage,
+  'unread_count': instance.unreadCount,
+  'status': _$ChatStatusEnumMap[instance.status]!,
+  'updated_at': instance.updatedAt,
+};
 
 const _$ChatStatusEnumMap = {
   ChatStatus.pending: 'pending',

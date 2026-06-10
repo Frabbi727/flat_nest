@@ -8,6 +8,7 @@ import '../../listing/model/geo_model.dart';
 import '../../listing/model/listing_facing_model.dart';
 import '../../listing/model/listing_model.dart';
 import '../../listing/model/listing_type_model.dart';
+import '../../owner/model/access_request_model.dart';
 
 class ListingRepository extends BaseRepository {
   ListingRepository({required super.apiClient});
@@ -106,6 +107,19 @@ class ListingRepository extends BaseRepository {
     try {
       final response = await apiClient.get(path: ApiEndpoints.listing(id));
       return parseResponse(response, ListingModel.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<AccessRequestModel>> requestAccess(String listingId) async {
+    try {
+      final response = await apiClient.post(
+        path: ApiEndpoints.listingRequestAccess(listingId),
+        data: {},
+      );
+      return parseResponse(
+          response, (j) => AccessRequestModel.fromJson(j as Map<String, dynamic>));
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

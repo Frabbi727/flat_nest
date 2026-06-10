@@ -199,6 +199,8 @@ class ListingModel {
   final List<ListingPhotoModel> photos;
   @JsonKey(name: 'created_at', fromJson: _createdAtFromJson)
   final String createdAt;
+  @JsonKey(name: 'access_request_status')
+  final String? accessRequestStatus;
 
   const ListingModel({
     required this.id,
@@ -240,12 +242,63 @@ class ListingModel {
     this.owner,
     this.photos = const [],
     required this.createdAt,
+    this.accessRequestStatus,
   });
 
   factory ListingModel.fromJson(Map<String, dynamic> json) =>
       _$ListingModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ListingModelToJson(this);
+
+  ListingModel copyWith({String? accessRequestStatus}) {
+    return ListingModel(
+      id: id,
+      title: title,
+      area: area,
+      roadAndHouse: roadAndHouse,
+      availableFrom: availableFrom,
+      floorNo: floorNo,
+      facingId: facingId,
+      facing: facing,
+      road: road,
+      houseName: houseName,
+      block: block,
+      section: section,
+      ownerName: ownerName,
+      ownerPhone: ownerPhone,
+      ownerAltPhone: ownerAltPhone,
+      ownerEmail: ownerEmail,
+      preferredContact: preferredContact,
+      divisionId: divisionId,
+      districtId: districtId,
+      upazilaId: upazilaId,
+      unionId: unionId,
+      listingTypeId: listingTypeId,
+      type: type,
+      price: price,
+      deposit: deposit,
+      beds: beds,
+      baths: baths,
+      size: size,
+      description: description,
+      status: status,
+      statusLabel: statusLabel,
+      views: views,
+      lat: lat,
+      lng: lng,
+      distanceKm: distanceKm,
+      amenities: amenities,
+      owner: owner,
+      photos: photos,
+      createdAt: createdAt,
+      accessRequestStatus: accessRequestStatus ?? this.accessRequestStatus,
+    );
+  }
+
+  bool get accessGranted  => accessRequestStatus == 'accepted';
+  bool get accessPending  => accessRequestStatus == 'pending';
+  bool get accessRejected => accessRequestStatus == 'rejected';
+  bool get accessNotYet   => accessRequestStatus == null;
 
   static final _amountFmt = NumberFormat('#,##0.00');
 
@@ -316,6 +369,7 @@ class OwnerListingModel extends ListingModel {
     super.owner,
     super.photos = const [],
     required super.createdAt,
+    super.accessRequestStatus,
     this.inquiries = 0,
     this.rejectionReason,
   });

@@ -56,7 +56,7 @@ class AuthService extends GetxService {
     } catch (_) {}
 
     // Clear Google session so account picker shows next time
-    await GoogleSignIn().signOut();
+    await GoogleSignIn.instance.signOut();
 
     await _cacheManager.clearTokens();
     _accessToken.value = null;
@@ -75,7 +75,7 @@ class AuthService extends GetxService {
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        await GoogleSignIn().signOut();
+        await GoogleSignIn.instance.signOut();
         await _cacheManager.clearTokens();
         _accessToken.value = null;
         _refreshToken.value = null;
@@ -86,7 +86,7 @@ class AuthService extends GetxService {
     } catch (_) {
       return false;
     }
-    await GoogleSignIn().signOut();
+    await GoogleSignIn.instance.signOut();
     await _cacheManager.clearTokens();
     _accessToken.value = null;
     _refreshToken.value = null;

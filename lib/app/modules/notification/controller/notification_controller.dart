@@ -104,6 +104,15 @@ class NotificationController extends BaseController {
           Get.toNamed(Routes.chatList);
         }
         break;
+      case 'contact_info_requested':
+        Get.toNamed(Routes.ownerAccessRequests);
+        break;
+      case 'contact_info_granted':
+      case 'contact_info_denied':
+        if (n.referenceId != null) {
+          Get.toNamed(Routes.listingDetail, arguments: n.referenceId);
+        }
+        break;
     }
   }
 

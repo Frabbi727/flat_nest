@@ -22,10 +22,14 @@ class AuthController extends BaseController {
 
   final showPassword = false.obs;
   final showGoogleHint = false.obs;
-  final _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-    serverClientId: '305560403551-pprdlkpkgolqhu6ho81bk5cb9sflcqbk.apps.googleusercontent.com',
-  );
+
+  @override
+  void onInit() {
+    super.onInit();
+    GoogleSignIn.instance.initialize(
+      serverClientId: '305560403551-pprdlkpkgolqhu6ho81bk5cb9sflcqbk.apps.googleusercontent.com',
+    );
+  }
 
   @override
   void onClose() {
@@ -71,10 +75,8 @@ class AuthController extends BaseController {
 
   Future<void> signInWithGoogle() async {
     try {
-      final account = await _googleSignIn.signIn();
-      if (account == null) return;
-
-      final auth = await account.authentication;
+      final account = await GoogleSignIn.instance.authenticate();
+      final auth = account.authentication;
       final idToken = auth.idToken;
       if (idToken == null) {
         showError('Google sign-in failed. Please try again.');

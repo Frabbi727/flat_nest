@@ -23,6 +23,10 @@ class ApiEndpoints {
 
   // ── Owner ─────────────────────────────────────────────────────────────────
   static const String ownerListings = '/owner/listings';
+  static String listingRequestAccess(String id) => '/listings/$id/request-access';
+  static const String ownerAccessRequests = '/owner/access-requests';
+  static String ownerAccessRequestAccept(String id) => '/owner/access-requests/$id/accept';
+  static String ownerAccessRequestReject(String id) => '/owner/access-requests/$id/reject';
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
   static const String wishlist = '/wishlist';

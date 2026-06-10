@@ -6,15 +6,9 @@ part of 'listing_facing_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-int _parseId(dynamic v) {
-  if (v is int) return v;
-  if (v is num) return v.toInt();
-  return int.tryParse(v.toString()) ?? 0;
-}
-
 ListingFacingModel _$ListingFacingModelFromJson(Map<String, dynamic> json) =>
     ListingFacingModel(
-      id: _parseId(json['id']),
+      id: (json['id'] as num).toInt(),
       label: json['label'] as String,
       slug: json['slug'] as String,
     );

@@ -54,6 +54,12 @@ class _DashboardTab extends GetView<OwnerController> {
             ),
           ),
           SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            sliver: SliverToBoxAdapter(
+              child: _ContactRequestsCard(t: t),
+            ),
+          ),
+          SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
             sliver: SliverToBoxAdapter(
               child: Row(
@@ -348,6 +354,63 @@ class _KPICard extends StatelessWidget {
             child: Text(kpi.delta, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: _badgeText)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Contact requests card ─────────────────────────────────────────────────────
+
+class _ContactRequestsCard extends StatelessWidget {
+  final FlatNestTheme t;
+  const _ContactRequestsCard({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(Routes.ownerAccessRequests),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: t.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: t.borderSoft),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: t.warningSoft,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.contacts_outlined, size: 20, color: t.warning),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Contact Requests',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: t.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Renters requesting your contact info',
+                    style: TextStyle(fontSize: 12, color: t.inkSoft),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: t.inkSoft),
+          ],
+        ),
       ),
     );
   }

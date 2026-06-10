@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/flat_nest_theme.dart';
 import '../../../listing/model/listing_model.dart';
+import '../../controller/listing_detail_controller.dart';
 
 class ListingDetailContent extends StatelessWidget {
   final FlatNestTheme t;
@@ -70,6 +72,9 @@ class ListingDetailContent extends StatelessWidget {
             const SizedBox(height: 12),
             _AmenitiesGrid(t: t, amenities: listing.amenities),
           ],
+
+          // Access request banner — shown when sensitive fields are hidden
+          _AccessRequestBanner(t: t, listing: listing),
 
           // Location — map + address merged
           if (_hasLocation) ...[
@@ -978,5 +983,216 @@ class _StatDivider extends StatelessWidget {
       height: 60,
       child: VerticalDivider(color: t.borderSoft, width: 1),
     );
+  }
+}
+
+// ── Access request banner ─────────────────────────────────────────────────────
+
+class _AccessRequestBanner extends StatelessWidget {
+  final FlatNestTheme t;
+  final ListingModel listing;
+
+  const _AccessRequestBanner({required this.t, required this.listing});
+
+  @override
+  Widget build(BuildContext context) {
+    // When accepted, sensitive fields are in the response — no banner needed
+    if (listing.accessGranted) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 28),
+        _SectionDivider(t: t),
+        const SizedBox(height: 24),
+        _SectionTitle(t: t, text: 'Contact & Location'),
+        const SizedBox(height: 12),
+        _buildCard(context),
+      ],
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
+    if (listing.accessPending) {
+      return _InfoCard(
+        t: t,
+        icon: Icons.hourglass_top_rounded,
+        iconColor: t.warning,
+        bgColor: t.warningSoft,
+        message: 'Request sent — waiting for the owner to approve.',
+      );
+    }
+
+    if (listing.accessRejected) {
+      return _InfoCard(
+        t: t,
+        icon: Icons.cancel_outlined,
+        iconColor: const Color(0xFFD93636),
+        bgColor: const Color(0xFFFFEBEB),
+        message: 'Your previous request was declined.',
+        action: _RequestButton(
+          t: t,
+          label: 'Request Again',
+          onTap: _onRequest,
+        ),
+      );
+    }
+
+    // null — no request yet
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: t.borderSoft),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: t.primarySoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.lock_outline_rounded,
+                    size: 18, color: t.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Contact info is hidden',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: t.ink,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Request access to see the owner\'s phone number, email, and exact address.',
+            style: TextStyle(fontSize: 13, color: t.inkMid, height: 1.45),
+          ),
+          const SizedBox(height: 14),
+          _RequestButton(t: t, label: 'Request Contact Info', onTap: _onRequest),
+        ],
+      ),
+    );
+  }
+
+  void _onRequest() {
+    if (Get.isRegistered<ListingDetailController>()) {
+      Get.find<ListingDetailController>().requestAccess();
+    }
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final FlatNestTheme t;
+  final IconData icon;
+  final Color iconColor;
+  final Color bgColor;
+  final String message;
+  final Widget? action;
+
+  const _InfoCard({
+    required this.t,
+    required this.icon,
+    required this.iconColor,
+    required this.bgColor,
+    required this.message,
+    this.action,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: iconColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: t.ink,
+                    height: 1.45,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (action != null) ...[
+                  const SizedBox(height: 10),
+                  action!,
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RequestButton extends StatelessWidget {
+  final FlatNestTheme t;
+  final String label;
+  final VoidCallback onTap;
+
+  const _RequestButton({
+    required this.t,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isLoading = Get.isRegistered<ListingDetailController>()
+          ? Get.find<ListingDetailController>().isRequestingAccess.value
+          : false;
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: t.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+          child: isLoading
+              ? SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
+                )
+              : Text(
+                  label,
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+        ),
+      );
+    });
   }
 }

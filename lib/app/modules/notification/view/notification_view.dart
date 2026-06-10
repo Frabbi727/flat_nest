@@ -189,6 +189,9 @@ class _NotifTile extends GetView<NotificationController> {
       'listing_rejected' => Icons.cancel_outlined,
       'listing_submitted' => Icons.upload_rounded,
       'listing_review' => Icons.rate_review_outlined,
+      'contact_info_requested' => Icons.contacts_outlined,
+      'contact_info_granted' => Icons.lock_open_outlined,
+      'contact_info_denied' => Icons.lock_outlined,
       _ => Icons.notifications_outlined,
     };
   }
@@ -199,6 +202,9 @@ class _NotifTile extends GetView<NotificationController> {
       'listing_rejected' => const Color(0xFFFFEBEB),
       'listing_submitted' => t.primarySoft,
       'listing_review' => t.bgAlt,
+      'contact_info_requested' => t.warningSoft,
+      'contact_info_granted' => t.successSoft,
+      'contact_info_denied' => const Color(0xFFFFEBEB),
       _ => t.bgAlt,
     };
   }
@@ -207,6 +213,9 @@ class _NotifTile extends GetView<NotificationController> {
     return switch (n.kind) {
       'listing_approved' => t.success,
       'listing_rejected' => const Color(0xFFD93636),
+      'contact_info_requested' => t.warning,
+      'contact_info_granted' => t.success,
+      'contact_info_denied' => const Color(0xFFD93636),
       _ => t.primary,
     };
   }
