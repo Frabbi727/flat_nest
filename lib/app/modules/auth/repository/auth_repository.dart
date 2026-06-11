@@ -3,6 +3,7 @@ import 'package:falt_nest/app/core/network/api_endpoints.dart';
 
 import '../../../core/base/base_repository.dart';
 import '../../../core/network/resource.dart';
+import '../model/registration_step_response.dart';
 import '../model/user_model.dart';
 
 class AuthRepository extends BaseRepository {
@@ -42,20 +43,34 @@ class AuthRepository extends BaseRepository {
     }
   }
 
-  Future<Resource<void>> saveDetails({required String role}) async {
+  Future<Resource<RegistrationStepResponse>> registerBasic({
+    required String phone,
+    required String password,
+  }) async {
     try {
       final response = await apiClient.patch(
-        path: ApiEndpoints.registerDetails,
-        data: {'role': role},
+        path: ApiEndpoints.registerBasic,
+        data: {'phone': phone, 'password': password},
       );
-      return parseVoidResponse(response);
+      return parseResponse(response, RegistrationStepResponse.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }
   }
 
-  // Returns the avatar URL string from the response (or null if not provided).
-  Future<Resource<String?>> uploadAvatar(String filePath) async {
+  Future<Resource<RegistrationStepResponse>> saveDetails({required String role}) async {
+    try {
+      final response = await apiClient.patch(
+        path: ApiEndpoints.registerDetails,
+        data: {'role': role},
+      );
+      return parseResponse(response, RegistrationStepResponse.fromJson);
+    } catch (e) {
+      return Error(parseError(e), statusCode: parseStatusCode(e));
+    }
+  }
+
+  Future<Resource<RegistrationStepResponse>> uploadAvatar(String filePath) async {
     try {
       final formData = FormData.fromMap({
         'avatar': await MultipartFile.fromFile(
@@ -67,17 +82,7 @@ class AuthRepository extends BaseRepository {
         path: ApiEndpoints.registerAvatar,
         data: formData,
       );
-      final body = response.data as Map<String, dynamic>?;
-      final success = body?['success'] as bool? ?? false;
-      if (!success) {
-        return Error(body?['message'] as String? ?? 'Upload failed',
-            statusCode: response.statusCode ?? 500);
-      }
-      final data = body?['data'];
-      final avatarUrl = data is Map<String, dynamic>
-          ? data['avatar_url'] as String?
-          : null;
-      return Success(data: avatarUrl, statusCode: response.statusCode ?? 200);
+      return parseResponse(response, RegistrationStepResponse.fromJson);
     } catch (e) {
       return Error(parseError(e), statusCode: parseStatusCode(e));
     }

@@ -59,18 +59,16 @@ class AppPages {
       binding: HomeBinding(),
       middlewares: [AuthMiddleware()],
     ),
-    // Renter
+    // Renter — no auth required, guests can browse listings
     GetPage(
       name: Routes.renterHome,
       page: () => const RenterHomeView(),
       binding: RenterHomeBinding(),
-      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: Routes.listingDetail,
       page: () => const ListingDetailView(),
       binding: ListingDetailBinding(),
-      middlewares: [AuthMiddleware()],
     ),
     // Owner
     GetPage(

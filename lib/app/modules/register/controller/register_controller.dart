@@ -23,6 +23,7 @@ class RegisterController extends BaseController {
 
   // Step tracking
   final currentStep = 0.obs;
+  final isGoogleUser = false.obs;
 
   // Step 1 — Basic info
   final nameController = TextEditingController();
@@ -56,6 +57,7 @@ class RegisterController extends BaseController {
     if (args != null && args['step'] != null) {
       currentStep.value = (args['step'] as int) - 1;
     }
+    isGoogleUser.value = args?['isGoogleUser'] as bool? ?? false;
     for (final c in [
       nameController,
       emailController,
@@ -139,6 +141,43 @@ class RegisterController extends BaseController {
     }
   }
 
+  // Step 1 (Google users only): Save phone + password
+  void submitGoogleBasicInfo() async {
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+    final confirm = confirmPasswordController.text;
+
+    if (phone.isEmpty || password.isEmpty || confirm.isEmpty) {
+      showError('Please fill all fields');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters');
+      return;
+    }
+    if (password != confirm) {
+      showError('Passwords do not match');
+      return;
+    }
+
+    showLoading();
+    final result = await _authRepository.registerBasic(
+      phone: phone,
+      password: password,
+    );
+    hideLoading();
+
+    switch (result) {
+      case Success(data: final res?):
+        _authService.saveUser(res.user);
+        currentStep.value = 1;
+      case Success():
+        showError('Something went wrong');
+      case Error(message: final msg):
+        showError(msg);
+    }
+  }
+
   // Step 2: Save role + DOB
   void submitStep2() async {
     if (selectedRole.value == null) {
@@ -154,10 +193,11 @@ class RegisterController extends BaseController {
     hideLoading();
 
     switch (result) {
-      case Success():
-        final updated = _authService.currentUser?.copyWith(role: selectedRole.value);
-        if (updated != null) _authService.saveUser(updated);
+      case Success(data: final res?):
+        _authService.saveUser(res.user);
         currentStep.value = 2;
+      case Success():
+        showError('Something went wrong');
       case Error(message: final msg):
         showError(msg);
     }
@@ -187,16 +227,15 @@ class RegisterController extends BaseController {
     hideLoading();
 
     switch (result) {
-      case Success(data: final avatarUrl):
+      case Success(data: final res?):
         final tempPath = avatarPath.value;
         if (tempPath != null) {
           try { await File(tempPath).delete(); } catch (_) {}
         }
-        if (avatarUrl != null) {
-          final updated = _authService.currentUser?.copyWith(avatarUrl: avatarUrl);
-          if (updated != null) _authService.saveUser(updated);
-        }
+        _authService.saveUser(res.user);
         _navigateToHome();
+      case Success():
+        showError('Something went wrong');
       case Error(message: final msg):
         showError(msg);
     }
@@ -229,6 +268,15 @@ class RegisterController extends BaseController {
     if (p.contains(RegExp(r'[0-9]'))) s++;
     if (p.contains(RegExp(r'[^A-Za-z0-9]'))) s++;
     return s;
+  }
+
+  bool get googleBasicValid {
+    final phone = phoneController.text.trim();
+    final password = passwordController.text;
+    final confirm = confirmPasswordController.text;
+    return phone.replaceAll(RegExp(r'\D'), '').length == 11 &&
+        password.length >= 8 &&
+        password == confirm;
   }
 
   bool get step1Valid {

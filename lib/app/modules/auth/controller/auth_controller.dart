@@ -69,7 +69,7 @@ class AuthController extends BaseController {
         );
         _authService.saveUser(authResponse.user);
         Get.find<NotificationService>().registerTokenAfterLogin();
-        _navigateAfterAuth(authResponse.user);
+        _navigateAfterAuth(authResponse);
       case Success():
         showError(TranslationKeys.userDataNotFound.tr);
       case Error(message: final msg, code: final errorCode):
@@ -100,7 +100,7 @@ class AuthController extends BaseController {
           );
           _authService.saveUser(authResponse.user);
           Get.find<NotificationService>().registerTokenAfterLogin();
-          _navigateAfterAuth(authResponse.user);
+          _navigateAfterAuth(authResponse);
         case Success():
           showError(TranslationKeys.userDataNotFound.tr);
         case Error(message: final msg):
@@ -118,9 +118,14 @@ class AuthController extends BaseController {
     }
   }
 
-  void _navigateAfterAuth(UserModel user) {
+  void _navigateAfterAuth(AuthResponse authResponse) {
+    final user = authResponse.user;
     if (!user.isComplete) {
-      final step = user.role != null ? 3 : 2;
+      if (authResponse.registrationStep == 1 && user.phone == null) {
+        Get.offAllNamed(Routes.register, arguments: {'step': 1, 'isGoogleUser': true});
+        return;
+      }
+      final step = (authResponse.registrationStep ?? 1) + 1;
       Get.offAllNamed(Routes.register, arguments: {'step': step});
       return;
     }
