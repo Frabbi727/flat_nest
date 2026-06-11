@@ -121,7 +121,7 @@ class AuthController extends BaseController {
   void _navigateAfterAuth(AuthResponse authResponse) {
     final user = authResponse.user;
     if (!user.isComplete) {
-      if (authResponse.registrationStep == 1 && user.phone == null) {
+      if (user.phone == null) {
         Get.offAllNamed(Routes.register, arguments: {'step': 1, 'isGoogleUser': true});
         return;
       }
