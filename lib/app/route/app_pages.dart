@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../core/middleware/auth_middleware.dart';
+import '../core/middleware/owner_middleware.dart';
 import '../modules/auth/binding/auth_binding.dart';
 import '../modules/auth/view/login_view.dart';
 import '../modules/chat/binding/chat_binding.dart';
@@ -55,50 +57,59 @@ class AppPages {
       name: Routes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     // Renter
     GetPage(
       name: Routes.renterHome,
       page: () => const RenterHomeView(),
       binding: RenterHomeBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: Routes.listingDetail,
       page: () => const ListingDetailView(),
       binding: ListingDetailBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     // Owner
     GetPage(
       name: Routes.ownerHome,
       page: () => const OwnerHomeView(),
       binding: OwnerBinding(),
+      middlewares: [OwnerMiddleware()],
     ),
     GetPage(
       name: Routes.ownerAccessRequests,
       page: () => const OwnerAccessRequestsView(),
       binding: OwnerAccessRequestsBinding(),
+      middlewares: [OwnerMiddleware()],
     ),
     GetPage(
       name: Routes.createListing,
       page: () => const CreateListingView(),
       binding: CreateListingBinding(),
+      middlewares: [OwnerMiddleware()],
     ),
     // Notifications
     GetPage(
       name: Routes.notifications,
       page: () => const NotificationView(),
       binding: NotificationBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     // Chat
     GetPage(
       name: Routes.chatList,
       page: () => const ChatListView(),
       binding: ChatBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: Routes.chatDetail,
       page: () => const ChatDetailView(),
       binding: ChatBinding(),
+      middlewares: [AuthMiddleware()],
     ),
   ];
 }

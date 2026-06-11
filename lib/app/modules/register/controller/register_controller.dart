@@ -166,8 +166,12 @@ class RegisterController extends BaseController {
   Future<void> pickImage(ImageSource source) async {
     final xfile = await _picker.pickImage(source: source);
     if (xfile == null) return;
-    final compressed = await ImageCompressor.compress(File(xfile.path));
-    avatarPath.value = compressed.path;
+    try {
+      final compressed = await ImageCompressor.compress(File(xfile.path));
+      avatarPath.value = compressed.path;
+    } catch (_) {
+      showError('Could not process image. Please try another photo.');
+    }
   }
 
   // Step 3: Upload avatar then go to home
@@ -184,6 +188,10 @@ class RegisterController extends BaseController {
 
     switch (result) {
       case Success(data: final avatarUrl):
+        final tempPath = avatarPath.value;
+        if (tempPath != null) {
+          try { await File(tempPath).delete(); } catch (_) {}
+        }
         if (avatarUrl != null) {
           final updated = _authService.currentUser?.copyWith(avatarUrl: avatarUrl);
           if (updated != null) _authService.saveUser(updated);

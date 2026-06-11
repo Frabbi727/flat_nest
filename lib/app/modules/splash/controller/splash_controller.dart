@@ -19,7 +19,10 @@ class SplashController extends GetxController {
       Get.offAllNamed(Routes.onboarding);
     } else if (_authService.isAuthenticated) {
       final user = _authService.currentUser;
-      if (user?.isOwner == true) {
+      if (user?.isComplete == false) {
+        final step = user?.role != null ? 3 : 2;
+        Get.offAllNamed(Routes.register, arguments: {'step': step});
+      } else if (user?.isOwner == true) {
         Get.offAllNamed(Routes.ownerHome);
       } else {
         Get.offAllNamed(Routes.renterHome);

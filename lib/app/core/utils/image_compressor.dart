@@ -44,8 +44,12 @@ class ImageCompressor {
 
     if (out == null) return file;
 
-    final result = File(targetPath);
-    await result.writeAsBytes(out);
-    return result;
+    try {
+      final result = File(targetPath);
+      await result.writeAsBytes(out);
+      return result;
+    } catch (_) {
+      return file;
+    }
   }
 }

@@ -99,6 +99,7 @@ class LoginView extends GetView<AuthController> {
         TextField(
           controller: controller.emailController,
           keyboardType: TextInputType.emailAddress,
+          onChanged: controller.onEmailChanged,
           style: AppTextStyles.bodyMedium.copyWith(color: t.ink, fontSize: 15),
           decoration: _inputDecoration(t),
         ),

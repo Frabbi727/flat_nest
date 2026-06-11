@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -39,6 +40,10 @@ class AuthController extends BaseController {
   }
 
   void togglePassword() => showPassword.value = !showPassword.value;
+
+  void onEmailChanged(String _) {
+    if (showGoogleHint.value) showGoogleHint.value = false;
+  }
 
   void goToRegister() => Get.toNamed(Routes.register);
 
@@ -103,13 +108,12 @@ class AuthController extends BaseController {
       }
     } catch (e) {
       hideLoading();
-      if (e is PlatformException) {
-        Get.log('Google sign-in PlatformException');
-        Get.log('  code: ${e.code}');
-        Get.log('  message: ${e.message}');
-        Get.log('  details: ${e.details}');
+      if (kDebugMode) {
+        if (e is PlatformException) {
+          debugPrint('Google sign-in PlatformException: ${e.code} | ${e.message}');
+        }
+        debugPrint('Google sign-in error: $e');
       }
-      Get.log('Google sign-in error: $e');
       showError('Google sign-in failed. Please try again.');
     }
   }
