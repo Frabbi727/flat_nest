@@ -85,6 +85,22 @@ class RegisterStep1View extends GetView<RegisterController> {
                 const SizedBox(height: 16),
               ],
 
+              // Read-only name + email for Google users
+              if (isGoogle) ...[
+                _ReadOnlyField(
+                  t: t,
+                  label: 'Full name',
+                  value: controller.googleUserName,
+                ),
+                const SizedBox(height: 16),
+                _ReadOnlyField(
+                  t: t,
+                  label: 'Email address',
+                  value: controller.googleUserEmail,
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // Phone — shown for both, but first for Google users
               FNField(
                 t: t,
@@ -236,6 +252,58 @@ class RegisterStep1View extends GetView<RegisterController> {
         }),
       );
     });
+  }
+}
+
+class _ReadOnlyField extends StatelessWidget {
+  final FlatNestTheme t;
+  final String label;
+  final String value;
+
+  const _ReadOnlyField({
+    required this.t,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: t.inkMid,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: t.bgAlt,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: t.borderSoft),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: TextStyle(fontSize: 15, color: t.inkMid),
+                ),
+              ),
+              Text(
+                'from Google',
+                style: TextStyle(fontSize: 11, color: t.inkSoft),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 

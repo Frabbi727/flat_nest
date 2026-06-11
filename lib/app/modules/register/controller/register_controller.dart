@@ -21,6 +21,9 @@ class RegisterController extends BaseController {
 
   List<RoleModel> get availableRoles => _metaService.roles;
 
+  String get googleUserName => _authService.currentUser?.name ?? '';
+  String get googleUserEmail => _authService.currentUser?.email ?? '';
+
   // Step tracking
   final currentStep = 0.obs;
   final isGoogleUser = false.obs;
